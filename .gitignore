@@ -41,6 +41,6 @@ node_modules/
 *.log
 *.sql
 *.sqlite
-
+wp-config.php
 # End of https://www.gitignore.io/api/linux,wordpress
 n
