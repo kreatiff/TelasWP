@@ -42,5 +42,6 @@ node_modules/
 *.sql
 *.sqlite
 wp-config.php
+wp-content/plugins/user-role-editor
 # End of https://www.gitignore.io/api/linux,wordpress
 n

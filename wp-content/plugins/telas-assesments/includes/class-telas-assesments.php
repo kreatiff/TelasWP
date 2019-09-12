@@ -157,6 +157,7 @@ class Telas_Assesments {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_admin, 'register_post_types' );
+		
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_post_type_relationship_fields' );
 		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_course_submitters_role' );
@@ -165,6 +166,8 @@ class Telas_Assesments {
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_telas_administrator_role' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_post_type_capabilites_for_super_admin', 999 );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_course_submitters_role', 999 );
+		
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_self_assessor_role', 999 );
 	}
 
 	/**
