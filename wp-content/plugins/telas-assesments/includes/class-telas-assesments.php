@@ -158,6 +158,8 @@ class Telas_Assesments {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_admin, 'register_post_types' );
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_post_type_relationship_fields' );
+		$this->loader->add_action( 'register_post_type_args', $plugin_admin, 'change_capabilities_of_telas_assessment', 10, 2 );
+		$this->loader->add_action( 'register_post_type_args', $plugin_admin, 'change_capabilities_of_telas_assessment', 10, 2 );
 	}
 
 	/**

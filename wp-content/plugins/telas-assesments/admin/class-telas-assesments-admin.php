@@ -101,7 +101,7 @@ class Telas_Assesments_Admin {
 	}
 
 	function register_post_types() {
-		register_post_type( 'telas-courses', array(
+		register_post_type( 'telas_courses', array(
 			'labels'                => array(
 				'name'                  => __( 'Courses', 'telas-web' ),
 				'singular_name'         => __( 'Course', 'telas-web' ),
@@ -143,7 +143,7 @@ class Telas_Assesments_Admin {
 			'rest_base'             => 'telas-courses',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 		) );
-		register_post_type( 'telas-assessment', array(
+		register_post_type( 'telas_assessment', array(
 			'labels'                => array(
 				'name'                  => __( 'Assessments', 'telas-web' ),
 				'singular_name'         => __( 'Assessment', 'telas-web' ),
@@ -187,6 +187,41 @@ class Telas_Assesments_Admin {
 		) );
 	}
 
+	function change_capabilities_of_telas_courses( $args, $post_type ) {
+		if ( 'telas_courses' !== $post_type ) {
+			return args;
+		}
+
+		$args['capabilities'] = array(
+			'edit_post'  => 'edit_telas_courses',
+			'edit_posts' => 'edit_telas_courses',
+			'edit_others_posts' => 'edit_other_telas_courses',
+			'publish_posts' => 'publish_telas_courses',
+			'read_post' => 'read_telas_courses',
+			'read_private_posts' => 'read_private_telas_courses',
+			'delete_posts' => 'delete_telas_courses'
+		);
+		return $args;
+	}
+	
+	function change_capabilities_of_telas_assessment( $args, $post_type ) {
+		if ( 'telas_assessment' !== $post_type ) {
+			return args;
+		}
+
+		$args['capabilities'] = array(
+			'edit_post'  => 'edit_telas_assessment',
+			'edit_posts' => 'edit_telas_assessment',
+			'edit_others_posts' => 'edit_other_telas_assessment',
+			'publish_posts' => 'publish_telas_assessment',
+			'read_post' => 'read_telas_assessment',
+			'read_private_posts' => 'read_private_telas_assessment',
+			'delete_posts' => 'delete_telas_assessment'
+		);
+		return $args;
+	}
+	
+	
 	function register_post_type_relationship_fields() {
 		if( function_exists('acf_add_local_field_group') ):
 			acf_add_local_field_group(array(
@@ -288,5 +323,4 @@ class Telas_Assesments_Admin {
 			));
 		endif;
 	}
-
 }
