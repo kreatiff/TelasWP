@@ -161,13 +161,22 @@ class Telas_Assesments {
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_post_type_relationship_fields' );
 		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_course_submitters_role' );
+		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_certified_reviewers_role' );
+		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_self_assessor_role' );
+		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_telas_administrator_role' );
+		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_post_type_capabilites_for_super_admin', 999 );
+		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_course_submitters_role', 999 );
 		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_self_assessor_role', 999 );
+		
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_post_type_capabilites_for_telas_telas_administrator', 999 );
+		
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_certified_reviews_role', 999 );
 	}
 
 	/**
