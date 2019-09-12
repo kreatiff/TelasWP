@@ -160,6 +160,10 @@ class Telas_Assesments {
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_post_type_relationship_fields' );
 		$this->loader->add_action( 'register_post_type_args', $plugin_admin, 'change_capabilities_of_telas_assessment', 10, 2 );
 		$this->loader->add_action( 'register_post_type_args', $plugin_admin, 'change_capabilities_of_telas_assessment', 10, 2 );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_course_submitters_role' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_certified_reviewers_role' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_self_assessor_role' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_telas_administrator_role' );
 	}
 
 	/**

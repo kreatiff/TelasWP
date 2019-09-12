@@ -220,7 +220,62 @@ class Telas_Assesments_Admin {
 		);
 		return $args;
 	}
-	
+
+	function add_course_submitters_role() {
+		if ( get_option( 'course_submitters_role_version' ) < 1 ) {
+			$role_capabilites_args = array(
+				'read' => true,
+				'edit_posts' => false,
+				'delete_posts' => false,
+				'publish_posts' => false,
+				'upload_files' => false,
+			);
+			add_role( 'telas_course_submitters', 'Course Submitters', $role_capabilites_args );
+			update_option( 'course_submitters_role_version', 1 );
+		}
+		
+	}
+
+	function add_self_assessor_role() {
+		if ( get_option( 'self_assessor_role_version' ) < 1 ) {
+			$role_capabilites_args = array(
+				'read' => true,
+				'edit_posts' => false,
+				'delete_posts' => false,
+				'publish_posts' => false,
+				'upload_files' => false,
+			);
+			add_role( 'telas_self_assessor', 'Self Assessor', $role_capabilites_args );
+			update_option( 'self_assessor_role_version', 1 );
+		}
+	}
+
+	function add_certified_reviewers_role() {
+		if ( get_option( 'certified_reviewers_role_version' ) < 1 ) {
+			$role_capabilites_args = array(
+				'read' => true,
+				'edit_posts' => false,
+				'delete_posts' => false,
+				'publish_posts' => false,
+				'upload_files' => false,
+			);
+			add_role( 'telas_certified_reviewers', 'Certified Reviewers', $role_capabilites_args );
+			update_option( 'certified_reviewers_role_version', 1 );
+		}
+	}
+	function add_telas_administrator_role() {
+		if ( get_option( 'telas_administrator_role_version' ) < 1 ) {
+			$role_capabilites_args = array(
+				'read' => true,
+				'edit_posts' => false,
+				'delete_posts' => false,
+				'publish_posts' => false,
+				'upload_files' => false,
+			);
+			add_role( 'telas_telas_administrator', 'TELAS Administrator', $role_capabilites_args );
+			update_option( 'telas_administrator_role_version', 1 );
+		}
+	}
 	
 	function register_post_type_relationship_fields() {
 		if( function_exists('acf_add_local_field_group') ):
