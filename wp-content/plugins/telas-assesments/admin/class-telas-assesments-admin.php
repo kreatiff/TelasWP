@@ -142,7 +142,10 @@ class Telas_Assesments_Admin {
 			'show_in_rest'          => true,
 			'rest_base'             => 'telas-courses',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
+			'capability_type' 		=> array( 'telas_course', 'telas_courses' ),
+			'map_meta_cap'			=> true
 		) );
+		
 		register_post_type( 'telas_assessment', array(
 			'labels'                => array(
 				'name'                  => __( 'Assessments', 'telas-web' ),
@@ -184,42 +187,11 @@ class Telas_Assesments_Admin {
 			'show_in_rest'          => true,
 			'rest_base'             => 'telas-assessment',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
+			'capability_type'		=> array( 'telas_assessment', 'telas_assessments' ),
+			'map_meta_cap'			=> true
 		) );
 	}
 
-	function change_capabilities_of_telas_courses( $args, $post_type ) {
-		if ( 'telas_courses' !== $post_type ) {
-			return args;
-		}
-
-		$args['capabilities'] = array(
-			'edit_post'  => 'edit_telas_courses',
-			'edit_posts' => 'edit_telas_courses',
-			'edit_others_posts' => 'edit_other_telas_courses',
-			'publish_posts' => 'publish_telas_courses',
-			'read_post' => 'read_telas_courses',
-			'read_private_posts' => 'read_private_telas_courses',
-			'delete_posts' => 'delete_telas_courses'
-		);
-		return $args;
-	}
-	
-	function change_capabilities_of_telas_assessment( $args, $post_type ) {
-		if ( 'telas_assessment' !== $post_type ) {
-			return args;
-		}
-
-		$args['capabilities'] = array(
-			'edit_post'  => 'edit_telas_assessment',
-			'edit_posts' => 'edit_telas_assessment',
-			'edit_others_posts' => 'edit_other_telas_assessment',
-			'publish_posts' => 'publish_telas_assessment',
-			'read_post' => 'read_telas_assessment',
-			'read_private_posts' => 'read_private_telas_assessment',
-			'delete_posts' => 'delete_telas_assessment'
-		);
-		return $args;
-	}
 
 	function add_course_submitters_role() {
 		if ( get_option( 'course_submitters_role_version' ) < 1 ) {
@@ -275,6 +247,57 @@ class Telas_Assesments_Admin {
 			add_role( 'telas_telas_administrator', 'TELAS Administrator', $role_capabilites_args );
 			update_option( 'telas_administrator_role_version', 1 );
 		}
+	}
+	function add_custom_post_type_capabilites_for_super_admin() {
+		$role = get_role( 'administrator' );
+		$role->add_cap( 'read' );
+		$role->add_cap( 'read_telas_course');
+		$role->add_cap( 'read_private_telas_courses' );
+		$role->add_cap( 'edit_telas_course' );
+		$role->add_cap( 'edit_telas_courses' );
+		$role->add_cap( 'edit_others_telas_courses' );
+		$role->add_cap( 'edit_published_telas_courses' );
+		$role->add_cap( 'publish_telas_courses' );
+		$role->add_cap( 'delete_others_telas_courses' );
+		$role->add_cap( 'delete_private_telas_courses' );
+		$role->add_cap( 'delete_published_telas_courses' );
+		
+		$role->add_cap( 'read_telas_assessment');
+		$role->add_cap( 'read_private_telas_assessments' );
+		$role->add_cap( 'edit_telas_assessment' );
+		$role->add_cap( 'edit_telas_assessments' );
+		$role->add_cap( 'edit_others_telas_assessments' );
+		$role->add_cap( 'edit_published_telas_assessments' );
+		$role->add_cap( 'publish_telas_assessments' );
+		$role->add_cap( 'delete_others_telas_assessments' );
+		$role->add_cap( 'delete_private_telas_assessments' );
+		$role->add_cap( 'delete_published_telas_assessments' );
+	}
+	function add_custom_cap_for_course_submitters_role() {
+		$role = get_role( 'telas_course_submitters' );
+		$role->add_cap( 'read' );
+		$role->add_cap( 'read_telas_course');
+		$role->add_cap( 'read_private_telas_courses' );
+		$role->add_cap( 'edit_telas_course' );
+		$role->add_cap( 'edit_telas_courses' );
+		$role->add_cap( 'edit_others_telas_courses' );
+		$role->add_cap( 'edit_published_telas_courses' );
+		$role->add_cap( 'publish_telas_courses' );
+		$role->add_cap( 'delete_others_telas_courses' );
+		$role->add_cap( 'delete_private_telas_courses' );
+		$role->add_cap( 'delete_published_telas_courses' );
+		
+		$role->add_cap( 'read_telas_assessment');
+		$role->add_cap( 'read_private_telas_assessments' );
+		$role->add_cap( 'edit_telas_assessment' );
+		$role->add_cap( 'edit_telas_assessments' );
+		$role->add_cap( 'edit_others_telas_assessments' );
+		$role->add_cap( 'edit_published_telas_assessments' );
+		$role->add_cap( 'publish_telas_assessments' );
+		$role->add_cap( 'delete_others_telas_assessments' );
+		$role->add_cap( 'delete_private_telas_assessments' );
+		$role->add_cap( 'delete_published_telas_assessments' );
+ 
 	}
 	
 	function register_post_type_relationship_fields() {
