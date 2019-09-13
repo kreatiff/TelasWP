@@ -155,10 +155,14 @@ class Telas_Assesments {
 		$plugin_admin = new Telas_Assesments_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
+		
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		
 		$this->loader->add_action( 'init', $plugin_admin, 'register_post_types' );
 		
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_post_type_relationship_fields' );
+		
+		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_assessment_field' );
 		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_course_submitters_role' );
 		
