@@ -1681,4 +1681,53 @@ class Telas_Assesments_Admin {
 
 		endif;
 	}
+
+	function register_routes() {
+		$version = '1';
+		$namespace = 'extended-telasweb/v' . $version;
+		$base = 'register';
+		register_rest_route( $namespace, '/' . $base, array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'register_user_callback' ),
+			)
+		));
+	}
+
+	function register_user_callback( $request ) {
+		$all_params = $request->get_params();
+		$new_user_data = array(
+			'user_login' => $all_params['email'],
+			'user_nicename' => $all_params['firstName'] . ' ' . $all_params['lastName'],
+			'user_email' => $all_params['email'],
+			'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
+			'role' => $all_params['telasRole'],
+			'user_pass' => NULL
+
+		);
+		$new_user_id = wp_insert_user( $new_user_data );
+		if ( is_wp_error( $new_user_id ) ) {
+			$error_code = $new_user_id->get_error_code();
+			return new WP_Error(
+				'[extend_telas] ' . $error_code,
+				$new_user_id->get_error_message( $error_code ),
+				array(
+					'status' => 403,
+				)
+			);
+		}
+		update_user_meta( $new_user_id, 'position', $all_params['position'] );
+		update_user_meta( $new_user_id, 'faculty', $all_params['faculty'] );
+		update_user_meta( $new_user_id, 'institution_name', $all_params['institutionName'] );
+		update_user_meta( $new_user_id, 'institution_campus', $all_params['institutionCampus'] );
+		update_user_meta( $new_user_id, 'instituion_state', $all_params['instituionState'] );
+		update_user_meta( $new_user_id, 'instituion_country', $all_params['instituionCountry'] );
+		$data = array(
+			'full_name'         => $all_params['firstName'] . ' ' . $all_params['lastName'],
+			'user_id'           => $new_user_id,
+			'user_email'        => $all_params['email']
+		);
+
+		return apply_filters( 'extend_telas_before_dispatch', $data );
+	}
 }
