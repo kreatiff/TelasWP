@@ -1701,7 +1701,10 @@ class Telas_Assesments_Admin {
 			'user_nicename' => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'user_email' => $all_params['email'],
 			'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
+			'first_name' => $all_params['firstName'],
+			'last_name' => $all_params['lastName'],
 			'role' => $all_params['telasRole'],
+			'nickname' => $all_params['firstName'].$all_params['lastName'],
 			'user_pass' => NULL
 
 		);
@@ -1720,8 +1723,8 @@ class Telas_Assesments_Admin {
 		update_user_meta( $new_user_id, 'faculty', $all_params['faculty'] );
 		update_user_meta( $new_user_id, 'institution_name', $all_params['institutionName'] );
 		update_user_meta( $new_user_id, 'institution_campus', $all_params['institutionCampus'] );
-		update_user_meta( $new_user_id, 'instituion_state', $all_params['instituionState'] );
-		update_user_meta( $new_user_id, 'instituion_country', $all_params['instituionCountry'] );
+		update_user_meta( $new_user_id, 'institution_state', $all_params['institutionState'] );
+		update_user_meta( $new_user_id, 'institution_country', $all_params['institutionCountry'] );
 		$data = array(
 			'full_name'         => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'user_id'           => $new_user_id,
@@ -1729,5 +1732,148 @@ class Telas_Assesments_Admin {
 		);
 
 		return apply_filters( 'extend_telas_before_dispatch', $data );
+	}
+
+	function register_acf_field_for_users() {
+		if( function_exists('acf_add_local_field_group') ):
+			acf_add_local_field_group(array(
+				'key' => 'group_5d805f37e4856',
+				'title' => 'User Fields',
+				'fields' => array(
+					array(
+						'key' => 'field_5d805f3e1d321',
+						'label' => 'Position',
+						'name' => 'position',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d805f4e1d322',
+						'label' => 'Faculty/Dept',
+						'name' => 'faculty',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d805f831d323',
+						'label' => 'Institution Name',
+						'name' => 'institution_name',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d805f901d324',
+						'label' => 'Institution Campus',
+						'name' => 'institution_campus',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d805f971d325',
+						'label' => 'Institution State / Region',
+						'name' => 'institution_state',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d805f9f1d326',
+						'label' => 'Institution Country',
+						'name' => 'institution_country',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+				),
+				'location' => array(
+					array(
+						array(
+							'param' => 'user_role',
+							'operator' => '==',
+							'value' => 'all',
+						),
+					),
+				),
+				'menu_order' => 0,
+				'position' => 'normal',
+				'style' => 'default',
+				'label_placement' => 'top',
+				'instruction_placement' => 'label',
+				'hide_on_screen' => '',
+				'active' => true,
+				'description' => '',
+			));
+
+		endif;
 	}
 }
