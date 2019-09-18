@@ -51,7 +51,6 @@ class Telas_Assesments_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -139,7 +138,7 @@ class Telas_Assesments_Admin {
 			'query_var'             => true,
 			'menu_position'         => null,
 			'menu_icon'             => 'dashicons-admin-post',
-			'show_in_rest'          => true,
+			'show_in_rest'          => false,
 			'rest_base'             => 'telas-courses',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 			'capability_type' 		=> array( 'telas_course', 'telas_courses' ),
@@ -1692,8 +1691,51 @@ class Telas_Assesments_Admin {
 				'callback'            => array( $this, 'register_user_callback' ),
 			)
 		));
+		register_rest_route( $namespace, '/' . 'submit-course', array(
+			'methods' => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'submit_course_callback' ),
+			'permission_callback' => array( $this, 'submit_course_permission_callback' )
+		));
 	}
+	function submit_course_permission_callback( $request ) {
+		return current_user_can( 'publish_telas_courses' );
+	}
+	function submit_course_callback( $request ) {
+		$all_params = $request->get_params();
+		if ( ! current_user_can( 'publish_telas_courses' ) ) {
+			return new WP_Error(
+				'[extend_telas]' . '403',
+				'permission_denied',
+				array(
+					'status' => 403
+				)
+			);
+		}
+		$new_course_args = array(
+			'post_title' => $all_params['coursePackageName'],
+			'post_type' => 'telas_courses',
+			'meta_input' => $request->get_params()
+		);
+		$new_course_id = wp_insert_post( $new_course_args );
+		if ( is_wp_error( $new_course_id ) ) {
+			$error_code = $new_course_id->get_error_code();
+			return new WP_Error(
+				'[jwt_auth] ' . $error_code,
+				$new_course_id->get_error_message( $error_code ),
+				array(
+					'status' => 403,
+				)
+			);
+		}
+		$data = array(
+			'course_title'      => $all_params['coursePackageName'],
+			'message'           => 'Course Submitted',
+			'status'			=> 200
+		);
 
+		return apply_filters( 'extend_telas_before_dispatch', $data );
+	}
+	
 	function register_user_callback( $request ) {
 		$all_params = $request->get_params();
 		$new_user_data = array(
@@ -1728,7 +1770,8 @@ class Telas_Assesments_Admin {
 		$data = array(
 			'full_name'         => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'user_id'           => $new_user_id,
-			'user_email'        => $all_params['email']
+			'user_email'        => $all_params['email'],
+			'status' 			=> 200
 		);
 
 		return apply_filters( 'extend_telas_before_dispatch', $data );
@@ -1875,5 +1918,12 @@ class Telas_Assesments_Admin {
 			));
 
 		endif;
+	}
+
+	function modify_jwt_authentication_response( $data, $user ) {
+		$user_data = get_userdata( $data['user_id']);
+		$user_roles = $user_data->roles;
+		$data['roles'] = $user_roles;
+		return $data;
 	}
 }

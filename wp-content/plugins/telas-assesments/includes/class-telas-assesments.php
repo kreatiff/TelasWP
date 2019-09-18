@@ -184,6 +184,8 @@ class Telas_Assesments {
 		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_certified_reviews_role', 999 );
 		$this->loader->add_action( 'rest_api_init', $plugin_admin, 'register_routes' );
+
+		$this->loader->add_filter( 'jwt_auth_token_before_dispatch', $plugin_admin, 'modify_jwt_authentication_response', 10, 2 );
 	}
 
 	/**
