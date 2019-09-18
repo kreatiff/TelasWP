@@ -165,6 +165,7 @@ class Telas_Assesments {
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_assessment_field' );
 		
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_acf_field_for_users' );
+		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_acf_field_for_course_details' );
 		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_course_submitters_role' );
 		
