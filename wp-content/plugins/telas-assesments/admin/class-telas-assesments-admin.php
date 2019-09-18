@@ -1919,11 +1919,173 @@ class Telas_Assesments_Admin {
 
 		endif;
 	}
+	function register_acf_field_for_course_details() {
+		if( function_exists('acf_add_local_field_group') ):
+			acf_add_local_field_group(array(
+				'key' => 'group_5d81ea9bcdcb2',
+				'title' => 'Course Details',
+				'fields' => array(
+					array(
+						'key' => 'field_5d81eb69cd3a9',
+						'label' => 'Course Submission Date',
+						'name' => 'courseSubmissionDateString',
+						'type' => 'date_picker',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'display_format' => 'd/m/Y',
+						'return_format' => 'd/m/Y',
+						'first_day' => 1,
+					),
+					array(
+						'key' => 'field_5d81eaa1cd3a3',
+						'label' => 'Course Package Name',
+						'name' => 'coursePackageName',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d81eae7cd3a4',
+						'label' => 'Course Package Type',
+						'name' => 'coursePackageType',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d81eb03cd3a5',
+						'label' => 'Course Module Name',
+						'name' => 'courseModuleName',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d81eb18cd3a6',
+						'label' => 'Course Module Identifier',
+						'name' => 'courseModuleIdentifier',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d81eb31cd3a7',
+						'label' => 'Institution Name',
+						'name' => 'institutionName',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+					array(
+						'key' => 'field_5d81eb4acd3a8',
+						'label' => 'Faculty/Dept',
+						'name' => 'facultyDept',
+						'type' => 'text',
+						'instructions' => '',
+						'required' => 0,
+						'conditional_logic' => 0,
+						'wrapper' => array(
+							'width' => '',
+							'class' => '',
+							'id' => '',
+						),
+						'default_value' => '',
+						'placeholder' => '',
+						'prepend' => '',
+						'append' => '',
+						'maxlength' => '',
+					),
+				),
+				'location' => array(
+					array(
+						array(
+							'param' => 'post_type',
+							'operator' => '==',
+							'value' => 'telas_courses',
+						),
+					),
+				),
+				'menu_order' => 0,
+				'position' => 'normal',
+				'style' => 'default',
+				'label_placement' => 'top',
+				'instruction_placement' => 'label',
+				'hide_on_screen' => array(
+					0 => 'the_content',
+				),
+				'active' => true,
+				'description' => '',
+			));
 
+		endif;
+	}
+	
 	function modify_jwt_authentication_response( $data, $user ) {
 		$user_data = get_userdata( $data['user_id']);
 		$user_roles = $user_data->roles;
 		$data['roles'] = $user_roles;
 		return $data;
 	}
+	
 }
