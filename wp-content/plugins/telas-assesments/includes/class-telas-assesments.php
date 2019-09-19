@@ -187,6 +187,8 @@ class Telas_Assesments {
 		$this->loader->add_action( 'rest_api_init', $plugin_admin, 'register_routes' );
 
 		$this->loader->add_filter( 'jwt_auth_token_before_dispatch', $plugin_admin, 'modify_jwt_authentication_response', 10, 2 );
+		$this->loader->add_filter( 'wp_new_user_notification_email', $plugin_admin, 'new_user_notification', 10, 3 );
+		$this->loader->add_filter( 'authenticate', $plugin_admin, 'check_login_submit', 40 , 3 );
 	}
 
 	/**

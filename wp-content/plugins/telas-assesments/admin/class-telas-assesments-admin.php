@@ -1720,7 +1720,7 @@ class Telas_Assesments_Admin {
 		if ( is_wp_error( $new_course_id ) ) {
 			$error_code = $new_course_id->get_error_code();
 			return new WP_Error(
-				'[jwt_auth] ' . $error_code,
+				'[extend-telas] ' . $error_code,
 				$new_course_id->get_error_message( $error_code ),
 				array(
 					'status' => 403,
@@ -1773,7 +1773,7 @@ class Telas_Assesments_Admin {
 			'user_email'        => $all_params['email'],
 			'status' 			=> 200
 		);
-
+		wp_new_user_notification( $new_user_id );
 		return apply_filters( 'extend_telas_before_dispatch', $data );
 	}
 
@@ -2086,6 +2086,36 @@ class Telas_Assesments_Admin {
 		$user_roles = $user_data->roles;
 		$data['roles'] = $user_roles;
 		return $data;
+	}
+
+    function new_user_notification( $user_id, $plaintext_pass = '' ) {
+        $user = new WP_User($user_id);
+		$user_login = stripslashes( $user->user_login );
+		$user_email = stripslashes( $user->user_email );
+		$login_url  = wp_login_url();
+		$message  = __( 'Hi there,' ) . "/r/n/r/n";
+		$message .= sprintf( __( "Welcome to %s! " ), get_option('blogname') ) . "/r/n/r/n";
+		$message .= sprintf( __('Username: %s'), $user_login ) . "/r/n";
+		$message .= sprintf( __('Email: %s'), $user_email ) . "/r/n";
+		$plaintext_pass =  wp_generate_password( 8, false );
+		wp_set_password( $plaintext_pass, $user_id );
+		$message .= __( 'Password: We have generated password for you: ' ) . $plaintext_pass . "/r/n/r/n";
+		$message .= sprintf( __('If you have any problems, please contact me at %s.'), get_option('admin_email') ) . "/r/n/r/n";
+		$message .= __( 'bye!' );
+	
+		$wp_new_user_notification_email['subject'] = sprintf( '[%s] Your credentials.', $blogname );
+		$wp_new_user_notification_email['headers'] = array('Content-Type: text/html; charset=UTF-8');
+		$wp_new_user_notification_email['message'] = $message;
+	
+		return $wp_new_user_notification_email;
+	}
+
+	function check_login_submit($user, $username, $password) {
+		if ( is_wp_error( $user ) ) {
+			$user->errors['incorrect_password'][0] = "The password you entered for the username {$username} is incorrect.";
+			$user->errors['invalid_username'][0] = "Invalid Username.";
+		}
+		return $user;
 	}
 	
 }
