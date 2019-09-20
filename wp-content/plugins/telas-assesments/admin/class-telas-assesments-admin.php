@@ -138,7 +138,7 @@ class Telas_Assesments_Admin {
 			'query_var'             => true,
 			'menu_position'         => null,
 			'menu_icon'             => 'dashicons-admin-post',
-			'show_in_rest'          => false,
+			'show_in_rest'          => true,
 			'rest_base'             => 'telas-courses',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 			'capability_type' 		=> array( 'telas_course', 'telas_courses' ),
@@ -183,7 +183,7 @@ class Telas_Assesments_Admin {
 			'query_var'             => true,
 			'menu_position'         => null,
 			'menu_icon'             => 'dashicons-admin-post',
-			'show_in_rest'          => true,
+			'show_in_rest'          => false,
 			'rest_base'             => 'telas-assessment',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 			'capability_type'		=> array( 'telas_assessment', 'telas_assessments' ),
@@ -1735,7 +1735,7 @@ class Telas_Assesments_Admin {
 
 		return apply_filters( 'extend_telas_before_dispatch', $data );
 	}
-	
+
 	function register_user_callback( $request ) {
 		$all_params = $request->get_params();
 		$new_user_data = array(
