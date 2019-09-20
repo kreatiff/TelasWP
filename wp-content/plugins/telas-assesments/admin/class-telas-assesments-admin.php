@@ -1696,7 +1696,32 @@ class Telas_Assesments_Admin {
 			'callback' => array( $this, 'submit_course_callback' ),
 			'permission_callback' => array( $this, 'submit_course_permission_callback' )
 		));
+		register_rest_field( 'telas_courses',
+			'post_meta', // Add it to the response
+			array(
+				'get_callback'    => array( $this, 'prepare_post_meta' ), // Callback function - returns the value
+				'update_callback' => null,
+				'schema'          => null,
+			)
+		);
+		register_rest_field( 'telas_courses',
+			'featured_images', // Add it to the response
+			array(
+				'get_callback'    => array( $this, 'prepare_featured_image' ), // Callback function - returns the value
+				'update_callback' => null,
+				'schema'          => null,
+			)
+		);
 	}
+
+	function prepare_post_meta( $object, $field_name, $request ) {
+		return get_post_meta( $object['id'] );
+	}
+	
+	function prepare_featured_image( $object, $field_name, $request ) {
+		return get_the_post_thumbnail_url( $object['id'], 'post-thumbnail' );
+	}
+	
 	function submit_course_permission_callback( $request ) {
 		return current_user_can( 'publish_telas_courses' );
 	}
