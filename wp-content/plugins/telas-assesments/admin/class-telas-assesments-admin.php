@@ -1696,6 +1696,10 @@ class Telas_Assesments_Admin {
 			'callback' => array( $this, 'submit_course_callback' ),
 			'permission_callback' => array( $this, 'submit_course_permission_callback' )
 		));
+		register_rest_route( $namespace, '/' . 'telas-users', array(
+			'methods' => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'get_telas_users' )
+		));
 		register_rest_field( 'telas_courses',
 			'post_meta', // Add it to the response
 			array(
@@ -1724,6 +1728,22 @@ class Telas_Assesments_Admin {
 	
 	function submit_course_permission_callback( $request ) {
 		return current_user_can( 'publish_telas_courses' );
+	}
+
+	function get_telas_users( $request ) {
+		$all_params = $request->get_params();
+		$role = empty( $all_params['role'] ) ?  $all_params['role'] : 'telas_course_submitters';
+		$page = empty( $all_params['page'] ) ? 1 : $all_params['page'];
+		$per_page = empty( $all_params['per_page'] ) ? 10 : $all_params['per_page'];
+		
+		$user_query_args = array(
+			'role'         => $role,
+			'orderby'      => 'login',
+			'order'        => 'ASC',
+			'number'       => $per_page,
+			'paged' 	   => $page,
+		);
+		return apply_filters( 'extend_telas_before_dispath_users', get_users( $user_query_args ) );
 	}
 	function submit_course_callback( $request ) {
 		$all_params = $request->get_params();
