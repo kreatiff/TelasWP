@@ -122,6 +122,8 @@ class Telas_Assesments {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-telas-assesments-public.php';
 
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-telas-assesments-helper.php';
+
 		$this->loader = new Telas_Assesments_Loader();
 
 	}

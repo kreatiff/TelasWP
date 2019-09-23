@@ -51,6 +51,9 @@ class Telas_Assesments_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		// add_action( 'wp_mail_failed', array( $this, 'onMailError' ), 10, 1 );
+
+		// add_action( 'init', array( $this, 'new_user_notification' ) );
 	}
 
 	/**
@@ -1684,11 +1687,16 @@ class Telas_Assesments_Admin {
 	function register_routes() {
 		$version = '1';
 		$namespace = 'extended-telasweb/v' . $version;
-		$base = 'register';
-		register_rest_route( $namespace, '/' . $base, array(
+		register_rest_route( $namespace, '/' . 'register', array(
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'register_user_callback' ),
+			)
+		));
+		register_rest_route( $namespace, '/' . 'update-user', array(
+			array(
+				'methods' => WP_REST_Server::CREATABLE,
+				'callback' => array( $this, 'update_user_callback' ),
 			)
 		));
 		register_rest_route( $namespace, '/' . 'submit-course', array(
@@ -1699,6 +1707,10 @@ class Telas_Assesments_Admin {
 		register_rest_route( $namespace, '/' . 'telas-users', array(
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'get_telas_users' )
+		));
+		register_rest_route( $namespace, '/' . 'telas-user', array(
+			'methods' => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'get_tela_user_by_id' )
 		));
 		register_rest_field( 'telas_courses',
 			'post_meta', // Add it to the response
@@ -1729,7 +1741,24 @@ class Telas_Assesments_Admin {
 	function submit_course_permission_callback( $request ) {
 		return current_user_can( 'publish_telas_courses' );
 	}
-
+	
+	function get_tela_user_by_id( $request ) {
+		$all_params = $request->get_params();
+		$user_data = get_userdata( $all_params['user_id'] );
+		$user_details_meta_fields['first_name'] = $user_data->first_name; 
+		$user_details_meta_fields['last_name'] = $user_data->last_name; 
+		$user_details_meta_fields['user_email'] = $user_data->user_email; 
+		$user_details_meta_fields['roles'] = $user_data->roles;
+		$user_details_meta_fields['user_id'] = get_user_meta( $user_data->ID, 'user_id', true );
+		$user_details_meta_fields['position'] = get_user_meta( $user_data->ID, 'position', true );
+		$user_details_meta_fields['faculty'] = get_user_meta( $user_data->ID, 'faculty', true );
+		$user_details_meta_fields['institution_name'] = get_user_meta( $user_data->ID, 'institution_name', true );
+		$user_details_meta_fields['institution_campus'] = get_user_meta( $user_data->ID, 'institution_campus', true );
+		$user_details_meta_fields['institution_state'] = get_user_meta( $user_data->ID, 'institution_state', true );
+		$user_details_meta_fields['institution_country'] = get_user_meta( $user_data->ID, 'institution_country', true );
+		return $user_details_meta_fields;
+	}
+	
 	function get_telas_users( $request ) {
 		$all_params = $request->get_params();
 		$role = empty( $all_params['role'] ) ?  $all_params['role'] : 'telas_course_submitters';
@@ -1745,6 +1774,7 @@ class Telas_Assesments_Admin {
 		);
 		return apply_filters( 'extend_telas_before_dispath_users', get_users( $user_query_args ) );
 	}
+	
 	function submit_course_callback( $request ) {
 		$all_params = $request->get_params();
 		if ( ! current_user_can( 'publish_telas_courses' ) ) {
@@ -1785,14 +1815,9 @@ class Telas_Assesments_Admin {
 		$all_params = $request->get_params();
 		$new_user_data = array(
 			'user_login' => $all_params['email'],
-			'user_nicename' => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'user_email' => $all_params['email'],
-			'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
-			'first_name' => $all_params['firstName'],
-			'last_name' => $all_params['lastName'],
 			'role' => $all_params['telasRole'],
-			'nickname' => $all_params['firstName'].$all_params['lastName'],
-			'user_pass' => NULL
+			'user_pass' => $all_params['password']
 
 		);
 		$new_user_id = wp_insert_user( $new_user_data );
@@ -1806,20 +1831,77 @@ class Telas_Assesments_Admin {
 				)
 			);
 		}
-		update_user_meta( $new_user_id, 'position', $all_params['position'] );
-		update_user_meta( $new_user_id, 'faculty', $all_params['faculty'] );
-		update_user_meta( $new_user_id, 'institution_name', $all_params['institutionName'] );
-		update_user_meta( $new_user_id, 'institution_campus', $all_params['institutionCampus'] );
-		update_user_meta( $new_user_id, 'institution_state', $all_params['institutionState'] );
-		update_user_meta( $new_user_id, 'institution_country', $all_params['institutionCountry'] );
+		update_user_meta( $new_user_id, 'position',  ' ' );
+		update_user_meta( $new_user_id, 'faculty',  ' ' );
+		update_user_meta( $new_user_id, 'institution_name',  ' ' );
+		update_user_meta( $new_user_id, 'institution_campus',  ' ' );
+		update_user_meta( $new_user_id, 'institution_state',  ' ' );
+		update_user_meta( $new_user_id, 'institution_country',  ' ' );
+		update_user_meta( $new_user_id, 'is_first_time_updating', 'yes' );
+		update_user_meta( $new_user_id, 'activated_by_admin', 0 );
 		$data = array(
-			'full_name'         => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'user_id'           => $new_user_id,
 			'user_email'        => $all_params['email'],
 			'status' 			=> 200
 		);
-		wp_new_user_notification( $new_user_id );
-		return apply_filters( 'extend_telas_before_dispatch', $data );
+		$this->new_user_notification( $new_user_id, $all_params['password'] );
+		return apply_filters( 'extend_telas_new_user_before_dispatch', $data );
+	}
+
+	function update_user_callback( $request ) {
+		$all_params = $request->get_params();
+		$user_id = $all_params['user_id'];
+		$update_user_args = array(
+			'ID' => $user_id,
+			'first_name' => $all_params['firstName'],
+			'last_name' => $all_params['lastName'],
+			'role' => $all_params['telasRole'],
+		);
+		$updated_user_id = wp_update_user( $update_user_args );
+		if ( is_wp_error( $updated_user_id ) ) {
+			$error_code = $updated_user_id->get_error_code();
+			return new WP_Error(
+				'[extend_telas] ' . $error_code,
+				$updated_user_id->get_error_message( $error_code ),
+				array(
+					'status' => 403,
+				)
+			);
+		}
+
+		update_user_meta( $updated_user_id, 'position',  $all_params['position'] );
+		update_user_meta( $updated_user_id, 'faculty',  $all_params['faculty'] );
+		update_user_meta( $updated_user_id, 'institution_name',  $all_params['institutionName'] );
+		update_user_meta( $updated_user_id, 'institution_campus',  $all_params['institutionCampus'] );
+		update_user_meta( $updated_user_id, 'institution_state',  $all_params['institutionState'] );
+		update_user_meta( $updated_user_id, 'institution_country',  $all_params['institutionCountry'] );
+		$is_user_updating_first_time = get_user_meta( $updated_user_id, 'is_first_time_updating', true );
+		$user_data = get_userdata( $all_params['user_id'] );
+		$user_object = new WP_User( $all_params['user_id'] );
+		if ( $is_user_updating_first_time == 'yes' ) {
+			
+			foreach( $user_data->roles as $role ) {
+				$user_object->remove_role( $role );
+			} 
+			$user_object->add_role( $all_params['telasRole'] );
+			update_user_meta( $updated_user_id, 'is_first_time_updating', 'no' );
+			$this->send_notifiction_to_telas_admin( $user_object );
+		}
+		
+		$user_details_meta_fields = get_fields( 'user_'. $all_params['user_id']);
+		$user_details_meta_fields['first_name'] = $user_data->first_name; 
+		$user_details_meta_fields['last_name'] = $user_data->last_name; 
+		$user_details_meta_fields['user_email'] = $user_data->user_email; 
+		$user_details_meta_fields['roles'] = $user_data->roles;
+		$user_details_meta_fields['user_id'] = $all_params['user_id'];
+		$user_details_meta_fields['position'] = $all_params['position'];
+		$user_details_meta_fields['faculty'] = $all_params['faculty'];
+		$user_details_meta_fields['institution_name'] = $all_params['institutionName'];
+		$user_details_meta_fields['institution_campus'] = $all_params['institutionCampus'];
+		$user_details_meta_fields['institution_state'] = $all_params['institutionState'];
+		$user_details_meta_fields['institution_country'] = $all_params['institutionCountry'];
+		// $this->profile_update_user_notification( $new_course_id, $all_params['password'] );
+		return apply_filters( 'extend_telas_update_before_dispatch', $user_details_meta_fields );
 	}
 
 	function register_acf_field_for_users() {
@@ -2129,31 +2211,73 @@ class Telas_Assesments_Admin {
 	function modify_jwt_authentication_response( $data, $user ) {
 		$user_data = get_userdata( $data['user_id']);
 		$user_roles = $user_data->roles;
+		$data['user_meta'] = get_fields( 'user_'. $user_data->ID );
 		$data['roles'] = $user_roles;
+		$data['is_logging_in_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 		return $data;
 	}
 
     function new_user_notification( $user_id, $plaintext_pass = '' ) {
-        $user = new WP_User($user_id);
+        $user = new WP_User( $user_id );
 		$user_login = stripslashes( $user->user_login );
 		$user_email = stripslashes( $user->user_email );
-		$login_url  = wp_login_url();
-		$message  = __( 'Hi there,' ) . "/r/n/r/n";
-		$message .= sprintf( __( "Welcome to %s! " ), get_option('blogname') ) . "/r/n/r/n";
-		$message .= sprintf( __('Username: %s'), $user_login ) . "/r/n";
-		$message .= sprintf( __('Email: %s'), $user_email ) . "/r/n";
-		$plaintext_pass =  wp_generate_password( 8, false );
-		wp_set_password( $plaintext_pass, $user_id );
-		$message .= __( 'Password: We have generated password for you: ' ) . $plaintext_pass . "/r/n/r/n";
-		$message .= sprintf( __('If you have any problems, please contact me at %s.'), get_option('admin_email') ) . "/r/n/r/n";
-		$message .= __( 'bye!' );
-	
-		$wp_new_user_notification_email['subject'] = sprintf( '[%s] Your credentials.', $blogname );
-		$wp_new_user_notification_email['headers'] = array('Content-Type: text/html; charset=UTF-8');
-		$wp_new_user_notification_email['message'] = $message;
-	
-		return $wp_new_user_notification_email;
+		$blogname = get_option('blogname');
+		$subject = sprintf( '[%s] Your credentials.', $blogname );
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$to = $user_email;
+		$message_title = 'Verify Your E-mail.';
+		$header_image = '';
+		$message_heading = 'Please login to complete your TELAS registration';
+		$message_body = "";
+		$site_url = get_option('siteurl');
+		// $signature = "{$blogname}, <br />{$site_url}";
+		$signature = "";
+		$has_aside = true;
+		$button_link = 'http://localhost:8080/login';
+		$button_text = 'Complete Registration';
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		wp_mail( $to, $subject, $message, $headers );
 	}
+
+	function send_notifiction_to_telas_admin( $user_object ) {
+		$message_title = 'Please verify this newly created Account';
+		$header_image = '';
+		$message_heading = 'User Details:';
+		
+		$message_body = '<table rules="all" style="border-color: #666;" cellpadding="10">';
+		$message_body .= "<tr style='background: #eee;'><td><strong>First Name:</strong> </td><td>" . $user_object->first_name . "</td></tr>";
+		$message_body .= "<tr><td><strong>Last Name:</strong> </td><td>" . $user_object->last_name . "</td></tr>";
+		$message_body .= "<tr><td><strong>Position: </strong> </td><td>" . get_user_meta( $user_object->ID, 'position', true ) . "</td></tr>";
+		$message_body .= "<tr><td><strong>Faculty/Dept: </strong> </td><td>" . get_user_meta( $user_object->ID, 'faculty', true ) . "</td></tr>";
+		$message_body .= "<tr><td><strong>Institution Name:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_name', true ) . "</td></tr>";
+		$message_body .= "<tr><td><strong>Institution Campus:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_campus', true ) . "</td></tr>";
+		$addURLS = $_POST['addURLS'];
+		$message_body .= "<tr><td><strong>Institution State / Region:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_state', true ) . "</td></tr>";
+		$message_body .= "<tr><td><strong>Institution Country:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_country', true ) . "</td></tr>";
+		$message_body .= "<tr><td><strong>Email Address:</strong> </td><td>" . $user_object->user_email . "</td></tr>";
+		$message_body .= "<tr><td><strong>TELAS Role:</strong> </td><td>" . $user_object->roles[0] . "</td></tr>";
+		$message_body .= "</table>";
+		$signature = '';
+		$has_aside = true;
+		$button_link = 'https://localhost/dashboard';
+		$button_text = 'Apporve/Decline';
+		$blogname = get_option('blogname');
+		$subject = sprintf( '[%s] Please verify this newly created Account.', $blogname );
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+
+		$all_telas_admin_emails = Telas_Assesments_Helper::get_telas_admin_emails();
+		foreach( $all_telas_admin_emails as $to_emails ) {
+			wp_mail( $to_emails, $subject, $message, $headers );
+		}
+	}
+
+	function onMailError( $wp_error ) {
+		echo "<pre>";
+		print_r($wp_error);
+		echo "</pre>";
+	}   
 
 	function check_login_submit($user, $username, $password) {
 		if ( is_wp_error( $user ) ) {
