@@ -1900,7 +1900,7 @@ class Telas_Assesments_Admin {
 		$user_details_meta_fields['institution_campus'] = $all_params['institutionCampus'];
 		$user_details_meta_fields['institution_state'] = $all_params['institutionState'];
 		$user_details_meta_fields['institution_country'] = $all_params['institutionCountry'];
-		// $this->profile_update_user_notification( $new_course_id, $all_params['password'] );
+		$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 		return apply_filters( 'extend_telas_update_before_dispatch', $user_details_meta_fields );
 	}
 
