@@ -1748,14 +1748,16 @@ class Telas_Assesments_Admin {
 		$user_details_meta_fields['first_name'] = $user_data->first_name; 
 		$user_details_meta_fields['last_name'] = $user_data->last_name; 
 		$user_details_meta_fields['user_email'] = $user_data->user_email; 
-		$user_details_meta_fields['roles'] = $user_data->roles;
-		$user_details_meta_fields['user_id'] = get_user_meta( $user_data->ID, 'user_id', true );
+		$user_details_meta_fields['user_role'] = $user_data->roles[0];
+		$user_details_meta_fields['user_id'] = $user_data->ID;
 		$user_details_meta_fields['position'] = get_user_meta( $user_data->ID, 'position', true );
 		$user_details_meta_fields['faculty'] = get_user_meta( $user_data->ID, 'faculty', true );
 		$user_details_meta_fields['institution_name'] = get_user_meta( $user_data->ID, 'institution_name', true );
 		$user_details_meta_fields['institution_campus'] = get_user_meta( $user_data->ID, 'institution_campus', true );
 		$user_details_meta_fields['institution_state'] = get_user_meta( $user_data->ID, 'institution_state', true );
 		$user_details_meta_fields['institution_country'] = get_user_meta( $user_data->ID, 'institution_country', true );
+		$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
+		$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 		return $user_details_meta_fields;
 	}
 	
@@ -1816,8 +1818,8 @@ class Telas_Assesments_Admin {
 		$new_user_data = array(
 			'user_login' => $all_params['email'],
 			'user_email' => $all_params['email'],
-			'role' => $all_params['telasRole'],
-			'user_pass' => $all_params['password']
+			'user_pass' => $all_params['password'],
+			'role' => 'subscriber',
 
 		);
 		$new_user_id = wp_insert_user( $new_user_data );
@@ -1831,14 +1833,14 @@ class Telas_Assesments_Admin {
 				)
 			);
 		}
-		update_user_meta( $new_user_id, 'position',  ' ' );
-		update_user_meta( $new_user_id, 'faculty',  ' ' );
-		update_user_meta( $new_user_id, 'institution_name',  ' ' );
-		update_user_meta( $new_user_id, 'institution_campus',  ' ' );
-		update_user_meta( $new_user_id, 'institution_state',  ' ' );
-		update_user_meta( $new_user_id, 'institution_country',  ' ' );
+		update_user_meta( $new_user_id, 'position',  '' );
+		update_user_meta( $new_user_id, 'faculty',  '' );
+		update_user_meta( $new_user_id, 'institution_name',  '' );
+		update_user_meta( $new_user_id, 'institution_campus',  '' );
+		update_user_meta( $new_user_id, 'institution_state',  '' );
+		update_user_meta( $new_user_id, 'institution_country',  '' );
 		update_user_meta( $new_user_id, 'is_first_time_updating', 'yes' );
-		update_user_meta( $new_user_id, 'activated_by_admin', 0 );
+		update_user_meta( $new_user_id, 'activated_by_admin', 'no' );
 		$data = array(
 			'user_id'           => $new_user_id,
 			'user_email'        => $all_params['email'],
@@ -1892,7 +1894,7 @@ class Telas_Assesments_Admin {
 		$user_details_meta_fields['first_name'] = $user_data->first_name; 
 		$user_details_meta_fields['last_name'] = $user_data->last_name; 
 		$user_details_meta_fields['user_email'] = $user_data->user_email; 
-		$user_details_meta_fields['roles'] = $user_data->roles;
+		$user_details_meta_fields['user_role'] = $user_data->roles[0];
 		$user_details_meta_fields['user_id'] = $all_params['user_id'];
 		$user_details_meta_fields['position'] = $all_params['position'];
 		$user_details_meta_fields['faculty'] = $all_params['faculty'];
@@ -1901,6 +1903,7 @@ class Telas_Assesments_Admin {
 		$user_details_meta_fields['institution_state'] = $all_params['institutionState'];
 		$user_details_meta_fields['institution_country'] = $all_params['institutionCountry'];
 		$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
+		$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 		return apply_filters( 'extend_telas_update_before_dispatch', $user_details_meta_fields );
 	}
 
@@ -2212,8 +2215,9 @@ class Telas_Assesments_Admin {
 		$user_data = get_userdata( $data['user_id']);
 		$user_roles = $user_data->roles;
 		$data['user_meta'] = get_fields( 'user_'. $user_data->ID );
-		$data['roles'] = $user_roles;
-		$data['is_logging_in_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
+		$data['user_role'] = $user_roles[0];
+		$data['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
+		$data['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 		return $data;
 	}
 
@@ -2230,7 +2234,6 @@ class Telas_Assesments_Admin {
 		$message_heading = 'Please login to complete your TELAS registration';
 		$message_body = "";
 		$site_url = get_option('siteurl');
-		// $signature = "{$blogname}, <br />{$site_url}";
 		$signature = "";
 		$has_aside = true;
 		$button_link = 'http://localhost:8080/login';
@@ -2271,6 +2274,7 @@ class Telas_Assesments_Admin {
 		foreach( $all_telas_admin_emails as $to_emails ) {
 			wp_mail( $to_emails, $subject, $message, $headers );
 		}
+		update_user_meta( $user_object->ID, 'mail_sent_for_approval', 'yes' );
 	}
 
 	function onMailError( $wp_error ) {
