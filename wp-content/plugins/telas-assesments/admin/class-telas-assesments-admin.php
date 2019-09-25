@@ -210,8 +210,8 @@ class Telas_Assesments_Admin {
 		
 	}
 
-	function add_self_assessor_role() {
-		if ( get_option( 'self_assessor_role_version' ) < 1 ) {
+	function add_assessor_role() {
+		if ( get_option( 'telas_assessor' ) < 1 ) {
 			$role_capabilites_args = array(
 				'read' => true,
 				'edit_posts' => false,
@@ -219,24 +219,11 @@ class Telas_Assesments_Admin {
 				'publish_posts' => false,
 				'upload_files' => false,
 			);
-			add_role( 'telas_self_assessor', 'Self Assessor', $role_capabilites_args );
-			update_option( 'self_assessor_role_version', 1 );
+			add_role( 'telas_assessor', 'Assessor', $role_capabilites_args );
+			update_option( 'telas_assessor', 1 );
 		}
 	}
 
-	function add_certified_reviewers_role() {
-		if ( get_option( 'certified_reviewers_role_version' ) < 1 ) {
-			$role_capabilites_args = array(
-				'read' => true,
-				'edit_posts' => false,
-				'delete_posts' => false,
-				'publish_posts' => false,
-				'upload_files' => false,
-			);
-			add_role( 'telas_certified_reviewers', 'Certified Reviewers', $role_capabilites_args );
-			update_option( 'certified_reviewers_role_version', 1 );
-		}
-	}
 	function add_telas_administrator_role() {
 		if ( get_option( 'telas_administrator_role_version' ) < 1 ) {
 			$role_capabilites_args = array(
@@ -327,35 +314,13 @@ class Telas_Assesments_Admin {
 		$role->remove_cap( 'delete_published_telas_assessments' );
 	}
 
-	function add_custom_cap_for_self_assessor_role() {
-		$role = get_role( 'telas_self_assessor' );
+	function add_custom_cap_for_telas_assessor_role() {
+		$role = get_role( 'telas_assessor' );
 		$role->add_cap( 'read' );
 		$role->add_cap( 'read_telas_course');
 		$role->remove_cap( 'read_private_telas_courses' );
 		$role->add_cap( 'edit_telas_course' );
 		$role->add_cap( 'edit_telas_courses' );
-		
-		$role->add_cap( 'read_telas_assessment');
-		$role->add_cap( 'read_private_telas_assessments' );
-		$role->add_cap( 'edit_telas_assessment' );
-		$role->add_cap( 'edit_telas_assessments' );
-		$role->add_cap( 'edit_others_telas_assessments' );
-		$role->add_cap( 'edit_published_telas_assessments' );
-		$role->add_cap( 'publish_telas_assessments' );
-		$role->remove_cap( 'delete_others_telas_assessments' );
-		$role->add_cap( 'delete_private_telas_assessments' );
-		$role->add_cap( 'delete_published_telas_assessments' );
-	}
-	
-	
-	function add_custom_cap_for_certified_reviews_role() {
-		$role = get_role( 'telas_certified_reviewers' );
-		$role->add_cap( 'read' );
-		$role->add_cap( 'read_telas_course');
-		$role->remove_cap( 'read_private_telas_courses' );
-		$role->add_cap( 'edit_telas_course' );
-		$role->add_cap( 'edit_telas_courses' );
-		
 		$role->add_cap( 'read_telas_assessment');
 		$role->add_cap( 'read_private_telas_assessments' );
 		$role->add_cap( 'edit_telas_assessment' );
@@ -1683,7 +1648,6 @@ class Telas_Assesments_Admin {
 
 		endif;
 	}
-
 	function register_routes() {
 		$version = '1';
 		$namespace = 'extended-telasweb/v' . $version;
@@ -1745,10 +1709,26 @@ class Telas_Assesments_Admin {
 	function get_tela_user_by_id( $request ) {
 		$all_params = $request->get_params();
 		$user_data = get_userdata( $all_params['user_id'] );
+		
+		$user_role = in_array( 'telas_assessor', $user_data->roles ) ? get_user_meta( $user_data->ID, 'telas_assessor_level', true ) : $user_data->roles;
+		$user_role = in_array( 'telas_course_submitters', $user_data->roles ) ? 'telas_course_submitters' : $user_data->roles;
+
+		$user_role = in_array( 'telas_telas_administrator', $user_data->roles ) ? 'telas_telas_administrator' : $user_data->roles;
+		
+		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
+			$user_role = ! empty( get_user_meta( $user_data->ID, 'telas_assessor_level', true ) ) ? get_user_meta( $user_data->ID, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
+		} else if ( in_array( 'telas_course_submitters', $user_data->roles ) ) {
+			$user_role = 'telas_course_submitters';
+		} else if ( in_array( 'telas_telas_administrator', $user_data->roles ) ) {
+			$user_role = 'telas_telas_administrator';
+		} else {
+			$user_role = '';
+		}
+		
 		$user_details_meta_fields['first_name'] = $user_data->first_name; 
 		$user_details_meta_fields['last_name'] = $user_data->last_name; 
-		$user_details_meta_fields['user_email'] = $user_data->user_email; 
-		$user_details_meta_fields['user_role'] = $user_data->roles[0];
+		$user_details_meta_fields['user_email'] = $user_data->user_email;
+		$user_details_meta_fields['user_role'] = $user_role;
 		$user_details_meta_fields['user_id'] = $user_data->ID;
 		$user_details_meta_fields['position'] = get_user_meta( $user_data->ID, 'position', true );
 		$user_details_meta_fields['faculty'] = get_user_meta( $user_data->ID, 'faculty', true );
@@ -1760,7 +1740,7 @@ class Telas_Assesments_Admin {
 		$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 		return $user_details_meta_fields;
 	}
-	
+
 	function get_telas_users( $request ) {
 		$all_params = $request->get_params();
 		$role = empty( $all_params['role'] ) ?  $all_params['role'] : 'telas_course_submitters';
@@ -1853,11 +1833,12 @@ class Telas_Assesments_Admin {
 	function update_user_callback( $request ) {
 		$all_params = $request->get_params();
 		$user_id = $all_params['user_id'];
+		$role = $all_params['telasRole'] === 'telas_course_submitters' ? 'telas_course_submitters' : 'telas_assessor';
 		$update_user_args = array(
 			'ID' => $user_id,
 			'first_name' => $all_params['firstName'],
 			'last_name' => $all_params['lastName'],
-			'role' => $all_params['telasRole'],
+			'role' => $role,
 		);
 		$updated_user_id = wp_update_user( $update_user_args );
 		if ( is_wp_error( $updated_user_id ) ) {
@@ -1870,7 +1851,6 @@ class Telas_Assesments_Admin {
 				)
 			);
 		}
-
 		update_user_meta( $updated_user_id, 'position',  $all_params['position'] );
 		update_user_meta( $updated_user_id, 'faculty',  $all_params['faculty'] );
 		update_user_meta( $updated_user_id, 'institution_name',  $all_params['institutionName'] );
@@ -1878,32 +1858,43 @@ class Telas_Assesments_Admin {
 		update_user_meta( $updated_user_id, 'institution_state',  $all_params['institutionState'] );
 		update_user_meta( $updated_user_id, 'institution_country',  $all_params['institutionCountry'] );
 		$is_user_updating_first_time = get_user_meta( $updated_user_id, 'is_first_time_updating', true );
-		$user_data = get_userdata( $all_params['user_id'] );
-		$user_object = new WP_User( $all_params['user_id'] );
+		$user_data = get_userdata( $updated_user_id );
+		$user_object = new WP_User( $updated_user_id );
 		if ( $is_user_updating_first_time == 'yes' ) {
 			
 			foreach( $user_data->roles as $role ) {
 				$user_object->remove_role( $role );
 			} 
-			$user_object->add_role( $all_params['telasRole'] );
+			$user_object->add_role( $role );
 			update_user_meta( $updated_user_id, 'is_first_time_updating', 'no' );
+			if ( $role === 'telas_assessor' ) {
+				update_user_meta( $updated_user_id, 'telas_assessor_level', $all_params['telasRole'] );
+			}
 			$this->send_notifiction_to_telas_admin( $user_object );
 		}
-		
-		$user_details_meta_fields = get_fields( 'user_'. $all_params['user_id']);
+		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
+			$user_role = ! empty( get_user_meta( $updated_user_id, 'telas_assessor_level', true ) ) ? get_user_meta( $updated_user_id, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
+		} else if ( in_array( 'telas_course_submitters', $user_data->roles ) ) {
+			$user_role = 'telas_course_submitters';
+		} else if ( in_array( 'telas_telas_administrator', $user_data->roles ) ) {
+			$user_role = 'telas_telas_administrator';
+		} else {
+			$user_role = '';
+		}
+		$user_details_meta_fields = get_fields( 'user_'. $updated_user_id);
 		$user_details_meta_fields['first_name'] = $user_data->first_name; 
 		$user_details_meta_fields['last_name'] = $user_data->last_name; 
 		$user_details_meta_fields['user_email'] = $user_data->user_email; 
-		$user_details_meta_fields['user_role'] = $user_data->roles[0];
-		$user_details_meta_fields['user_id'] = $all_params['user_id'];
+		$user_details_meta_fields['user_role'] = $user_role;
+		$user_details_meta_fields['user_id'] = $updated_user_id;
 		$user_details_meta_fields['position'] = $all_params['position'];
 		$user_details_meta_fields['faculty'] = $all_params['faculty'];
 		$user_details_meta_fields['institution_name'] = $all_params['institutionName'];
 		$user_details_meta_fields['institution_campus'] = $all_params['institutionCampus'];
 		$user_details_meta_fields['institution_state'] = $all_params['institutionState'];
 		$user_details_meta_fields['institution_country'] = $all_params['institutionCountry'];
-		$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
-		$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
+		$user_details_meta_fields['is_first_time'] = get_user_meta( $updated_user_id, 'is_first_time_updating', true );
+		$user_details_meta_fields['activated_by_admin'] = get_user_meta( $updated_user_id, 'activated_by_admin', true );
 		return apply_filters( 'extend_telas_update_before_dispatch', $user_details_meta_fields );
 	}
 
@@ -2215,7 +2206,7 @@ class Telas_Assesments_Admin {
 		$user_data = get_userdata( $data['user_id']);
 		$user_roles = $user_data->roles;
 		$data['user_meta'] = get_fields( 'user_'. $user_data->ID );
-		$data['user_role'] = $user_roles[0];
+		$data['user_role'] = '';
 		$data['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 		$data['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 		return $data;
@@ -2258,7 +2249,7 @@ class Telas_Assesments_Admin {
 		$message_body .= "<tr><td><strong>Institution State / Region:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_state', true ) . "</td></tr>";
 		$message_body .= "<tr><td><strong>Institution Country:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_country', true ) . "</td></tr>";
 		$message_body .= "<tr><td><strong>Email Address:</strong> </td><td>" . $user_object->user_email . "</td></tr>";
-		$message_body .= "<tr><td><strong>TELAS Role:</strong> </td><td>" . $user_object->roles[0] . "</td></tr>";
+		$message_body .= "<tr><td><strong>TELAS Role:</strong> </td><td>" . reset($user_object->roles) . "</td></tr>";
 		$message_body .= "</table>";
 		$signature = '';
 		$has_aside = true;
