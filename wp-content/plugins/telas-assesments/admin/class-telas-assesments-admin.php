@@ -261,6 +261,7 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'delete_others_telas_assessments' );
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
+		$role->add_cap( 'list_users' );
 	}
 	
 	function add_custom_post_type_capabilites_for_telas_telas_administrator() {
@@ -287,6 +288,7 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'delete_others_telas_assessments' );
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
+		$role->add_cap( 'list_users' );
 	}
 	function add_custom_cap_for_course_submitters_role() {
 		$role = get_role( 'telas_course_submitters' );
@@ -312,6 +314,7 @@ class Telas_Assesments_Admin {
 		$role->remove_cap( 'delete_others_telas_assessments' );
 		$role->remove_cap( 'delete_private_telas_assessments' );
 		$role->remove_cap( 'delete_published_telas_assessments' );
+		$role->add_cap( 'list_users' );
 	}
 
 	function add_custom_cap_for_telas_assessor_role() {
@@ -331,6 +334,7 @@ class Telas_Assesments_Admin {
 		$role->remove_cap( 'delete_others_telas_assessments' );
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
+		$role->add_cap( 'list_users' );
 	}
 	
 	
@@ -2205,8 +2209,17 @@ class Telas_Assesments_Admin {
 	function modify_jwt_authentication_response( $data, $user ) {
 		$user_data = get_userdata( $data['user_id']);
 		$user_roles = $user_data->roles;
+		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
+			$user_role = ! empty( get_user_meta( $updated_user_id, 'telas_assessor_level', true ) ) ? get_user_meta( $updated_user_id, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
+		} else if ( in_array( 'telas_course_submitters', $user_data->roles ) ) {
+			$user_role = 'telas_course_submitters';
+		} else if ( in_array( 'telas_telas_administrator', $user_data->roles ) ) {
+			$user_role = 'telas_telas_administrator';
+		} else {
+			$user_role = '';
+		}
 		$data['user_meta'] = get_fields( 'user_'. $user_data->ID );
-		$data['user_role'] = '';
+		$data['user_role'] = $user_role;
 		$data['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 		$data['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 		return $data;
@@ -2281,5 +2294,38 @@ class Telas_Assesments_Admin {
 		}
 		return $user;
 	}
+
+	/**
+	 * Removes `has_published_posts` from the query args so even users who have not
+	 * published content are returned by the request.
+	 *
+	 * @see https://developer.wordpress.org/reference/classes/wp_user_query/
+	 *
+	 * @param array           $prepared_args Array of arguments for WP_User_Query.
+	 * @param WP_REST_Request $request       The current request.
+	 *
+	 * @return array
+	 */
+	function prefix_remove_has_published_posts_from_wp_api_user_query( $prepared_args, $request ) {
+		unset( $prepared_args['has_published_posts'] );
+		return $prepared_args;
+	}
+
+
+	function modify_rest_user_query( $prepared_args, $request ) {
+		$all_params = $request->get_params();
+		if ( empty( $all_params['meta'] ) ) {
+			return $prepared_args;
+		}
+		$prepared_args['meta_query'] = array(
+			array(
+				'key' => $all_params['meta']['key'],
+				'value' => $all_params['meta']['value'],
+				'compare' => '=',
+			),
+		);
+		return $prepared_args;
+	}
+	
 	
 }

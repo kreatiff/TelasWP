@@ -189,6 +189,8 @@ class Telas_Assesments {
 		$this->loader->add_filter( 'jwt_auth_token_before_dispatch', $plugin_admin, 'modify_jwt_authentication_response', 10, 2 );
 		$this->loader->add_filter( 'wp_new_user_notification_email', $plugin_admin, 'new_user_notification', 10, 3 );
 		$this->loader->add_filter( 'authenticate', $plugin_admin, 'check_login_submit', 40 , 3 );
+		$this->loader->add_filter( 'rest_user_query', $plugin_admin, 'prefix_remove_has_published_posts_from_wp_api_user_query', 10, 2 );
+		$this->loader->add_filter( 'rest_user_query', $plugin_admin, 'modify_rest_user_query', 20, 2 );
 	}
 
 	/**
