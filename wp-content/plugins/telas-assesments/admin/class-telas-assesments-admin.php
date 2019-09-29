@@ -1696,6 +1696,13 @@ class Telas_Assesments_Admin {
 				'schema'          => null,
 			)
 		);
+		register_rest_route( $namespace, '/' . 'assign-assessors', array(
+			array(
+				'methods' => WP_REST_Server::CREATABLE,
+				'callback' => array( $this, 'assign_assessors_callback' ),
+				'permission_callback' => array( $this, 'assign_assessors_permission_callback' )
+			)
+		));
 	}
 
 	function prepare_post_meta( $object, $field_name, $request ) {
@@ -1900,6 +1907,39 @@ class Telas_Assesments_Admin {
 		$user_details_meta_fields['is_first_time'] = get_user_meta( $updated_user_id, 'is_first_time_updating', true );
 		$user_details_meta_fields['activated_by_admin'] = get_user_meta( $updated_user_id, 'activated_by_admin', true );
 		return apply_filters( 'extend_telas_update_before_dispatch', $user_details_meta_fields );
+	}
+
+	function assign_assessors_callback( $request ) {
+		$all_params = $request->get_params();
+		$reviewer_user_id = $all_params['key'];
+		$course_id = $all_params['courseId'];
+		$course_has_assessment = $all_params['courseHasAssesment'];
+		$course_title = get_the_title( $course_id );
+		$reviewer_level = $all_params['reviewerLevel'];
+		$course_has_assessment = ! empty( get_post_meta( $course_id, 'course_assessment', true ) ) ? true : false;
+		if ( $course_has_assessment ) {
+			$assessment_id = get_post_meta( $course_id, 'course_assessment', true );
+		} else {
+			$create_new_assessment_args = array(
+				'post_type' => 'telas_assessment',
+				'post_title' => 'Assessment For ' . $course_title,
+				'meta_input' => array(
+					$reviewer_level => $reviewer_user_id,
+				),
+			);
+			$assessment_id = wp_insert_post( $create_new_assessment_args );
+			update_post_meta( $assessment_id , 'assigned_course', $course_id );
+			update_post_meta( $course_id, 'course_assessment', $assessment_id );
+		}
+		update_post_meta( $assessment_id, $reviewer_level, $reviewer_user_id );
+		update_post_meta( $course_id, $reviewer_level, $reviewer_user_id );
+		$course_object = get_post( $course_id );
+    	$postController = new \WP_REST_Posts_Controller($course_object->post_type);
+    	$response = $postController->prepare_item_for_response( $course_object, $request );
+    	return rest_ensure_response( $response );
+	}
+	function assign_assessors_permission_callback() {
+		return current_user_can( 'delete_others_telas_assessments' );
 	}
 
 	function register_acf_field_for_users() {
