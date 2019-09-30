@@ -266,6 +266,14 @@ class Telas_Assesments_Admin {
 	
 	function add_custom_post_type_capabilites_for_telas_telas_administrator() {
 		$role = get_role( 'telas_telas_administrator' );
+
+		$role->add_cap( 'list_users' );
+		$role->add_cap('delete_users');
+		$role->add_cap('delete_user');
+		$role->add_cap('remove_users');
+		$role->add_cap('remove_user');
+		
+		
 		$role->add_cap( 'read' );
 		$role->add_cap( 'read_telas_course');
 		$role->add_cap( 'read_private_telas_courses' );
@@ -288,7 +296,7 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'delete_others_telas_assessments' );
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
-		$role->add_cap( 'list_users' );
+		
 	}
 	function add_custom_cap_for_course_submitters_role() {
 		$role = get_role( 'telas_course_submitters' );
@@ -1661,6 +1669,18 @@ class Telas_Assesments_Admin {
 				'callback'            => array( $this, 'register_user_callback' ),
 			)
 		));
+		register_rest_field( 'user', 'user_extra', array(
+			'get_callback' => function ($user) {
+				return array(
+					'first_name' => $user['first_name'],
+					'last_name' => $user['last_name'],
+					'user_email' => $user['email'],
+					'user_meta' => get_user_meta( $user['id'] )
+				);
+			},
+			'update_callback' => null,
+			'schema' => null,
+		));
 		register_rest_route( $namespace, '/' . 'update-user', array(
 			array(
 				'methods' => WP_REST_Server::CREATABLE,
@@ -1700,11 +1720,55 @@ class Telas_Assesments_Admin {
 			array(
 				'methods' => WP_REST_Server::CREATABLE,
 				'callback' => array( $this, 'assign_assessors_callback' ),
-				'permission_callback' => array( $this, 'assign_assessors_permission_callback' )
+				'permission_callback' => array( $this, 'assign_assessors_permission_callback' ),
 			)
 		));
+		register_rest_route( $namespace, '/' . 'user-actions', array(
+			array(
+				'methods' => WP_REST_Server::CREATABLE,
+				'callback' => array( $this, 'user_actions_callback' ),
+				'permission_callback' => array( $this, 'user_actions_permission_callback' ),
+			),
+		));
 	}
-
+	function user_actions_permission_callback() {
+		return current_user_can( 'delete_others_telas_assessments' );
+	}
+	function user_actions_callback( $request ) {
+		$all_params = $request->get_params();
+		if ( $all_params['action'] === 'approve' ) {
+			update_user_meta( $all_params['user_id'], 'activated_by_admin', 'yes' );
+			$user_data = get_userdata( $all_params['user_id'] );
+			$user_role = in_array( 'telas_assessor', $user_data->roles ) ? get_user_meta( $user_data->ID, 'telas_assessor_level', true ) : $user_data->roles;
+			$user_role = in_array( 'telas_course_submitters', $user_data->roles ) ? 'telas_course_submitters' : $user_data->roles;
+			$user_role = in_array( 'telas_telas_administrator', $user_data->roles ) ? 'telas_telas_administrator' : $user_data->roles;
+			if ( in_array( 'telas_assessor', $user_data->roles ) ) {
+				$user_role = ! empty( get_user_meta( $user_data->ID, 'telas_assessor_level', true ) ) ? get_user_meta( $user_data->ID, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
+			} else if ( in_array( 'telas_course_submitters', $user_data->roles ) ) {
+				$user_role = 'telas_course_submitters';
+			} else if ( in_array( 'telas_telas_administrator', $user_data->roles ) ) {
+				$user_role = 'telas_telas_administrator';
+			} else {
+				$user_role = '';
+			}
+			$user_details_meta_fields['first_name'] = $user_data->first_name; 
+			$user_details_meta_fields['last_name'] = $user_data->last_name; 
+			$user_details_meta_fields['user_email'] = $user_data->user_email;
+			$user_details_meta_fields['user_role'] = $user_role;
+			$user_details_meta_fields['user_id'] = $user_data->ID;
+			$user_details_meta_fields['position'] = get_user_meta( $user_data->ID, 'position', true );
+			$user_details_meta_fields['faculty'] = get_user_meta( $user_data->ID, 'faculty', true );
+			$user_details_meta_fields['institution_name'] = get_user_meta( $user_data->ID, 'institution_name', true );
+			$user_details_meta_fields['institution_campus'] = get_user_meta( $user_data->ID, 'institution_campus', true );
+			$user_details_meta_fields['institution_state'] = get_user_meta( $user_data->ID, 'institution_state', true );
+			$user_details_meta_fields['institution_country'] = get_user_meta( $user_data->ID, 'institution_country', true );
+			$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
+			$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
+			$user_details_meta_fields['status'] = 'approved';
+			return $user_details_meta_fields;
+		}
+	}
+	
 	function prepare_post_meta( $object, $field_name, $request ) {
 		return get_post_meta( $object['id'] );
 	}
