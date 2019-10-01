@@ -2421,13 +2421,14 @@ class Telas_Assesments_Admin {
 		if ( empty( $all_params['meta'] ) ) {
 			return $prepared_args;
 		}
-		$prepared_args['meta_query'] = array(
-			array(
-				'key' => $all_params['meta']['key'],
-				'value' => $all_params['meta']['value'],
-				'compare' => '=',
-			),
-		);
+		$prepared_args['meta_query']['relation'] = 'AND';
+		foreach( $all_params['meta'] as $meta_query_value ) {
+			$prepared_args['meta_query'][] = array(
+				'key' => $meta_query_value['key'],
+				'value' => $meta_query_value['value'],
+				'compare' => 'LIKE',
+			);
+		}
 		return $prepared_args;
 	}
 	
