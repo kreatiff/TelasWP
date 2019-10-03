@@ -1716,6 +1716,15 @@ class Telas_Assesments_Admin {
 				'schema'          => null,
 			)
 		);
+		register_rest_field( 'telas_courses',
+			'author_name',
+			array(
+				'get_callback' => array( $this, 'prepare_author_name' ),
+				'update_callback' => null,
+				'schema' => null,
+			)
+		);
+		
 		register_rest_route( $namespace, '/' . 'create-assessment', array(
 			array(
 				'methods' => WP_REST_Server::CREATABLE,
@@ -1787,6 +1796,10 @@ class Telas_Assesments_Admin {
 	
 	function submit_course_permission_callback( $request ) {
 		return current_user_can( 'publish_telas_courses' );
+	}
+
+	function prepare_author_name( $object, $field_name, $request ) {
+		return get_user_meta( $object['author'], 'first_name', true ) . ' ' . get_user_meta( $object['author'], 'last_name', true );
 	}
 
 	function prepare_assessment_data( $object, $field_name, $request ) {
@@ -2030,6 +2043,18 @@ class Telas_Assesments_Admin {
 		$course_has_assessment = $all_params['courseHasAssesment'];
 		$course_title = get_the_title( $course_id );
 		$reviewer_level = $all_params['reviewerLevel'];
+		$coureses_assigned_to_the_user = get_user_meta( $reviewer_user_id, 'courses_assigned', true );
+		if ( empty( $coureses_assigned_to_the_user ) ) {
+			$coureses_assigned_to_the_user = array( $course_id );
+		} else {
+			$coureses_assigned_to_the_user = array_unique( array_push( $coureses_assigned_to_the_user, $course_id ) );
+		}
+		$assigned_reviewers_to_a_course = get_post_meta( $course_id, 'reviewers_assigned', true );
+		if ( empty( $assigned_reviewers_to_a_course ) ) {
+			$assigned_reviewers_to_a_course = array( $reviewer_user_id );
+		} else {
+			$assigned_reviewers_to_a_course = array_unique( array_push( $assigned_reviewers_to_a_course, $reviewer_user_id ) );
+		}
 		switch ($reviewer_level) {
 			case 'admin_reviewer':
 				$create_new_assessment_args = array(
@@ -2042,6 +2067,9 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assigned_admin_reviewer_user_id', $reviewer_user_id );
 				update_post_meta( $course_id, 'assigned_admin_reviewer_status', 'assigned' );
 				update_post_meta( $course_id, 'assigned_admin_reviewer_assessment', $new_assessment_id );
+				update_user_meta( $reviewer_user_id, 'assigned_courses', $coureses_assigned_to_the_user );
+				update_post_meta( $course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course );
+				update_user_meta( $reviewer_user_id, 'assigned_reviewer_role', 'admin_reviewer' );
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
@@ -2404,8 +2432,10 @@ class Telas_Assesments_Admin {
 	function modify_jwt_authentication_response( $data, $user ) {
 		$user_data = get_userdata( $data['user_id']);
 		$user_roles = $user_data->roles;
+		$assigned_courses = '';
 		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
 			$user_role = ! empty( get_user_meta( $updated_user_id, 'telas_assessor_level', true ) ) ? get_user_meta( $updated_user_id, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
+			$assigned_courses = get_user_meta( $data['user_id'], 'assigned_courses', true );
 		} else if ( in_array( 'telas_course_submitters', $user_data->roles ) ) {
 			$user_role = 'telas_course_submitters';
 		} else if ( in_array( 'telas_telas_administrator', $user_data->roles ) ) {
@@ -2417,6 +2447,7 @@ class Telas_Assesments_Admin {
 		$data['user_role'] = $user_role;
 		$data['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 		$data['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
+		$data['assigned_courses'] = $assigned_courses;
 		return $data;
 	}
 
