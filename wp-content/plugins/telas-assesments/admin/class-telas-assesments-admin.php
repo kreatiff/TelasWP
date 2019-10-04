@@ -180,13 +180,13 @@ class Telas_Assesments_Admin {
 			'hierarchical'          => false,
 			'show_ui'               => true,
 			'show_in_nav_menus'     => true,
-			'supports'              => array( 'title' ),
+			'supports'              => array( 'title', 'author' ),
 			'has_archive'           => true,
 			'rewrite'               => true,
 			'query_var'             => true,
 			'menu_position'         => null,
 			'menu_icon'             => 'dashicons-admin-post',
-			'show_in_rest'          => false,
+			'show_in_rest'          => true,
 			'rest_base'             => 'telas-assessment',
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 			'capability_type'		=> array( 'telas_assessment', 'telas_assessments' ),
@@ -2061,6 +2061,7 @@ class Telas_Assesments_Admin {
 					'post_type' => 'telas_assessment',
 					'post_title' => 'Admin Reviewer Assessment for ' . $course_title,
 					'post_status' => 'publish',
+					'post_author' => $reviewer_user_id,
 				);
 				$new_assessment_id = wp_insert_post( $create_new_assessment_args );
 				update_post_meta( $new_assessment_id, 'assigned_course', $course_id );
@@ -2070,6 +2071,7 @@ class Telas_Assesments_Admin {
 				update_user_meta( $reviewer_user_id, 'assigned_courses', $coureses_assigned_to_the_user );
 				update_post_meta( $course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course );
 				update_user_meta( $reviewer_user_id, 'assigned_reviewer_role', 'admin_reviewer' );
+				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
