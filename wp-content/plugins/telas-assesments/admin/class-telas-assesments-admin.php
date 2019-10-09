@@ -1739,6 +1739,12 @@ class Telas_Assesments_Admin {
 				'permission_callback' => array( $this, 'user_actions_permission_callback' ),
 			),
 		));
+		register_rest_route( $namespace, '/' . 'update-assessment', array(
+			array(
+				'methods' => WP_REST_Server::CREATABLE,
+				'callback' => array( $this, 'update_assessment_callback' ),
+			),
+		));
 		register_rest_field( 'telas_courses',
 			'assesment_data',
 			array(
@@ -1892,6 +1898,21 @@ class Telas_Assesments_Admin {
 			'paged' 	   => $page,
 		);
 		return apply_filters( 'extend_telas_before_dispath_users', get_users( $user_query_args ) );
+	}
+	
+	function update_assessment_callback( $request ) {
+		$all_params = $request->get_params();
+		$assessment_data = $all_params['assessment_data'];
+		$assessment_id = $all_params['assessments_id'];
+		$percentage_completed = $all_params['percentage_completed'];
+		foreach( $assessment_data as $assessment_review_key => $assessment_review_value ) {
+			update_post_meta( $assessment_id, $assessment_review_key, $assessment_review_value );
+		}
+		update_post_meta( $assessment_id, 'percentage_completed', $percentage_completed );
+		return array(
+			'message'           => 'Updated Assessment',
+			'status'			=> 200
+		);
 	}
 	
 	function submit_course_callback( $request ) {
