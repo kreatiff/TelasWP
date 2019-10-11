@@ -1917,7 +1917,7 @@ class Telas_Assesments_Admin {
 		update_post_meta( $assessment_id, 'assessment_answer_data', array_merge( $assessment_data, $prev_assessment_data ) );
 		update_post_meta( $assessment_id, 'assessment_comment', $comment );
 		update_post_meta( $assessment_id, 'percentage_completed', $percentage_completed );
-		update_post_meta( $assessment_id, 'assessment_status', 'in_progress' );
+		update_post_meta( $assessment_id, 'assessment_status', 'in-progress' );
 		if ( $all_params['action'] === 'complete' ) {
 			update_post_meta( $assessment_id, 'assessment_status', 'complete' );
 		}
