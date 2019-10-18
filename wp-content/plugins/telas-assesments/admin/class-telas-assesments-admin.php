@@ -1795,6 +1795,7 @@ class Telas_Assesments_Admin {
 			$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 			$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 			$user_details_meta_fields['status'] = 'approved';
+			$this->new_user_approve_notification(  $user_data );
 			return $user_details_meta_fields;
 		}
 	}
@@ -1922,17 +1923,29 @@ class Telas_Assesments_Admin {
 		if ( $all_params['action'] === 'complete' ) {
 			update_post_meta( $assessment_id, 'assessment_status', 'completed' );
 			$assessment_level = get_post_meta( $assigned_course_id, 'assessment_level', true );
+			$all_assessments = ! empty( get_post_meta( $assigned_course_id, 'assessments', true ) ) ? get_post_meta( $assigned_course_id, 'assessments', true ) : array();
+			$all_completed_assessments = ! empty( get_post_meta( $assigned_course_id, 'completed_assessments', true ) ) ? get_post_meta( $assigned_course_id, 'completed_assessments', true ) : array();
+			array_push( $all_completed_assessments, $assessment_id );
+			update_post_meta( $assigned_course_id, 'completed_assessments', array_unique( $all_completed_assessments ) );
 			switch ($assessment_level) {
 				case 'admin_reviewer':
+					$all_assessments['admin_reviewer']['status'] = 'completed';
+					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_admin_reviewer_status', 'completed' );
 					break;
 				case 'interim_reviewer':
+					$all_assessments['interim_reviewer']['status'] = 'completed';
+					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_interim_reviewer_status', 'completed' );
 					break;
 				case 'first_reviewer':
+					$all_assessments['first_reviewer']['status'] = 'completed';
+					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_first_reviewer_status', 'completed' );
 					break;
 				case 'second_reviewer':
+					$all_assessments['second_reviewer']['status'] = 'completed';
+					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_second_reviewer_status', 'completed' );
 					break;
 				
@@ -1953,7 +1966,7 @@ class Telas_Assesments_Admin {
 		$course_details = array(
 			'title' => get_the_title( $course_id ),
 			'review_status' => get_post_meta( $assessment_id, 'percentage_completed', true ),
-			
+			'previous_assessments' => get_post_meta( $course_id, 'completed_assessments', true ),
 		);
 		$all_meta = get_post_meta( $assessment_id );
 		return array(
@@ -2143,6 +2156,17 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'admin_reviewer' );
 				update_post_meta( $course_id, 'assessment_level', 'admin_reviewer' );
+				update_post_meta( 
+					$course_id,
+					'assessments',
+					array(
+						'admin_reviewer' => 
+						array(
+							'asessment_id' => $new_assessment_id,
+							'assessment_status' => 'assigned',
+						)
+					)
+				);
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
@@ -2163,6 +2187,17 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
 				update_post_meta( $course_id, 'assessment_level', 'interim_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'interim_reviewer' );
+				update_post_meta( 
+					$course_id,
+					'assessments',
+					array(
+						'interim_reviewer' => 
+						array(
+							'asessment_id' => $new_assessment_id,
+							'assessment_status' => 'assigned',
+						)
+					)
+				);
 			break;
 			case 'first_reviewer':
 				$create_new_assessment_args = array(
@@ -2183,6 +2218,17 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
 				update_post_meta( $course_id, 'assessment_level', 'first_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'first_reviewer' );
+				update_post_meta( 
+					$course_id,
+					'assessments',
+					array(
+						'first_reviewer' => 
+						array(
+							'asessment_id' => $new_assessment_id,
+							'assessment_status' => 'assigned',
+						)
+					)
+				);
 			break;
 			case 'second_reviewer':
 				$create_new_assessment_args = array(
@@ -2204,6 +2250,17 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
 				update_post_meta( $course_id, 'assessment_level', 'second_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'second_reviewer' );
+				update_post_meta( 
+					$course_id,
+					'assessments',
+					array(
+						'second_reviewer' => 
+						array(
+							'asessment_id' => $new_assessment_id,
+							'assessment_status' => 'assigned',
+						)
+					)
+				);
 			break;
 			
 			default:
@@ -2562,6 +2619,26 @@ class Telas_Assesments_Admin {
 		$has_aside = true;
 		$button_link = 'http://localhost:8080/login';
 		$button_text = 'Complete Registration';
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		wp_mail( $to, $subject, $message, $headers );
+	}
+
+	function new_user_approve_notification( $user ) {
+		$user_login = stripslashes( $user->user_login );
+		$user_email = stripslashes( $user->user_email );
+		$blogname = get_option('blogname');
+		$subject = sprintf( '[%s] Profile Approved.', $blogname );
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$to = $user_email;
+		$message_title = 'Your submitted profile has been approved';
+		$header_image = '';
+		$message_heading = 'Please login to continue your work.';
+		$message_body = "";
+		$site_url = get_option('siteurl');
+		$signature = "";
+		$has_aside = true;
+		$button_link = 'http://localhost:8080/login';
+		$button_text = 'Login';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		wp_mail( $to, $subject, $message, $headers );
 	}
