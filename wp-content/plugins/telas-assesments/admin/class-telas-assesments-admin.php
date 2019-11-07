@@ -2633,7 +2633,7 @@ class Telas_Assesments_Admin {
 		$site_url = get_option('siteurl');
 		$signature = "";
 		$has_aside = true;
-		$button_link = 'http://localhost:8080/login';
+		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/login';
 		$button_text = 'Complete Registration';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		wp_mail( $to, $subject, $message, $headers );
@@ -2653,7 +2653,7 @@ class Telas_Assesments_Admin {
 		$site_url = get_option('siteurl');
 		$signature = "";
 		$has_aside = true;
-		$button_link = 'http://localhost:8080/login';
+		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/login';
 		$button_text = 'Login';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		wp_mail( $to, $subject, $message, $headers );
@@ -2679,7 +2679,7 @@ class Telas_Assesments_Admin {
 		$message_body .= "</table>";
 		$signature = '';
 		$has_aside = true;
-		$button_link = 'https://localhost/dashboard';
+		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/user-profile/' . $user_object->ID;
 		$button_text = 'Apporve/Decline';
 		$blogname = get_option('blogname');
 		$subject = sprintf( '[%s] Please verify this newly created Account.', $blogname );
