@@ -1840,6 +1840,17 @@ class Telas_Assesments_Admin {
 		$assigned_second_reviewer_user_id = get_post_meta( $post_id, 'assigned_second_reviewer_user_id', true );
 		$assigned_second_reviewer_status = get_post_meta( $post_id, 'assigned_second_reviewer_status', true );
 		$assigned_second_reviewer_user_email = $assigned_second_reviewer_user_id ? get_userdata($assigned_second_reviewer_user_id)->user_email : '';
+		// var_dump( $assigned_admin_reviewer_user_id, $assigned_first_reviewer_user_id, $assigned_second_reviewer_user_id, $assigned_interim_reviewer_user_id );
+		$assigned_admin_reviewer_assessment_ids = ! empty(  $assigned_admin_reviewer_user_id ) ? get_user_meta( $assigned_admin_reviewer_user_id, 'assigned_assessments', true ) : array();
+		$assigned_first_reviewer_assessment_ids = ! empty( $assigned_first_reviewer_user_id ) ? get_user_meta( $assigned_first_reviewer_user_id, 'assigned_assessments', true ) : array();
+		$assigned_second_reviewer_assessment_ids = ! empty( $assigned_second_reviewer_user_id ) ? get_user_meta( $assigned_second_reviewer_user_id, 'assigned_assessments', true ) : array();
+		$assigned_interim_reviewer_assessment_ids = ! empty( $assigned_interim_reviewer_user_id ) ? get_user_meta( $assigned_interim_reviewer_user_id, 'assigned_assessments', true ) : array();
+
+		$completed_assessments = get_post_meta( $post_id, 'completed_assessments', true );
+		$admin_assessment_id = array_intersect( $completed_assessments, $assigned_admin_reviewer_assessment_ids );
+		$first_assessment_id = array_intersect( $completed_assessments, $assigned_first_reviewer_assessment_ids );
+		$second_assessment_id = array_intersect( $completed_assessments, $assigned_second_reviewer_assessment_ids );
+		$interim_assessment_id = array_intersect( $completed_assessments, $assigned_interim_reviewer_assessment_ids );
 		return array(
 			'is_assigned_admin_reviewer' => $assigned_admin_reviewer_user_id ? 'yes' : 'no',
 			'has_admin_reviewer_completed' => $assigned_admin_reviewer_status === 'completed' ? 'yes' : 'no',
@@ -1857,6 +1868,10 @@ class Telas_Assesments_Admin {
 			'assigned_interim_reviewer_user_email' => $assigned_interim_reviewer_user_email,
 			'assigned_first_reviewer_user_email' => $assigned_first_reviewer_user_email,
 			'assigned_second_reviewer_user_email' => $assigned_second_reviewer_user_email,
+			'admin_reviewer_assessment_id' => reset( $admin_assessment_id ),
+			'first_reviewer_assessment_id' => reset( $first_assessment_id ),
+			'second_reviewer_assessment_id' => reset( $second_assessment_id ),
+			'interim_review_assessment_id' => reset( $interim_assessment_id ),
 			'assessments' => get_post_meta( $post_id, 'assessments', true ),
 		);
 		
@@ -1942,6 +1957,7 @@ class Telas_Assesments_Admin {
 					$all_assessments['interim_reviewer']['status'] = 'completed';
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_interim_reviewer_status', 'completed' );
+					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
 					break;
 				case 'first_reviewer':
 					$all_assessments['first_reviewer']['status'] = 'completed';
@@ -1952,6 +1968,7 @@ class Telas_Assesments_Admin {
 					$all_assessments['second_reviewer']['status'] = 'completed';
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_second_reviewer_status', 'completed' );
+					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
 					break;
 				
 				default:
