@@ -1952,6 +1952,7 @@ class Telas_Assesments_Admin {
 					$all_assessments['admin_reviewer']['status'] = 'completed';
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_admin_reviewer_status', 'completed' );
+					update_post_meta( $assigned_course_id, 'assessment_progress', 'in-progress' );
 					break;
 				case 'interim_reviewer':
 					$all_assessments['interim_reviewer']['status'] = 'completed';
@@ -1963,12 +1964,14 @@ class Telas_Assesments_Admin {
 					$all_assessments['first_reviewer']['status'] = 'completed';
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_first_reviewer_status', 'completed' );
+					update_post_meta( $assigned_course_id, 'assessment_progress', 'in-progress' );
 					break;
 				case 'second_reviewer':
 					$all_assessments['second_reviewer']['status'] = 'completed';
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_second_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
+					update_post_meta( $assigned_course_id, 'compare_ready', 'yes' );
 					break;
 				
 				default:
@@ -2698,7 +2701,7 @@ class Telas_Assesments_Admin {
 		$signature = '';
 		$has_aside = true;
 		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/user-profile/' . $user_object->ID;
-		$button_text = 'Apporve/Decline';
+		$button_text = 'Approve/Decline';
 		$blogname = get_option('blogname');
 		$subject = sprintf( '[%s] Please verify this newly created Account.', $blogname );
 		$headers = array('Content-Type: text/html; charset=UTF-8');
