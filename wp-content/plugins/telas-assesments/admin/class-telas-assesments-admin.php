@@ -2161,7 +2161,8 @@ class Telas_Assesments_Admin {
 		if ( empty( $assigned_reviewers_to_a_course ) ) {
 			$assigned_reviewers_to_a_course = array( $reviewer_user_id );
 		} else {
-			$assigned_reviewers_to_a_course = array_unique( array_push( $assigned_reviewers_to_a_course, $reviewer_user_id ) );
+			array_push( $assigned_reviewers_to_a_course, $reviewer_user_id );
+			$assigned_reviewers_to_a_course = array_unique( $assigned_reviewers_to_a_course );
 		}
 		$assigned_assessments = empty( get_user_meta( $reviewer_user_id, 'assigned_assessments', true ) ) ? array() : get_user_meta( $reviewer_user_id, 'assigned_assessments', true );
 		switch ($reviewer_level) {
@@ -2185,17 +2186,6 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assessment_level', 'admin_reviewer' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
-				update_post_meta( 
-					$course_id,
-					'assessments',
-					array(
-						'telas_admin_reviewers' => 
-						array(
-							'asessment_id' => $new_assessment_id,
-							'assessment_status' => 'assigned',
-						)
-					)
-				);
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
@@ -2218,17 +2208,6 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'interim_reviewer' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
-				update_post_meta( 
-					$course_id,
-					'assessments',
-					array(
-						'telas_interim_reviewers' => 
-						array(
-							'asessment_id' => $new_assessment_id,
-							'assessment_status' => 'assigned',
-						)
-					)
-				);
 			break;
 			case 'first_reviewer':
 				$create_new_assessment_args = array(
@@ -2251,17 +2230,6 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'first_reviewer' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
-				update_post_meta(
-					$course_id,
-					'assessments',
-					array(
-						'first_reviewer' => 
-						array(
-							'asessment_id' => $new_assessment_id,
-							'assessment_status' => 'assigned',
-						)
-					)
-				);
 			break;
 			case 'second_reviewer':
 				$create_new_assessment_args = array(
@@ -2286,17 +2254,6 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
-				update_post_meta( 
-					$course_id,
-					'assessments',
-					array(
-						'second_reviewer' => 
-						array(
-							'asessment_id' => $new_assessment_id,
-							'assessment_status' => 'assigned',
-						)
-					)
-				);
 			break;
 			
 			default:
