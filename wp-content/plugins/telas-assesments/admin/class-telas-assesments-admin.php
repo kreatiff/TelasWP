@@ -1872,7 +1872,8 @@ class Telas_Assesments_Admin {
 			'first_reviewer_assessment_id' => reset( $first_assessment_id ),
 			'second_reviewer_assessment_id' => reset( $second_assessment_id ),
 			'interim_review_assessment_id' => reset( $interim_assessment_id ),
-			'assessments' => get_post_meta( $post_id, 'assessments', true ),
+			'all_completed_assessment_data' => get_post_meta( $post_id, 'assessments', true ),
+			'completed_assessments' => get_post_meta( $post_id, 'completed_assessments', true ),
 		);
 		
 	}
@@ -1950,24 +1951,28 @@ class Telas_Assesments_Admin {
 			switch ($assessment_level) {
 				case 'admin_reviewer':
 					$all_assessments['admin_reviewer']['status'] = 'completed';
+					$all_assessments['admin_reviewer']['review_data'] = $assessment_data;
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_admin_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'in-progress' );
 					break;
 				case 'interim_reviewer':
 					$all_assessments['interim_reviewer']['status'] = 'completed';
+					$all_assessments['interim_reviewer']['review_data'] = $assessment_data;
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_interim_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
 					break;
 				case 'first_reviewer':
 					$all_assessments['first_reviewer']['status'] = 'completed';
+					$all_assessments['first_reviewer']['review_data'] = $assessment_data;
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_first_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'in-progress' );
 					break;
 				case 'second_reviewer':
 					$all_assessments['second_reviewer']['status'] = 'completed';
+					$all_assessments['second_reviewer']['review_data'] = $assessment_data;
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_second_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
