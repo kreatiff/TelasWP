@@ -192,6 +192,51 @@ class Telas_Assesments_Admin {
 			'capability_type'		=> array( 'telas_assessment', 'telas_assessments' ),
 			'map_meta_cap'			=> true
 		) );
+		
+		register_post_type( 'telas_report', array(
+			'labels'                => array(
+				'name'                  => __( 'Reports', 'telas-web' ),
+				'singular_name'         => __( 'Report', 'telas-web' ),
+				'all_items'             => __( 'All Reports', 'telas-web' ),
+				'archives'              => __( 'Report Archives', 'telas-web' ),
+				'attributes'            => __( 'Report Attributes', 'telas-web' ),
+				'insert_into_item'      => __( 'Insert into Report', 'telas-web' ),
+				'uploaded_to_this_item' => __( 'Uploaded to this Report', 'telas-web' ),
+				'featured_image'        => _x( 'Featured Image', 'telas-assessment', 'telas-web' ),
+				'set_featured_image'    => _x( 'Set featured image', 'telas-assessment', 'telas-web' ),
+				'remove_featured_image' => _x( 'Remove featured image', 'telas-assessment', 'telas-web' ),
+				'use_featured_image'    => _x( 'Use as featured image', 'telas-assessment', 'telas-web' ),
+				'filter_items_list'     => __( 'Filter Reports list', 'telas-web' ),
+				'items_list_navigation' => __( 'Reports list navigation', 'telas-web' ),
+				'items_list'            => __( 'Reports list', 'telas-web' ),
+				'new_item'              => __( 'New Report', 'telas-web' ),
+				'add_new'               => __( 'Add New', 'telas-web' ),
+				'add_new_item'          => __( 'Add New Report', 'telas-web' ),
+				'edit_item'             => __( 'Edit Report', 'telas-web' ),
+				'view_item'             => __( 'View Report', 'telas-web' ),
+				'view_items'            => __( 'View Reports', 'telas-web' ),
+				'search_items'          => __( 'Search Reports', 'telas-web' ),
+				'not_found'             => __( 'No Reports found', 'telas-web' ),
+				'not_found_in_trash'    => __( 'No Reports found in trash', 'telas-web' ),
+				'parent_item_colon'     => __( 'Parent Report:', 'telas-web' ),
+				'menu_name'             => __( 'Reports', 'telas-web' ),
+			),
+			'public'                => true,
+			'hierarchical'          => false,
+			'show_ui'               => true,
+			'show_in_nav_menus'     => true,
+			'supports'              => array( 'title', 'author' ),
+			'has_archive'           => true,
+			'rewrite'               => true,
+			'query_var'             => true,
+			'menu_position'         => null,
+			'menu_icon'             => 'dashicons-admin-post',
+			'show_in_rest'          => true,
+			'rest_base'             => 'telas-report',
+			'rest_controller_class' => 'WP_REST_Posts_Controller',
+			'capability_type'		=> array( 'telas_report', 'telas_reports' ),
+			'map_meta_cap'			=> true
+		) );
 	}
 
 
@@ -262,6 +307,17 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
 		$role->add_cap( 'list_users' );
+		//Cap for reports
+		$role->add_cap( 'read_telas_report');
+		$role->add_cap( 'read_private_telas_reports' );
+		$role->add_cap( 'edit_telas_report' );
+		$role->add_cap( 'edit_telas_reports' );
+		$role->add_cap( 'edit_others_telas_reports' );
+		$role->add_cap( 'edit_published_telas_reports' );
+		$role->add_cap( 'publish_telas_reports' );
+		$role->add_cap( 'delete_others_telas_reports' );
+		$role->add_cap( 'delete_private_telas_reports' );
+		$role->add_cap( 'delete_published_telas_reports' );
 	}
 	
 	function add_custom_post_type_capabilites_for_telas_telas_administrator() {
@@ -296,6 +352,17 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'delete_others_telas_assessments' );
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
+		//Cap for reports
+		$role->add_cap( 'read_telas_report');
+		$role->add_cap( 'read_private_telas_reports' );
+		$role->add_cap( 'edit_telas_report' );
+		$role->add_cap( 'edit_telas_reports' );
+		$role->add_cap( 'edit_others_telas_reports' );
+		$role->add_cap( 'edit_published_telas_reports' );
+		$role->add_cap( 'publish_telas_reports' );
+		$role->add_cap( 'delete_others_telas_reports' );
+		$role->add_cap( 'delete_private_telas_reports' );
+		$role->add_cap( 'delete_published_telas_reports' );
 		
 	}
 	function add_custom_cap_for_course_submitters_role() {
@@ -323,6 +390,8 @@ class Telas_Assesments_Admin {
 		$role->remove_cap( 'delete_private_telas_assessments' );
 		$role->remove_cap( 'delete_published_telas_assessments' );
 		$role->add_cap( 'list_users' );
+		//Cap for reports
+		$role->add_cap( 'read_telas_report');
 	}
 
 	function add_custom_cap_for_telas_assessor_role() {
@@ -343,6 +412,17 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'delete_private_telas_assessments' );
 		$role->add_cap( 'delete_published_telas_assessments' );
 		$role->add_cap( 'list_users' );
+		//Cap for reports
+		$role->add_cap( 'read_telas_report');
+		$role->add_cap( 'read_private_telas_reports' );
+		$role->add_cap( 'edit_telas_report' );
+		$role->add_cap( 'edit_telas_reports' );
+		$role->add_cap( 'edit_others_telas_reports' );
+		$role->add_cap( 'edit_published_telas_reports' );
+		$role->add_cap( 'publish_telas_reports' );
+		$role->add_cap( 'delete_others_telas_reports' );
+		$role->add_cap( 'delete_private_telas_reports' );
+		$role->add_cap( 'delete_published_telas_reports' );
 	}
 	
 	
