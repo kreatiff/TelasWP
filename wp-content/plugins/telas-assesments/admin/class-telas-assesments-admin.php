@@ -180,7 +180,7 @@ class Telas_Assesments_Admin {
 			'hierarchical'          => false,
 			'show_ui'               => true,
 			'show_in_nav_menus'     => true,
-			'supports'              => array( 'title', 'author' ),
+			'supports'              => array( 'title', 'author', 'custom-fields' ),
 			'has_archive'           => true,
 			'rewrite'               => true,
 			'query_var'             => true,
@@ -225,7 +225,7 @@ class Telas_Assesments_Admin {
 			'hierarchical'          => false,
 			'show_ui'               => true,
 			'show_in_nav_menus'     => true,
-			'supports'              => array( 'title', 'author' ),
+			'supports'              => array( 'title', 'author', 'custom-fields' ),
 			'has_archive'           => true,
 			'rewrite'               => true,
 			'query_var'             => true,
@@ -1840,6 +1840,14 @@ class Telas_Assesments_Admin {
 				'schema' => null,
 			)
 		);
+		register_rest_field('telas_report',
+			'all_fields',
+			array(
+				'get_callback' => array( $this, 'prepare_get_telas_report_fields' ),
+				'update_callback' => array( $this, 'prepare_update_telas_report_fields' ),
+				'schema' => array( 'all_fields', 'All Custom Fields of Report' ),
+			)
+		);
 	}
 	function user_actions_permission_callback() {
 		return current_user_can( 'delete_others_telas_assessments' );
@@ -1954,6 +1962,9 @@ class Telas_Assesments_Admin {
 			'interim_review_assessment_id' => reset( $interim_assessment_id ),
 			'all_completed_assessment_data' => get_post_meta( $post_id, 'assessments', true ),
 			'completed_assessments' => get_post_meta( $post_id, 'completed_assessments', true ),
+			'all_assigned_reviewers' => get_post_meta( $post_id, 'reviewers_assigned', true ),
+			'has_report' => get_post_meta( $post_id, 'has_report_created', true ) === 'yes' ? 'yes' : 'no',
+			'assigned_report' => ! empty( get_post_meta( $post_id, 'report_post_id', true ) ) ? get_post_meta( $post_id, 'report_post_id', true ) : 0,
 		);
 		
 	}
@@ -2803,6 +2814,18 @@ class Telas_Assesments_Admin {
 		}
 		return $prepared_args;
 	}
+
+
+	function prepare_get_telas_report_fields( $report_object, $field_name, $request ) {
+		return get_post_meta( $report_object['id'], $field_name, true );
+	}
+
+	function prepare_update_telas_report_fields( $value, $report_object, $field_name ) {
+		update_post_meta( $value['report_of_course'], 'report_post_id', $report_object->ID );
+		update_post_meta( $value['report_of_course'], 'has_report_created', 'yes' );
+		return update_post_meta( $report_object->ID, $field_name, $value );
+	}
+
 	
 	
 }
