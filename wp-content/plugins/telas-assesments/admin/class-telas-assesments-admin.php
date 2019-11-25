@@ -1882,6 +1882,7 @@ class Telas_Assesments_Admin {
 			$user_details_meta_fields['institution_country'] = get_user_meta( $user_data->ID, 'institution_country', true );
 			$user_details_meta_fields['is_first_time'] = get_user_meta( $user_data->ID, 'is_first_time_updating', true );
 			$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
+			$user_details_meta_fields['nickname'] = get_user_meta( $user_data->ID, 'nickname', true );
 			$user_details_meta_fields['status'] = 'approved';
 			$this->new_user_approve_notification(  $user_data );
 			return $user_details_meta_fields;
@@ -1915,19 +1916,23 @@ class Telas_Assesments_Admin {
 		$assigned_admin_reviewer_user_id = get_post_meta( $post_id, 'assigned_admin_reviewer_user_id', true );
 		$assigned_admin_reviewer_status = get_post_meta( $post_id, 'assigned_admin_reviewer_status', true );
 		$assigned_admin_reviewer_user_email = $assigned_admin_reviewer_user_id ? get_userdata($assigned_admin_reviewer_user_id)->user_email : '';
+		$asssigned_admin_reviewer_user_display_name = $assigned_admin_reviewer_user_id ? get_userdata( $assigned_admin_reviewer_user_id )->display_name : '';
 		
 		$assigned_interim_reviewer_user_id = get_post_meta( $post_id, 'assigned_interim_reviewer_user_id', true );
 		$assigned_interim_reviewer_status = get_post_meta( $post_id, 'assigned_interim_reviewer_status', true );
 		$assigned_interim_reviewer_user_email = $assigned_interim_reviewer_user_id ? get_userdata($assigned_interim_reviewer_user_id)->user_email : '';
+		$asssigned_interim_reviewer_user_display_name = $assigned_interim_reviewer_user_id ? get_userdata( $assigned_interim_reviewer_user_id )->display_name : '';
 		
 		$assigned_first_reviewer_user_id = get_post_meta( $post_id, 'assigned_first_reviewer_user_id', true );
 		$assigned_first_reviewer_status = get_post_meta( $post_id, 'assigned_first_reviewer_status', true);
 		$assigned_first_reviewer_user_email = $assigned_first_reviewer_user_id ? get_userdata($assigned_first_reviewer_user_id)->user_email : '';
+		$asssigned_first_reviewer_user_display_name = $assigned_first_reviewer_user_id ? get_userdata( $assigned_first_reviewer_user_id )->display_name : '';
 		
 		
 		$assigned_second_reviewer_user_id = get_post_meta( $post_id, 'assigned_second_reviewer_user_id', true );
 		$assigned_second_reviewer_status = get_post_meta( $post_id, 'assigned_second_reviewer_status', true );
 		$assigned_second_reviewer_user_email = $assigned_second_reviewer_user_id ? get_userdata($assigned_second_reviewer_user_id)->user_email : '';
+		$asssigned_second_reviewer_user_display_name = $assigned_second_reviewer_user_id ? get_userdata( $assigned_second_reviewer_user_id )->display_name : '';
 		// var_dump( $assigned_admin_reviewer_user_id, $assigned_first_reviewer_user_id, $assigned_second_reviewer_user_id, $assigned_interim_reviewer_user_id );
 		$assigned_admin_reviewer_assessment_ids = ! empty(  $assigned_admin_reviewer_user_id ) ? get_user_meta( $assigned_admin_reviewer_user_id, 'assigned_assessments', true ) : array();
 		$assigned_first_reviewer_assessment_ids = ! empty( $assigned_first_reviewer_user_id ) ? get_user_meta( $assigned_first_reviewer_user_id, 'assigned_assessments', true ) : array();
@@ -1953,6 +1958,10 @@ class Telas_Assesments_Admin {
 			'assigned_first_reviewer_status' => $assigned_first_reviewer_status,
 			'assigned_second_reviewer_status' => $assigned_second_reviewer_status,
 			'assigned_admin_reviewer_user_email' => $assigned_admin_reviewer_user_email,
+			'asssigned_admin_reviewer_user_display_name' => $asssigned_admin_reviewer_user_display_name,
+			'asssigned_interim_reviewer_user_display_name' => $asssigned_interim_reviewer_user_display_name,
+			'asssigned_first_reviewer_user_display_name' => $asssigned_first_reviewer_user_display_name,
+			'asssigned_second_reviewer_user_display_name' => $asssigned_second_reviewer_user_display_name,
 			'assigned_interim_reviewer_user_email' => $assigned_interim_reviewer_user_email,
 			'assigned_first_reviewer_user_email' => $assigned_first_reviewer_user_email,
 			'assigned_second_reviewer_user_email' => $assigned_second_reviewer_user_email,
@@ -2180,6 +2189,8 @@ class Telas_Assesments_Admin {
 			'ID' => $user_id,
 			'first_name' => $all_params['firstName'],
 			'last_name' => $all_params['lastName'],
+			'nickname' => $all_params['firstName'] . ' ' . $all_params['lastName'],
+			'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'role' => $role,
 		);
 		$updated_user_id = wp_update_user( $update_user_args );
@@ -2199,6 +2210,8 @@ class Telas_Assesments_Admin {
 		update_user_meta( $updated_user_id, 'institution_campus',  $all_params['institutionCampus'] );
 		update_user_meta( $updated_user_id, 'institution_state',  $all_params['institutionState'] );
 		update_user_meta( $updated_user_id, 'institution_country',  $all_params['institutionCountry'] );
+		update_user_meta( $updated_user_id, 'nickname', $all_params['firstName'] . ' ' . $all_params['lastName'] );
+		update_user_meta( $updated_user_id, 'display_name', $all_params['firstName'] . ' ' . $all_params['lastName'] );
 		$is_user_updating_first_time = get_user_meta( $updated_user_id, 'is_first_time_updating', true );
 		$user_data = get_userdata( $updated_user_id );
 		$user_object = new WP_User( $updated_user_id );
@@ -2282,6 +2295,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assessment_level', 'admin_reviewer' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
+				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
@@ -2304,6 +2318,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'interim_reviewer' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
+				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
 			break;
 			case 'first_reviewer':
 				$create_new_assessment_args = array(
@@ -2326,6 +2341,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $new_assessment_id, 'assessment_assigned_user_level', 'first_reviewer' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
+				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
 			break;
 			case 'second_reviewer':
 				$create_new_assessment_args = array(
