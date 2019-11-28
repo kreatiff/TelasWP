@@ -1780,6 +1780,11 @@ class Telas_Assesments_Admin {
 			'methods' => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'get_tela_user_by_id' )
 		));
+		register_rest_route( $namespace, '/' . 'assessment-calc/(?P<id>\d+)', array(
+			'methods' => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'get_assessment_calculation' ),
+			
+		));
 		register_rest_field( 'telas_courses',
 			'post_meta', // Add it to the response
 			array(
@@ -2043,7 +2048,7 @@ class Telas_Assesments_Admin {
 		update_post_meta( $assessment_id, 'assessment_status', 'in-progress' );
 		if ( $all_params['action'] === 'complete' ) {
 			update_post_meta( $assessment_id, 'assessment_status', 'completed' );
-			$assessment_level = get_post_meta( $assigned_course_id, 'assessment_level', true );
+			$assessment_level = get_post_meta( $assessment_id, 'assessment_assigned_user_level', true );
 			$all_assessments = ! empty( get_post_meta( $assigned_course_id, 'assessments', true ) ) ? get_post_meta( $assigned_course_id, 'assessments', true ) : array();
 			$all_completed_assessments = ! empty( get_post_meta( $assigned_course_id, 'completed_assessments', true ) ) ? get_post_meta( $assigned_course_id, 'completed_assessments', true ) : array();
 			array_push( $all_completed_assessments, $assessment_id );
@@ -2842,6 +2847,99 @@ class Telas_Assesments_Admin {
 		return update_post_meta( $report_object->ID, $field_name, $value );
 	}
 
-	
+	function get_assessment_calculation( $request ) {
+		$all_params = $request->get_params();
+		$assessment_id = $all_params['id'];
+		$assessment_level = get_post_meta( $assessment_id, 'assessment_assigned_user_level', true );
+		$assigned_course_id = get_post_meta( $assessment_id, 'assigned_course', true );
+		$admin_assessment_progress = get_post_meta( $assigned_course_id, 'assigned_admin_reviewer_status', true );
+		if ( $admin_assessment_progress !== 'completed' ) {
+			return array(
+				'calc' => false,
+				'status' => 200,
+			);
+		}
+		if ( $assessment_level === 'admin_reviewer' ) {
+			$data = array(
+				'calc'           	=> false,
+				'status' 			=> 200
+			);
+			return apply_filters( 'extend_telas_assessment_calc_before_dispatch', $data );
+		}
+		$current_assessment_progress = get_post_meta( $assigned_course_id, 'assigned_' . trim($assessment_level) . '_status', true );
+		if ( $current_assessment_progress !== 'completed' ) {
+			return array(
+				'calc' => false,
+				'status' => 200,
+			);
+		}
+		$all_completed_assessments = get_post_meta( $assigned_course_id, 'assessments', true );
+		$admin_review = $all_completed_assessments['admin_reviewer']['review_data'];
+		$current_assessment_review = $all_completed_assessments[$assessment_level]['review_data'];
+		$all_review = array_merge( $admin_review, $current_assessment_review );
+		$pattern = "/domain*/";
+		$all_domain_entry_keys = array_filter(array_keys($all_review), function($entry) use ($pattern) {
+			return preg_match($pattern, $entry);
+		});
+		$all_domain_entry_keys = array_values($all_domain_entry_keys);
+		$all_domain_entries = array();
+		$first_domain_selected_total = 0;
+		$second_domain_selected_total = 0;
+		$third_domain_selected_total = 0;
+		$fourth_domain_selected_total = 0;
+		foreach( $all_domain_entry_keys as $domain_entry_key ) {
+			$domain_entry_key_segment = explode( '_', $domain_entry_key );
+			if ( $domain_entry_key_segment[1] === '1' ) {
+				$all_domain_entries['first']['values'][$domain_entry_key] = (float) $all_review[$domain_entry_key];
+				$first_domain_selected_total += (float) $all_review[$domain_entry_key];
+			} elseif( $domain_entry_key_segment[1] === '2' ) {
+				$all_domain_entries['second']['values'][$domain_entry_key] = (float) $all_review[$domain_entry_key];
+				$second_domain_selected_total += (float) $all_review[$domain_entry_key];
+			} elseif ( $domain_entry_key_segment[1] === '3' ) {
+				$all_domain_entries['third']['values'][$domain_entry_key] = (float) $all_review[$domain_entry_key];
+				$third_domain_selected_total += (float) $all_review[$domain_entry_key];
+			} else {
+				$all_domain_entries['fourth']['values'][$domain_entry_key] = (float) $all_review[$domain_entry_key];
+				$fourth_domain_selected_total += (float) $all_review[$domain_entry_key];
+			}
+		}
+		$all_domain_entries['first']['selected_total'] = round( $first_domain_selected_total, 2 );
+		$all_domain_entries['second']['selected_total'] = round( $second_domain_selected_total, 2 );
+		$all_domain_entries['third']['selected_total'] = round( $third_domain_selected_total, 2 );
+		$all_domain_entries['fourth']['selected_total'] = round( $fourth_domain_selected_total, 2 );
+		
+		$first_domain_badge_level = round( ( $first_domain_selected_total / 25 ) * 100 );
+		$second_domain_badge_level = round( ( $second_domain_selected_total / 25 ) * 100 );
+		$third_domain_badge_level = round( ( $third_domain_selected_total / 25 ) * 100 );
+		$fourth_domain_badge_level = round( ( $fourth_domain_selected_total / 25 ) * 100 );
+		$accreditation_percentage = round ( ( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ) );
+
+		if ( $accreditation_percentage >= 0 && $accreditation_percentage <= 49 ) {
+			$badge = 'No Badge';
+		} elseif ( $accreditation_percentage >= 50 && $accreditation_percentage <= 59 ) {
+			$badge = 'Bronze';
+		} elseif ( $accreditation_percentage >= 60 && $accreditation_percentage <= 69 ) {
+			$badge = 'Silver';
+		} elseif ( $accreditation_percentage >= 70 && $accreditation_percentage <= 79 ) {
+			$badge = 'Gold';
+		} elseif ( $accreditation_percentage >= 80 && $accreditation_percentage <= 89 ) {
+			$badge = 'Platinum';
+		} elseif ( $accreditation_percentage >= 90 && $accreditation_percentage <= 100 ) {
+			$badge = 'Diamond';
+		} else {
+			$badge = 'No Badge';
+		}
+		
+		$all_domain_entries['first']['badge_level'] = $first_domain_badge_level;
+		$all_domain_entries['second']['badge_level'] = $second_domain_badge_level;
+		$all_domain_entries['third']['badge_level'] = $third_domain_badge_level;
+		$all_domain_entries['fourth']['badge_level'] = $fourth_domain_badge_level;
+		$all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
+		$all_domain_entries['accreditation_badge'] = $badge;
+		return array(
+			'calc' => $all_domain_entries,
+			'status' => 200,
+		);
+	}
 	
 }
