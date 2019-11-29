@@ -2041,8 +2041,8 @@ class Telas_Assesments_Admin {
 		$percentage_completed = $all_params['percentage_completed'];
 		$comment = $all_params['comment'];
 		$assigned_course_id = get_post_meta( $assessment_id, 'assigned_course', true );
-		$prev_assessment_data = empty( get_post_meta( $assessment_id, 'assessment_answer_data', true ) ) ? array() : get_post_meta( $assessment_id, 'assessment_answer_data', true );\
-		update_post_meta( $assessment_id, 'assessment_answer_data', array_merge( $assessment_data, $prev_assessment_data ) );
+		$prev_assessment_data = empty( get_post_meta( $assessment_id, 'assessment_answer_data', true ) ) ? array() : get_post_meta( $assessment_id, 'assessment_answer_data', true );
+		update_post_meta( $assessment_id, 'assessment_answer_data', array_merge( $prev_assessment_data, $assessment_data ) );
 		update_post_meta( $assessment_id, 'comment', $comment );
 		update_post_meta( $assessment_id, 'percentage_completed', $percentage_completed );
 		update_post_meta( $assessment_id, 'assessment_status', 'in-progress' );
