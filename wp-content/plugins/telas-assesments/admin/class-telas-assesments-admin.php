@@ -1950,6 +1950,7 @@ class Telas_Assesments_Admin {
 		$second_assessment_id = array_intersect( $completed_assessments, $assigned_second_reviewer_assessment_ids );
 		$interim_assessment_id = array_intersect( $completed_assessments, $assigned_interim_reviewer_assessment_ids );
 		return array(
+			'current_assessment_level' => get_post_meta( $post_id, 'assessment_level', true ),
 			'is_assigned_admin_reviewer' => $assigned_admin_reviewer_user_id ? 'yes' : 'no',
 			'has_admin_reviewer_completed' => $assigned_admin_reviewer_status === 'completed' ? 'yes' : 'no',
 			'is_assigned_interim_reviewer' => $assigned_interim_reviewer_user_id ? 'yes' : 'no',
@@ -1973,7 +1974,7 @@ class Telas_Assesments_Admin {
 			'admin_reviewer_assessment_id' => reset( $admin_assessment_id ),
 			'first_reviewer_assessment_id' => reset( $first_assessment_id ),
 			'second_reviewer_assessment_id' => reset( $second_assessment_id ),
-			'interim_review_assessment_id' => reset( $interim_assessment_id ),
+			'interim_reviewer_assessment_id' => reset( $interim_assessment_id ),
 			'all_completed_assessment_data' => get_post_meta( $post_id, 'assessments', true ),
 			'completed_assessments' => get_post_meta( $post_id, 'completed_assessments', true ),
 			'all_assigned_reviewers' => get_post_meta( $post_id, 'reviewers_assigned', true ),
@@ -2088,6 +2089,7 @@ class Telas_Assesments_Admin {
 					# code...
 					break;
 			}
+			$this->assessment_completed_admin_notification( $assessment_level,  $assigned_course_id,  $assessment_id );
 		}
 		$assessment_object = get_post( $assessment_id );
     	$postController = new \WP_REST_Posts_Controller($assessment_object->post_type);
@@ -2794,7 +2796,7 @@ class Telas_Assesments_Admin {
 		$message_title = 'You have been assigned a course to review.';
 		$header_image = '';
 		$course_title = get_the_title( $course_id );
-		$role = ucfirst( str_replace( '_', $role ) );
+		$role = ucfirst( str_replace( '_', ' ', $role ) );
 		$message_heading = "You have been assigned {$course_title} to review as {$role}.";
 		$message_body = '<p>Please click the button to start.</p>';
 		$signature = '';
@@ -2807,6 +2809,26 @@ class Telas_Assesments_Admin {
 		$user = new WP_User( $user_id );
 		$user_email = stripslashes( $user->user_email );
 		wp_mail( $user_email, $subject, $message, $headers );
+	}
+	function assessment_completed_admin_notification( $assessment_level, $assigned_course_id, $assessment_id ) {
+		$message_title = 'Assessment Completed';
+		$header_image = '';
+		$course_title = get_the_title( $assigned_course_id );
+		$assessment_title = get_the_title( $assessment_id );
+		$assessment_level = ucfirst( str_replace( '_', ' ', $assessment_level ) );
+		$message_heading = "{$assessment_level} has completed review for {$course_title}.";
+		$message_body = '<p>Please click the button to view the assessment.</p>';
+		$signature = '';
+		$button_link = 'https://trusting-bardeen-776108.netlify.com/assessment/' . $assessment_id;
+		$button_text = 'View Assessment';
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$blogname = get_option('blogname');
+		$subject = sprintf( '[%s]  Assessment Completed', $blogname );
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$all_telas_admin_emails = Telas_Assesments_Helper::get_telas_admin_emails();
+		foreach( $all_telas_admin_emails as $to_emails ) {
+			wp_mail( $to_emails, $subject, $message, $headers );
+		}
 	}
 
 	function onMailError( $wp_error ) {
