@@ -2265,11 +2265,11 @@ class Telas_Assesments_Admin {
 		$course_has_assessment = $all_params['courseHasAssesment'];
 		$course_title = get_the_title( $course_id );
 		$reviewer_level = $all_params['reviewerLevel'];
-		$coureses_assigned_to_the_user = get_user_meta( $reviewer_user_id, 'courses_assigned', true );
-		if ( empty( $coureses_assigned_to_the_user ) ) {
-			$coureses_assigned_to_the_user = array( $course_id );
+		$courses_assigned_to_the_user = get_user_meta( $reviewer_user_id, 'courses_assigned', true );
+		if ( empty( $courses_assigned_to_the_user ) ) {
+			$courses_assigned_to_the_user = array( $course_id );
 		} else {
-			$coureses_assigned_to_the_user = array_unique( array_push( $coureses_assigned_to_the_user, $course_id ) );
+			$courses_assigned_to_the_user = array_unique( array_push( $courses_assigned_to_the_user, $course_id ) );
 		}
 		$assigned_reviewers_to_a_course = get_post_meta( $course_id, 'reviewers_assigned', true );
 		if ( empty( $assigned_reviewers_to_a_course ) ) {
@@ -2277,7 +2277,7 @@ class Telas_Assesments_Admin {
 		} else {
 			array_push( $assigned_reviewers_to_a_course, $reviewer_user_id );
 			$assigned_reviewers_to_a_course = array_unique( $assigned_reviewers_to_a_course );
-		}
+		}		
 		$assigned_assessments = empty( get_user_meta( $reviewer_user_id, 'assigned_assessments', true ) ) ? array() : get_user_meta( $reviewer_user_id, 'assigned_assessments', true );
 		switch ($reviewer_level) {
 			case 'admin_reviewer':
@@ -2292,7 +2292,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assigned_admin_reviewer_user_id', $reviewer_user_id );
 				update_post_meta( $course_id, 'assigned_admin_reviewer_status', 'assigned' );
 				update_post_meta( $course_id, 'assigned_admin_reviewer_assessment', $new_assessment_id );
-				update_user_meta( $reviewer_user_id, 'assigned_courses', $coureses_assigned_to_the_user );
+				update_user_meta( $reviewer_user_id, 'assigned_courses', $courses_assigned_to_the_user );
 				update_post_meta( $course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course );
 				update_user_meta( $reviewer_user_id, 'assigned_reviewer_role', 'admin_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
@@ -2315,7 +2315,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assigned_admin_reviewer_status', 'completed' );
 				update_post_meta( $course_id, 'assigned_interim_reviewer_status', 'assigned' );
 				update_post_meta( $course_id, 'assigned_interim_reviewer_assessment', $new_assessment_id );
-				update_user_meta( $reviewer_user_id, 'assigned_courses', $coureses_assigned_to_the_user );
+				update_user_meta( $reviewer_user_id, 'assigned_courses', $courses_assigned_to_the_user );
 				update_post_meta( $course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course );
 				update_user_meta( $reviewer_user_id, 'assigned_reviewer_role', 'interim_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
@@ -2338,7 +2338,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assigned_first_reviewer_status', 'assigned' );
 				update_post_meta( $course_id, 'assigned_first_reviewer_assessment', $new_assessment_id );
 				update_post_meta( $course_id, 'assigned_admin_reviewer_status', 'completed' );
-				update_user_meta( $reviewer_user_id, 'assigned_courses', $coureses_assigned_to_the_user );
+				update_user_meta( $reviewer_user_id, 'assigned_courses', $courses_assigned_to_the_user );
 				update_post_meta( $course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course );
 				update_user_meta( $reviewer_user_id, 'assigned_reviewer_role', 'first_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
@@ -2362,7 +2362,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assigned_second_reviewer_assessment', $new_assessment_id );
 				update_post_meta( $course_id, 'assigned_admin_reviewer_status', 'completed' );
 				update_post_meta( $course_id, 'assigned_first_reviewer_status', 'completed' );
-				update_user_meta( $reviewer_user_id, 'assigned_courses', $coureses_assigned_to_the_user );
+				update_user_meta( $reviewer_user_id, 'assigned_courses', $courses_assigned_to_the_user );
 				update_post_meta( $course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course );
 				update_user_meta( $reviewer_user_id, 'assigned_reviewer_role', 'second_reviewer' );
 				update_post_meta( $new_assessment_id, 'assessment_status', 'assigned' );
@@ -2377,6 +2377,7 @@ class Telas_Assesments_Admin {
 				# code...
 				break;
 		}
+		$this->course_reviewer_assigned_email_notification( $reviewer_user_id, $course_id, $new_assessment_id, $reviewer_level );
 		$course_object = get_post( $course_id );
     	$postController = new \WP_REST_Posts_Controller($course_object->post_type);
     	$response = $postController->prepare_item_for_response( $course_object, $request );
@@ -2728,7 +2729,7 @@ class Telas_Assesments_Admin {
 		$site_url = get_option('siteurl');
 		$signature = "";
 		$has_aside = true;
-		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/login';
+		$button_link = 'https://trusting-bardeen-776108.netlify.com/login';
 		$button_text = 'Complete Registration';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		wp_mail( $to, $subject, $message, $headers );
@@ -2748,7 +2749,7 @@ class Telas_Assesments_Admin {
 		$site_url = get_option('siteurl');
 		$signature = "";
 		$has_aside = true;
-		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/login';
+		$button_link = 'https://trusting-bardeen-776108.netlify.com/login';
 		$button_text = 'Login';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		wp_mail( $to, $subject, $message, $headers );
@@ -2774,7 +2775,7 @@ class Telas_Assesments_Admin {
 		$message_body .= "</table>";
 		$signature = '';
 		$has_aside = true;
-		$button_link = 'https://suspicious-archimedes-ed7114.netlify.com/user-profile/' . $user_object->ID;
+		$button_link = 'https://trusting-bardeen-776108.netlify.com/user-profile/' . $user_object->ID;
 		$button_text = 'Approve/Decline';
 		$blogname = get_option('blogname');
 		$subject = sprintf( '[%s] Please verify this newly created Account.', $blogname );
@@ -2787,6 +2788,25 @@ class Telas_Assesments_Admin {
 			wp_mail( $to_emails, $subject, $message, $headers );
 		}
 		update_user_meta( $user_object->ID, 'mail_sent_for_approval', 'yes' );
+	}
+
+	function course_reviewer_assigned_email_notification( $user_id, $course_id, $assessment_id, $role ) {
+		$message_title = 'You have been assigned a course to review.';
+		$header_image = '';
+		$course_title = get_the_title( $course_id );
+		$role = ucfirst( str_replace( '_', $role ) );
+		$message_heading = "You have been assigned {$course_title} to review as {$role}.";
+		$message_body = '<p>Please click the button to start.</p>';
+		$signature = '';
+		$button_link = 'https://trusting-bardeen-776108.netlify.com/assessment/' . $assessment_id;
+		$button_text = 'Start';
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$blogname = get_option('blogname');
+		$subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$user = new WP_User( $user_id );
+		$user_email = stripslashes( $user->user_email );
+		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
 	function onMailError( $wp_error ) {

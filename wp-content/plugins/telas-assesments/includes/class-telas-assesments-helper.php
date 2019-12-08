@@ -21,7 +21,7 @@
  * @author     TELAS <telas@contactus.com>
  */
 class Telas_Assesments_Helper {
-    public static function get_email_body( $title = 'TELAS USER' , $header_image = '', $message_heading = '', $message_body = '', $signature = '', $has_aside = true, $button_link = '', $button_text = '' ) {
+    public static function get_email_body( $title = 'TELAS Notification' , $header_image = '', $message_heading = '', $message_body = '', $signature = '', $has_aside = true, $button_link = '', $button_text = '' ) {
         ob_start();
 		?>
 		<!doctype html>
