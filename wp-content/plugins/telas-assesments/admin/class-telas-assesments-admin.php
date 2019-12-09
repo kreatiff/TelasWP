@@ -1980,6 +1980,10 @@ class Telas_Assesments_Admin {
 			'all_assigned_reviewers' => get_post_meta( $post_id, 'reviewers_assigned', true ),
 			'has_report' => get_post_meta( $post_id, 'has_report_created', true ) === 'yes' ? 'yes' : 'no',
 			'assigned_report' => ! empty( get_post_meta( $post_id, 'report_post_id', true ) ) ? get_post_meta( $post_id, 'report_post_id', true ) : 0,
+			'assigned_admin_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ),
+			'assigned_interim_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ),
+			'assigned_first_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ),
+			'assigned_second_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ),
 		);
 		
 	}
