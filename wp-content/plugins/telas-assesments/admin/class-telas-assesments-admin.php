@@ -1984,6 +1984,14 @@ class Telas_Assesments_Admin {
 			'assigned_interim_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ),
 			'assigned_first_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ),
 			'assigned_second_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ),
+			'current_review_status' => get_post_meta( $post_id, 'current_review_status', true ) ? get_post_meta( $post_id, 'current_review_status', true ) : 'none',
+			'last_status_update' => get_post_meta( $post_id, 'last_status_update', true ) ? get_post_meta( $post_id, 'last_status_update', true ) : get_the_date(),
+			'first_review_commencement_date' => get_post_meta( $post_id, 'first_review_commencement_date', true ) ? get_post_meta( $post_id, 'first_review_commencement_date', true ) : 'none',
+			'first_review_completion_date' => get_post_meta( $post_id, 'first_review_completion_date', true ) ? get_post_meta( $post_id, 'first_review_completion_date', true ) : 'none',
+			'second_review_commencement_date' => get_post_meta( $post_id, 'second_review_commencement_date', true ) ? get_post_meta( $post_id, 'second_review_commencement_date', true ) : 'none',
+			'second_review_completion_date' => get_post_meta( $post_id, 'second_review_completion_date', true ) ? get_post_meta( $post_id, 'second_review_completion_date', true ) : 'none',
+			'combined_review_commencement_date' => get_post_meta( $post_id, 'combined_review_commencement_date', true ) ? get_post_meta( $post_id, 'combined_review_commencement_date', true ) : 'none',
+			'combined_review_completion_date' => get_post_meta( $post_id, 'combined_review_completion_date', true ) ? get_post_meta( $post_id, 'combined_review_completion_date', true ) : 'none',
 		);
 		
 	}
@@ -2040,6 +2048,7 @@ class Telas_Assesments_Admin {
 	}
 	
 	function update_assessment_callback( $request ) {
+		$date_format = get_option( 'date_format' );
 		$all_params = $request->get_params();
 		$assessment_data = $all_params['assessment_data'];
 		$assessment_id = $all_params['assessments_id'];
@@ -2051,6 +2060,8 @@ class Telas_Assesments_Admin {
 		update_post_meta( $assessment_id, 'comment', $comment );
 		update_post_meta( $assessment_id, 'percentage_completed', $percentage_completed );
 		update_post_meta( $assessment_id, 'assessment_status', 'in-progress' );
+		update_post_meta( $assigned_course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ));
+		update_post_meta( $assigned_course_id, 'current_review_status', str_replace( 'er', '', str_replace( '_', ' ', $assessment_level ) ) . 'In Progress' );
 		if ( $all_params['action'] === 'complete' ) {
 			update_post_meta( $assessment_id, 'assessment_status', 'completed' );
 			$assessment_level = get_post_meta( $assessment_id, 'assessment_assigned_user_level', true );
@@ -2065,6 +2076,8 @@ class Telas_Assesments_Admin {
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_admin_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'in-progress' );
+					update_post_meta( $assigned_course_id, 'admin_review_completion_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+					update_post_meta( $assigned_course_id, 'current_review_status', 'Admin Review Completed' );
 					break;
 				case 'interim_reviewer':
 					$all_assessments['interim_reviewer']['status'] = 'completed';
@@ -2072,6 +2085,8 @@ class Telas_Assesments_Admin {
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_interim_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
+					update_post_meta( $assigned_course_id, 'interim_review_completion_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+					update_post_meta( $assigned_course_id, 'current_review_status', 'Interim Review Completed' );
 					break;
 				case 'first_reviewer':
 					$all_assessments['first_reviewer']['status'] = 'completed';
@@ -2079,6 +2094,8 @@ class Telas_Assesments_Admin {
 					update_post_meta( $assigned_course_id, 'assessments', $all_assessments );
 					update_post_meta( $assigned_course_id, 'assigned_first_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'in-progress' );
+					update_post_meta( $assigned_course_id, 'first_review_completion_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+					update_post_meta( $assigned_course_id, 'current_review_status', 'First Review Completed' );
 					break;
 				case 'second_reviewer':
 					$all_assessments['second_reviewer']['status'] = 'completed';
@@ -2087,6 +2104,8 @@ class Telas_Assesments_Admin {
 					update_post_meta( $assigned_course_id, 'assigned_second_reviewer_status', 'completed' );
 					update_post_meta( $assigned_course_id, 'assessment_progress', 'complete' );
 					update_post_meta( $assigned_course_id, 'compare_ready', 'yes' );
+					update_post_meta( $assigned_course_id, 'second_review_completion_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+					update_post_meta( $assigned_course_id, 'current_review_status', 'Second Review Completed' );
 					break;
 				
 				default:
@@ -2265,6 +2284,7 @@ class Telas_Assesments_Admin {
 	}
 
 	function assign_assessors_callback( $request ) {
+		$date_format = get_option( 'date_format' );
 		$all_params = $request->get_params();
 		$reviewer_user_id = $all_params['key'];
 		$course_id = $all_params['courseId'];
@@ -2307,6 +2327,9 @@ class Telas_Assesments_Admin {
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
 				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
+				update_post_meta( $course_id, 'current_review_status', 'Admin Reviewer Assigned');
+				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
+				update_post_meta( $course_id, 'admin_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
@@ -2330,6 +2353,9 @@ class Telas_Assesments_Admin {
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
 				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
+				update_post_meta( $course_id, 'current_review_status', 'Interim Reviewer Assigned' );
+				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
+				update_post_meta( $course_id, 'interim_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
 			break;
 			case 'first_reviewer':
 				$create_new_assessment_args = array(
@@ -2353,6 +2379,10 @@ class Telas_Assesments_Admin {
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
 				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
+				update_post_meta( $course_id, 'current_review_status', 'First Reviewer Assigned' );
+				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
+				update_post_meta( $course_id, 'first_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+				
 			break;
 			case 'second_reviewer':
 				$create_new_assessment_args = array(
@@ -2377,6 +2407,9 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'assessment_progress', 'in-progress' );
 				array_push( $assigned_assessments, $new_assessment_id );
 				update_user_meta( $reviewer_user_id, 'assigned_assessments', $assigned_assessments );
+				update_post_meta( $course_id, 'current_review_status', 'First Reviewer Assigned' );
+				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
+				update_post_meta( $course_id, 'second_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
 			break;
 			
 			default:
