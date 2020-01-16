@@ -1987,6 +1987,8 @@ class Telas_Assesments_Admin {
 			'current_review_status' => get_post_meta( $post_id, 'current_review_status', true ) ? get_post_meta( $post_id, 'current_review_status', true ) : 'none',
 			'last_status_update' => get_post_meta( $post_id, 'last_status_update', true ) ? get_post_meta( $post_id, 'last_status_update', true ) : get_the_date(),
 			'first_review_commencement_date' => get_post_meta( $post_id, 'first_review_commencement_date', true ) ? get_post_meta( $post_id, 'first_review_commencement_date', true ) : 'none',
+			'admin_review_commencement_date' => get_post_meta( $post_id, 'admin_review_commencement_date', true ) ? get_post_meta( $post_id, 'admin_review_commencement_date', true ) : 'none',
+			'admin_review_completion_date' => get_post_meta( $post_id, 'admin_review_completion_date', true ) ? get_post_meta( $post_id, 'admin_review_completion_date', true ) : 'none',
 			'first_review_completion_date' => get_post_meta( $post_id, 'first_review_completion_date', true ) ? get_post_meta( $post_id, 'first_review_completion_date', true ) : 'none',
 			'second_review_commencement_date' => get_post_meta( $post_id, 'second_review_commencement_date', true ) ? get_post_meta( $post_id, 'second_review_commencement_date', true ) : 'none',
 			'second_review_completion_date' => get_post_meta( $post_id, 'second_review_completion_date', true ) ? get_post_meta( $post_id, 'second_review_completion_date', true ) : 'none',
@@ -2044,7 +2046,7 @@ class Telas_Assesments_Admin {
 			'number'       => $per_page,
 			'paged' 	   => $page,
 		);
-		return apply_filters( 'extend_telas_before_dispath_users', get_users( $user_query_args ) );
+		return apply_filters( 'extend_telas_before_dispatch_users', get_users( $user_query_args ) );
 	}
 	
 	function update_assessment_callback( $request ) {
@@ -2923,6 +2925,9 @@ class Telas_Assesments_Admin {
 	function prepare_update_telas_report_fields( $value, $report_object, $field_name ) {
 		update_post_meta( $value['report_of_course'], 'report_post_id', $report_object->ID );
 		update_post_meta( $value['report_of_course'], 'has_report_created', 'yes' );
+		update_post_meta( $assigned_course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ));
+		update_post_meta( $assigned_course_id, 'current_review_status', 'Combined Review Started' );
+		update_post_meta( $value['report_of_course'], 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
 		return update_post_meta( $report_object->ID, $field_name, $value );
 	}
 
