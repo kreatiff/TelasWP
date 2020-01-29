@@ -2132,16 +2132,19 @@ class Telas_Assesments_Admin {
 		$assessment_id = $object['id'];
 		$course_id = get_post_meta( $assessment_id, 'assigned_course', true );
 		$course_details = array(
-			'courseName' => get_the_title( $course_id ),
+			'title' => get_the_title( $course_id ),
 			'review_status' => get_post_meta( $assessment_id, 'percentage_completed', true ),
 			'previous_assessments' => get_post_meta( $course_id, 'completed_assessments', true ),
 			'institution_name' => get_post_meta( $course_id, 'institutionName', true ),
 			'assigned_date' => get_the_date( get_option( 'date_format' ), $assessment_id ),
-			'courseID' => $course_id
+			'courseID' => $course_id,
+			'assessmentId' => $assessment_id,
+			'assessment_user_level' => get_post_meta( $assessment_id, 'assessment_assigned_user_level', true ),
+			'assessmentName' => get_the_title( $assessment_id ),
 		);
 		$all_meta = get_post_meta( $assessment_id );
 		return array(
-			'course_information' => $course_details,
+			'course_detail' => $course_details,
 			'all_meta' => $all_meta,
 			'assessment_data' => empty( get_post_meta( $assessment_id, 'assessment_answer_data', true ) ) ? array() : get_post_meta( $assessment_id, 'assessment_answer_data', true ),
 			'comment' => empty( get_post_meta( $assessment_id, 'comment', true ) ) ? '' : get_post_meta( $assessment_id, 'comment', true ),
