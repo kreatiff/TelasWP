@@ -1986,6 +1986,8 @@ class Telas_Assesments_Admin {
 			'assigned_second_reviewer_assessment_id' => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ),
 			'current_review_status' => get_post_meta( $post_id, 'current_review_status', true ) ? get_post_meta( $post_id, 'current_review_status', true ) : 'none',
 			'last_status_update' => get_post_meta( $post_id, 'last_status_update', true ) ? get_post_meta( $post_id, 'last_status_update', true ) : get_the_date(),
+			'interim_review_commencement_date' => get_post_meta( $post_id, 'interim_review_commencement_date', true ) ? get_post_meta( $post_id, 'interim_review_commencement_date', true ) : 'none',
+			'interim_review_completion_date' => get_post_meta( $post_id, 'interim_review_completion_date', true ) ? get_post_meta( $post_id, 'interim_review_completion_date', true ) : 'none',
 			'first_review_commencement_date' => get_post_meta( $post_id, 'first_review_commencement_date', true ) ? get_post_meta( $post_id, 'first_review_commencement_date', true ) : 'none',
 			'admin_review_commencement_date' => get_post_meta( $post_id, 'admin_review_commencement_date', true ) ? get_post_meta( $post_id, 'admin_review_commencement_date', true ) : 'none',
 			'admin_review_completion_date' => get_post_meta( $post_id, 'admin_review_completion_date', true ) ? get_post_meta( $post_id, 'admin_review_completion_date', true ) : 'none',
@@ -1994,6 +1996,10 @@ class Telas_Assesments_Admin {
 			'second_review_completion_date' => get_post_meta( $post_id, 'second_review_completion_date', true ) ? get_post_meta( $post_id, 'second_review_completion_date', true ) : 'none',
 			'combined_review_commencement_date' => get_post_meta( $post_id, 'combined_review_commencement_date', true ) ? get_post_meta( $post_id, 'combined_review_commencement_date', true ) : 'none',
 			'combined_review_completion_date' => get_post_meta( $post_id, 'combined_review_completion_date', true ) ? get_post_meta( $post_id, 'combined_review_completion_date', true ) : 'none',
+			'admin_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ) ) : false,
+			'interim_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ) : false,
+			'first_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ) : false,
+			'second_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ) : false,
 		);
 		
 	}
@@ -2126,13 +2132,16 @@ class Telas_Assesments_Admin {
 		$assessment_id = $object['id'];
 		$course_id = get_post_meta( $assessment_id, 'assigned_course', true );
 		$course_details = array(
-			'title' => get_the_title( $course_id ),
+			'courseName' => get_the_title( $course_id ),
 			'review_status' => get_post_meta( $assessment_id, 'percentage_completed', true ),
 			'previous_assessments' => get_post_meta( $course_id, 'completed_assessments', true ),
+			'institution_name' => get_post_meta( $course_id, 'institutionName', true ),
+			'assigned_date' => get_the_date( get_option( 'date_format' ), $assessment_id ),
+			'courseID' => $course_id
 		);
 		$all_meta = get_post_meta( $assessment_id );
 		return array(
-			'course_detail' => $course_details,
+			'course_information' => $course_details,
 			'all_meta' => $all_meta,
 			'assessment_data' => empty( get_post_meta( $assessment_id, 'assessment_answer_data', true ) ) ? array() : get_post_meta( $assessment_id, 'assessment_answer_data', true ),
 			'comment' => empty( get_post_meta( $assessment_id, 'comment', true ) ) ? '' : get_post_meta( $assessment_id, 'comment', true ),
