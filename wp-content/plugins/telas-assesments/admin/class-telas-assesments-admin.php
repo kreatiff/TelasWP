@@ -1948,7 +1948,6 @@ class Telas_Assesments_Admin {
 		$assigned_second_reviewer_status = get_post_meta( $post_id, 'assigned_second_reviewer_status', true );
 		$assigned_second_reviewer_user_email = $assigned_second_reviewer_user_id ? get_userdata($assigned_second_reviewer_user_id)->user_email : '';
 		$asssigned_second_reviewer_user_display_name = $assigned_second_reviewer_user_id ? get_userdata( $assigned_second_reviewer_user_id )->display_name : '';
-		// var_dump( $assigned_admin_reviewer_user_id, $assigned_first_reviewer_user_id, $assigned_second_reviewer_user_id, $assigned_interim_reviewer_user_id );
 		$assigned_admin_reviewer_assessment_ids = ! empty(  $assigned_admin_reviewer_user_id ) ? get_user_meta( $assigned_admin_reviewer_user_id, 'assigned_assessments', true ) : array();
 		$assigned_first_reviewer_assessment_ids = ! empty( $assigned_first_reviewer_user_id ) ? get_user_meta( $assigned_first_reviewer_user_id, 'assigned_assessments', true ) : array();
 		$assigned_second_reviewer_assessment_ids = ! empty( $assigned_second_reviewer_user_id ) ? get_user_meta( $assigned_second_reviewer_user_id, 'assigned_assessments', true ) : array();
@@ -2006,10 +2005,10 @@ class Telas_Assesments_Admin {
 			'second_review_completion_date' => get_post_meta( $post_id, 'second_review_completion_date', true ) ? get_post_meta( $post_id, 'second_review_completion_date', true ) : 'none',
 			'combined_review_commencement_date' => get_post_meta( $post_id, 'combined_review_commencement_date', true ) ? get_post_meta( $post_id, 'combined_review_commencement_date', true ) : 'none',
 			'combined_review_completion_date' => get_post_meta( $post_id, 'combined_review_completion_date', true ) ? get_post_meta( $post_id, 'combined_review_completion_date', true ) : 'none',
-			'admin_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ) ) : false,
-			'interim_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ) : false,
-			'first_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ) : false,
-			'second_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ) : false,
+			'admin_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_admin_reviewer_assessment', true ) ) : 'none',
+			'interim_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ) : 'none',
+			'first_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ) : 'none',
+      'second_assessment_assigned_date' => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ) : 'none',
 		);
 		
 	}
@@ -2778,25 +2777,25 @@ class Telas_Assesments_Admin {
 	}
 
     function new_user_notification( $user_id, $plaintext_pass = '' ) {
-        $user = new WP_User( $user_id );
-		$user_login = stripslashes( $user->user_login );
-		$user_email = stripslashes( $user->user_email );
-		$blogname = get_option('blogname');
-		$subject = sprintf( '[%s] Your credentials.', $blogname );
-		$headers = array('Content-Type: text/html; charset=UTF-8');
-		$to = $user_email;
-		$message_title = 'Verify Your E-mail.';
-		$header_image = '';
-		$message_heading = 'Please login to complete your TELAS registration';
-		$message_body = "";
-		$site_url = get_option('siteurl');
-		$signature = "";
-		$has_aside = true;
-		$button_link = 'https://trusting-bardeen-776108.netlify.com/login';
-		$button_text = 'Complete Registration';
-		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-		wp_mail( $to, $subject, $message, $headers );
-	}
+      $user = new WP_User( $user_id );
+      $user_login = stripslashes( $user->user_login );
+      $user_email = stripslashes( $user->user_email );
+      $blogname = get_option('blogname');
+      $subject = sprintf( '[%s] Your credentials.', $blogname );
+      $headers = array('Content-Type: text/html; charset=UTF-8');
+      $to = $user_email;
+      $message_title = 'Verify Your E-mail.';
+      $header_image = '';
+      $message_heading = 'Please login to complete your TELAS registration';
+      $message_body = "";
+      $site_url = get_option('siteurl');
+      $signature = "";
+      $has_aside = true;
+      $button_link = 'https://trusting-bardeen-776108.netlify.com/login';
+      $button_text = 'Complete Registration';
+      $message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+      wp_mail( $to, $subject, $message, $headers );
+    }
 
 	function new_user_approve_notification( $user ) {
 		$user_login = stripslashes( $user->user_login );
@@ -2962,9 +2961,9 @@ class Telas_Assesments_Admin {
 	function prepare_update_telas_report_fields( $value, $report_object, $field_name ) {
 		update_post_meta( $value['report_of_course'], 'report_post_id', $report_object->ID );
 		update_post_meta( $value['report_of_course'], 'has_report_created', 'yes' );
-		update_post_meta( $assigned_course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ));
-		update_post_meta( $assigned_course_id, 'current_review_status', 'Combined Review Started' );
+		update_post_meta( $value['report_of_course'], 'current_review_status', 'Combined Review Started' );
 		update_post_meta( $value['report_of_course'], 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
+		update_post_meta( $value['report_of_course'], 'combined_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
 		return update_post_meta( $report_object->ID, $field_name, $value );
 	}
 
@@ -3056,7 +3055,8 @@ class Telas_Assesments_Admin {
 		$all_domain_entries['third']['badge_level'] = $third_domain_badge_level;
 		$all_domain_entries['fourth']['badge_level'] = $fourth_domain_badge_level;
 		$all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
-		$all_domain_entries['accreditation_badge'] = $badge;
+    		$all_domain_entries['accreditation_badge'] = $badge;
+   	 	update_post_meta( $assigned_course_id, 'combined_review_completion_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
 		return array(
 			'calc' => $all_domain_entries,
 			'status' => 200,
