@@ -53,7 +53,7 @@ class Telas_Assesments_Admin {
 		$this->version = $version;
 		// add_action( 'wp_mail_failed', array( $this, 'onMailError' ), 10, 1 );
 
-		// add_action( 'init', array( $this, 'new_user_notification' ) );
+		// add_action( 'init', array( $this, 'test_email_function' ), 100 );
 	}
 
 	/**
@@ -1853,6 +1853,16 @@ class Telas_Assesments_Admin {
 				'schema' => array( 'all_fields', 'All Custom Fields of Report' ),
 			)
 		);
+		register_rest_route( $namespace, '/' . 'email-template', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'email_template_create_callback' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'email_template_get_callback' ),
+			)
+		));
 	}
 	function user_actions_permission_callback() {
 		return current_user_can( 'delete_others_telas_assessments' );
@@ -2849,13 +2859,28 @@ class Telas_Assesments_Admin {
 		$course_title = get_the_title( $course_id );
 		$role = ucfirst( str_replace( '_', ' ', $role ) );
 		$message_heading = "You have been assigned {$course_title} to review as {$role}.";
-		$message_body = '<p>Please click the button to start.</p>';
-		$signature = '';
-		$button_link = 'https://trusting-bardeen-776108.netlify.com/assessment/' . $assessment_id;
+		$email_replacement_array = array(
+			'firstname' =>  get_user_meta( $user_id, 'firstname', true ),
+			'date_of_course_submitted' =>  get_the_date( get_option( 'date_format' ), get_post_meta( $course_id, 'courseSubmissionDateString', true ) ),
+			'package_name' =>  get_post_meta( $course_id, 'coursePackageName', true ),
+			'package_type' =>  get_post_meta( $course_id, 'coursePackageType', true ),
+			'package_identifier' =>  get_post_meta( $course_id, 'coursePackageIdentifier', true ),
+			'module_identifier' =>  get_post_meta( $course_id, 'courseModuleIdentifier', true ),
+			'study_level' =>  get_post_meta( $course_id, 'studyLevel', true ),
+			'course_level' =>  get_post_meta( $course_id, 'courseLevel', true ),
+			'institution_name' =>  get_post_meta( $course_id, 'institutionName', true ),
+			'faculty' =>  get_post_meta( $course_id, 'facultyDept', true ),
+		);
+		$email_template_data = $this->prepare_course_assigned_email_data( $role, $email_replacement_array );
+
+		$message_body = $email_template_data['email_body'];
+		$signature = $email_template_data['salutation'];
+		$button_link = 'https://app.telas.edu.au/assessment/' . $assessment_id;
 		$button_text = 'Start';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-		$blogname = get_option('blogname');
-		$subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
+    $blogname = get_option('blogname');
+    $subject = "[{$blogname}] {$email_template_data['subject']}";
+		// $subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
 		$headers = array('Content-Type: text/html; charset=UTF-8');
 		$user = new WP_User( $user_id );
 		$user_email = stripslashes( $user->user_email );
@@ -3037,5 +3062,98 @@ class Telas_Assesments_Admin {
 			'status' => 200,
 		);
 	}
-	
+
+	function email_template_create_callback( $request ) {
+		$all_params = $request->get_params();
+		$template_id = $all_params['templateId'];
+		$subject_line = $all_params['subject'];
+		$email_body = $all_params['emailBody'];
+		$salutation = $all_params['salutation'];
+		update_option($template_id, array(
+			'subject' => $subject_line,
+			'emailBody' => nl2br(htmlentities($email_body, ENT_QUOTES, 'UTF-8')),
+			'salutation' => nl2br(htmlentities($salutation, ENT_QUOTES, 'UTF-8')),
+		));
+		return  array(
+			'subject' => $subject_line,
+			'emailBody' => $email_body,
+			'salutation' => $salutation,
+		);
+	}
+
+	function email_template_get_callback( $request ) {
+		$all_params = $request->get_params();
+		$template_id = $all_params['templateId'];
+		return get_option( $template_id );
+	}
+
+	function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() )	{
+		if ( 'admin_reviewer' === $role ) {
+			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
+		} elseif ( 'first_reviewer' === $role ) {
+			$email_template = get_option( 'first-reviewer-assigned-email-template' );
+		} elseif ( 'second_reviewer' === $role ) {
+			$email_template = get_option( 'second-reviewer-assigned-email-template' );
+		} else {
+			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
+		}
+		$subject = $email_template['subject'];
+		$body = $email_template['emailBody'];
+    $salutation = $email_template['salutation'];
+		$to_be_replaced = array(
+			'{[firstname]}',
+			'{[date_of_course_submitted]}',
+			'{[package_name]}',
+			'{[package_type]}',
+			'{[package_identifier]}',
+			'{[module_identifier]}',
+			'{[study_level]}',
+			'{[course_level]}',
+			'{[institution_name]}',
+			'{[faculty]}',
+    );
+    
+    $new_body = str_replace( $to_be_replaced, $replacement_array, $body );
+    return array(
+      'email_body' => $new_body,
+      'subject' => $subject,
+      'salutation' => $salutation,
+    );
+	}
+	function test_email_function() {
+    $user_id = 55;
+    $course_id = 294;
+    $role = 'admin_reviewer';
+		$message_title = 'You have been assigned a course to review.';
+		$header_image = '';
+		$course_title = get_the_title( $course_id );
+		$role = ucfirst( str_replace( '_', ' ', $role ) );
+		$message_heading = "You have been assigned {$course_title} to review as {$role}.";
+		$email_replacement_array = array(
+			'firstname' =>  get_user_meta( $user_id, 'firstname', true ),
+			'date_of_course_submitted' =>  get_the_date( get_option( 'date_format' ), get_post_meta( $course_id, 'courseSubmissionDateString', true ) ),
+			'package_name' =>  get_post_meta( $course_id, 'coursePackageName', true ),
+			'package_type' =>  get_post_meta( $course_id, 'coursePackageType', true ),
+			'package_identifier' =>  get_post_meta( $course_id, 'coursePackageIdentifier', true ),
+			'module_identifier' =>  get_post_meta( $course_id, 'courseModuleIdentifier', true ),
+			'study_level' =>  get_post_meta( $course_id, 'studyLevel', true ),
+			'course_level' =>  get_post_meta( $course_id, 'courseLevel', true ),
+			'institution_name' =>  get_post_meta( $course_id, 'institutionName', true ),
+			'faculty' =>  get_post_meta( $course_id, 'facultyDept', true ),
+		);
+		$email_template_data = $this->prepare_course_assigned_email_data( $role, $email_replacement_array );
+
+		$message_body = $email_template_data['email_body'];
+		$signature = $email_template_data['salutation'];
+		$button_link = 'https://app.telas.edu.au/assessment/';
+		$button_text = 'Start';
+    $message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+    echo $message;
+		// $blogname = get_option('blogname');
+		// // $subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
+		// $headers = array('Content-Type: text/html; charset=UTF-8');
+		// $user = new WP_User( $user_id );
+		// $user_email = stripslashes( $user->user_email );
+		// wp_mail( $user_email, $subject, $message, $headers );
+	}
 }
