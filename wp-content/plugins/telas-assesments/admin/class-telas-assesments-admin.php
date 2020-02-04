@@ -1750,14 +1750,7 @@ class Telas_Assesments_Admin {
 			)
 		));
 		register_rest_field( 'user', 'user_extra', array(
-			'get_callback' => function ($user) {
-				return array(
-					'first_name' => $user['first_name'],
-					'last_name' => $user['last_name'],
-					'user_email' => $user['email'],
-					'user_meta' => get_user_meta( $user['id'] )
-				);
-			},
+			'get_callback' => array( $this, 'get_user_meta_callback' ),
 			'update_callback' => null,
 			'schema' => null,
 		));
@@ -1863,6 +1856,15 @@ class Telas_Assesments_Admin {
 				'callback'            => array( $this, 'email_template_get_callback' ),
 			)
 		));
+	}
+	function get_user_meta_callback( $user ) {
+		$user_object = get_userdata( $user['id'] );
+		return array(
+			'first_name' => $user_object->first_name,
+			'last_name' => $user_object->last_name,
+			'user_email' => $user_object->user_email,
+			'user_meta' => get_user_meta( $user['id'] )
+		);
 	}
 	function user_actions_permission_callback() {
 		return current_user_can( 'delete_others_telas_assessments' );
