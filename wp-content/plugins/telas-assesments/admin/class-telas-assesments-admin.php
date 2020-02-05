@@ -2232,7 +2232,8 @@ class Telas_Assesments_Admin {
 			'user_email'        => $all_params['email'],
 			'status' 			=> 200
 		);
-		$this->new_user_notification( $new_user_id, $all_params['password'] );
+		// $this->new_user_notification( $new_user_id, $all_params['password'] );
+		Telas_Assesments_Helper::send_new_user_welcome_email( $new_user_id );
 		return apply_filters( 'extend_telas_new_user_before_dispatch', $data );
 	}
 
@@ -2280,7 +2281,7 @@ class Telas_Assesments_Admin {
 			if ( $role === 'telas_assessor' ) {
 				update_user_meta( $updated_user_id, 'telas_assessor_level', $all_params['telasRole'] );
 			}
-			$this->send_notifiction_to_telas_admin( $user_object );
+			$this->send_notification_to_telas_admin( $user_object );
 		}
 		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
 			$user_role = ! empty( get_user_meta( $updated_user_id, 'telas_assessor_level', true ) ) ? get_user_meta( $updated_user_id, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
@@ -2819,7 +2820,7 @@ class Telas_Assesments_Admin {
 		wp_mail( $to, $subject, $message, $headers );
 	}
 
-	function send_notifiction_to_telas_admin( $user_object ) {
+	function send_notification_to_telas_admin( $user_object ) {
 		$message_title = 'Please verify this newly created Account';
 		$header_image = '';
 		$message_heading = 'User Details:';
@@ -2879,8 +2880,8 @@ class Telas_Assesments_Admin {
 		$button_link = 'https://app.telas.edu.au/assessment/' . $assessment_id;
 		$button_text = 'Start';
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-    $blogname = get_option('blogname');
-    $subject = "[{$blogname}] {$email_template_data['subject']}";
+   		$blogname = get_option('blogname');
+    	$subject = "[{$blogname}] {$email_template_data['subject']}";
 		// $subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
 		$headers = array('Content-Type: text/html; charset=UTF-8');
 		$user = new WP_User( $user_id );
@@ -3101,7 +3102,7 @@ class Telas_Assesments_Admin {
 		}
 		$subject = $email_template['subject'];
 		$body = $email_template['emailBody'];
-    $salutation = $email_template['salutation'];
+    	$salutation = $email_template['salutation'];
 		$to_be_replaced = array(
 			'{[firstname]}',
 			'{[date_of_course_submitted]}',
@@ -3113,19 +3114,19 @@ class Telas_Assesments_Admin {
 			'{[course_level]}',
 			'{[institution_name]}',
 			'{[faculty]}',
-    );
+    	);
     
-    $new_body = str_replace( $to_be_replaced, $replacement_array, $body );
-    return array(
-      'email_body' => $new_body,
-      'subject' => $subject,
-      'salutation' => $salutation,
-    );
+		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
+		return array(
+			'email_body' => $new_body,
+			'subject' => $subject,
+			'salutation' => $salutation,
+		);
 	}
 	function test_email_function() {
-    $user_id = 55;
-    $course_id = 294;
-    $role = 'admin_reviewer';
+		$user_id = 55;
+		$course_id = 294;
+		$role = 'admin_reviewer';
 		$message_title = 'You have been assigned a course to review.';
 		$header_image = '';
 		$course_title = get_the_title( $course_id );
@@ -3149,13 +3150,7 @@ class Telas_Assesments_Admin {
 		$signature = $email_template_data['salutation'];
 		$button_link = 'https://app.telas.edu.au/assessment/';
 		$button_text = 'Start';
-    $message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-    echo $message;
-		// $blogname = get_option('blogname');
-		// // $subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
-		// $headers = array('Content-Type: text/html; charset=UTF-8');
-		// $user = new WP_User( $user_id );
-		// $user_email = stripslashes( $user->user_email );
-		// wp_mail( $user_email, $subject, $message, $headers );
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		echo $message;
 	}
 }

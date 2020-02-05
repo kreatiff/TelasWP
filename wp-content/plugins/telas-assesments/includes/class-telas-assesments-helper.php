@@ -114,5 +114,22 @@ class Telas_Assesments_Helper {
 			array_push( $all_telas_admin_emails, $telas_admin->user_email );
 		}
 		return $all_telas_admin_emails;
-	}
+  	}
+  
+  	public static function send_new_user_welcome_email( $user_id ) {
+    	$new_user_welcome_email_options = get_option( 'new-user-welcome-email-template' );
+    	$subject = $new_user_welcome_email_options['subject'];
+    	$email_body = $new_user_welcome_email_options['emailBody'];
+    	$email_salutation = $new_user_welcome_email_options['salutation'];
+		$message_heading = $subject;
+		$button_link = 'https://app.telas.edu.au/login/';
+		$button_text = 'Login';
+		$message = Telas_Assesments_Helper::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, $has_aside = true, $button_link, $button_text );
+   		$blog_name = get_option('blogname');
+    	$subject = "[{$blog_name}] {$subject}";
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$user = new WP_User( $user_id );
+		$user_email = stripslashes( $user->user_email );
+		wp_mail( $user_email, $subject, $message, $headers );
+  	}
 }
