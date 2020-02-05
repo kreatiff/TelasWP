@@ -2282,6 +2282,7 @@ class Telas_Assesments_Admin {
 				update_user_meta( $updated_user_id, 'telas_assessor_level', $all_params['telasRole'] );
 			}
 			$this->send_notification_to_telas_admin( $user_object );
+			Telas_Assesments_Helper::send_profile_completion_notification_email( $updated_user_id );
 		}
 		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
 			$user_role = ! empty( get_user_meta( $updated_user_id, 'telas_assessor_level', true ) ) ? get_user_meta( $updated_user_id, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
@@ -2832,7 +2833,6 @@ class Telas_Assesments_Admin {
 		$message_body .= "<tr><td><strong>Faculty/Dept: </strong> </td><td>" . get_user_meta( $user_object->ID, 'faculty', true ) . "</td></tr>";
 		$message_body .= "<tr><td><strong>Institution Name:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_name', true ) . "</td></tr>";
 		$message_body .= "<tr><td><strong>Institution Campus:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_campus', true ) . "</td></tr>";
-		$addURLS = $_POST['addURLS'];
 		$message_body .= "<tr><td><strong>Institution State / Region:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_state', true ) . "</td></tr>";
 		$message_body .= "<tr><td><strong>Institution Country:</strong> </td><td>" . get_user_meta( $user_object->ID, 'institution_country', true ) . "</td></tr>";
 		$message_body .= "<tr><td><strong>Email Address:</strong> </td><td>" . $user_object->user_email . "</td></tr>";

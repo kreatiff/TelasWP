@@ -131,5 +131,46 @@ class Telas_Assesments_Helper {
 		$user = new WP_User( $user_id );
 		$user_email = stripslashes( $user->user_email );
 		wp_mail( $user_email, $subject, $message, $headers );
-  	}
+	}
+
+	public static function send_profile_completion_notification_email( $user_id ) {
+		$profile_completion_email_options = get_option( 'profile-completion-notification-email-template' );
+		$subject = $profile_completion_email_options['subject'];
+		$email_body = $profile_completion_email_options['emailBody'];
+		$email_salutation = $profile_completion_email_options['salutation'];
+		$message_heading = $subject;
+		$user_object = new WP_User( $user_id );
+		$replacement_array = array(
+			'first_name' =>  $user_object->first_name,
+			'last_name' =>  $user_object->last_name,
+			'email_address' =>  $user_object->user_email,
+			'position' =>  get_user_meta( $user_id, 'position', true ),
+			'faculty' =>  get_user_meta( $user_id, 'faculty', true ),
+			'institution_name' =>  get_user_meta( $user_id, 'institution_name', true ),
+			'institution_campus' =>  get_user_meta( $user_id, 'institution_campus', true ),
+			'institution_state' =>  get_user_meta( $user_id, 'institution_state', true ),
+			'institution_country' =>  get_user_meta( $user_id, 'institution_country', true ),
+			'selected_role' =>  reset($user_object->roles),
+		);
+		$to_be_replaced = array(
+			'{[first_name]}',
+			'{[last_name]}',
+			'{[email_address]}',
+			'{[position]}',
+			'{[faculty]}',
+			'{[institution_name]}',
+			'{[institution_campus]}',
+			'{[institution_state]}',
+			'{[institution_country]}',
+			'{[selected_role]}',
+    	);
+		$email_body = str_replace( $to_be_replaced, $replacement_array, $email_body );
+		$message = Telas_Assesments_Helper::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, false, $button_link, $button_text );
+		$blog_name = get_option('blogname');
+    	$subject = "[{$blog_name}] {$subject}";
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$user = new WP_User( $user_id );
+		$user_email = stripslashes( $user->user_email );
+		wp_mail( $user_email, $subject, $message, $headers );
+	}
 }
