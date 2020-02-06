@@ -1901,7 +1901,7 @@ class Telas_Assesments_Admin {
 			$user_details_meta_fields['activated_by_admin'] = get_user_meta( $user_data->ID, 'activated_by_admin', true );
 			$user_details_meta_fields['nickname'] = get_user_meta( $user_data->ID, 'nickname', true );
 			$user_details_meta_fields['status'] = 'approved';
-			$this->new_user_approve_notification(  $user_data );
+			Telas_Assesments_Helper::profile_approved_notification_email( $user_data, $user_role );
 			return $user_details_meta_fields;
 		}
 	}

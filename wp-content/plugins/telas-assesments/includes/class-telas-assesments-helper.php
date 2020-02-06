@@ -173,4 +173,34 @@ class Telas_Assesments_Helper {
 		$user_email = stripslashes( $user->user_email );
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
+
+	function profile_approved_notification_email( $user, $user_role ) {
+		$user_login = stripslashes( $user->user_login );
+		$user_email = stripslashes( $user->user_email );
+		if ( $user_role === 'telas_interim_reviewers' ) {
+			$approved_email_object = get_option( 'interim-reviewer-approval-email-template' );
+		} elseif ( $user_role === 'telas_course_submitters' ) {
+			$approved_email_object = get_option( 'course-submitter-approval-email-template' );
+		} else {
+			return;
+		}
+		$subject = $approved_email_object['subject'];
+		$email_body = $approved_email_object['emailBody'];
+		$email_salutation = $approved_email_object['salutation'];
+		$email_body = str_replace( '{[first_name]}', $user->first_name, $email_body );
+		$blog_name = get_option('blogname');
+		$subject = "[{$blog_name}] {$subject}";
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$to = $user_email;
+		$message_title = $subject;
+		$header_image = '';
+		$message_heading = $subject;
+		$message_body = $email_body;
+		$signature = $email_salutation;
+		$has_aside = true;
+		$button_link = 'https://app.telas.edu.au/login';
+		$button_text = 'Login';
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$mail_flag = wp_mail( $to, $subject, $message, $headers );
+	}
 }
