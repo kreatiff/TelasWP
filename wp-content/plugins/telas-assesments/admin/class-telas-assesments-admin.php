@@ -2409,7 +2409,6 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'current_review_status', 'First Reviewer Assigned' );
 				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
 				update_post_meta( $course_id, 'first_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
-				
 			break;
 			case 'second_reviewer':
 				$create_new_assessment_args = array(
@@ -2443,7 +2442,8 @@ class Telas_Assesments_Admin {
 				# code...
 				break;
 		}
-		$this->course_reviewer_assigned_email_notification( $reviewer_user_id, $course_id, $new_assessment_id, $reviewer_level );
+		Telas_Assesments_Helper::reviewer_assigned_notification(  $reviewer_user_id, $course_id, $new_assessment_id, $reviewer_level );
+		// $this->course_reviewer_assigned_email_notification( $reviewer_user_id, $course_id, $new_assessment_id, $reviewer_level );
 		$course_object = get_post( $course_id );
     	$postController = new \WP_REST_Posts_Controller($course_object->post_type);
     	$response = $postController->prepare_item_for_response( $course_object, $request );
@@ -3090,39 +3090,7 @@ class Telas_Assesments_Admin {
 		return get_option( $template_id );
 	}
 
-	function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() )	{
-		if ( 'admin_reviewer' === $role ) {
-			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
-		} elseif ( 'first_reviewer' === $role ) {
-			$email_template = get_option( 'first-reviewer-assigned-email-template' );
-		} elseif ( 'second_reviewer' === $role ) {
-			$email_template = get_option( 'second-reviewer-assigned-email-template' );
-		} else {
-			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
-		}
-		$subject = $email_template['subject'];
-		$body = $email_template['emailBody'];
-    	$salutation = $email_template['salutation'];
-		$to_be_replaced = array(
-			'{[firstname]}',
-			'{[date_of_course_submitted]}',
-			'{[package_name]}',
-			'{[package_type]}',
-			'{[package_identifier]}',
-			'{[module_identifier]}',
-			'{[study_level]}',
-			'{[course_level]}',
-			'{[institution_name]}',
-			'{[faculty]}',
-    	);
-    
-		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
-		return array(
-			'email_body' => $new_body,
-			'subject' => $subject,
-			'salutation' => $salutation,
-		);
-	}
+	
 	function test_email_function() {
 		$user_id = 55;
 		$course_id = 294;

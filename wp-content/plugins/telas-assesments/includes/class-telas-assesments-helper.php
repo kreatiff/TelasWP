@@ -203,4 +203,72 @@ class Telas_Assesments_Helper {
 		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		$mail_flag = wp_mail( $to, $subject, $message, $headers );
 	}
+
+	function reviewer_assigned_notification( $user_id, $course_id, $assessment_id, $role ) {
+		$message_title = 'You have been assigned a course to review.';
+		$header_image = '';
+		$course_title = get_the_title( $course_id );
+		$role_string = ucfirst( str_replace( '_', ' ', $role ) );
+		$message_heading = "You have been assigned {$course_title} to review as {$role_string}.";
+		$email_replacement_array = array(
+			'firstname' =>  get_user_meta( $user_id, 'first_name', true ),
+			'date_of_course_submitted' =>  get_the_date( get_option( 'date_format' ), get_post_meta( $course_id, 'courseSubmissionDateString', true ) ),
+			'package_name' =>  get_post_meta( $course_id, 'coursePackageName', true ),
+			'package_type' =>  get_post_meta( $course_id, 'coursePackageType', true ),
+			'package_identifier' =>  get_post_meta( $course_id, 'coursePackageIdentifier', true ),
+			'module_identifier' =>  get_post_meta( $course_id, 'courseModuleIdentifier', true ),
+			'study_level' =>  get_post_meta( $course_id, 'studyLevel', true ),
+			'course_level' =>  get_post_meta( $course_id, 'courseLevel', true ),
+			'institution_name' =>  get_post_meta( $course_id, 'institutionName', true ),
+			'faculty' =>  get_post_meta( $course_id, 'facultyDept', true ),
+		);
+		$email_template_data = Telas_Assesments_Helper::prepare_course_assigned_email_data( $role, $email_replacement_array );
+
+		$message_body = $email_template_data['email_body'];
+		$signature = $email_template_data['salutation'];
+		$button_link = 'https://app.telas.edu.au/assessment/' . $assessment_id;
+		$button_text = 'Start';
+		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+   		$blog_name = get_option('blogname');
+    	$subject = "[{$blog_name}] {$email_template_data['subject']}";
+		// $subject = sprintf( '[%s] You have been assigned a course to review.', $blog_name );
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$user = new WP_User( $user_id );
+		$user_email = stripslashes( $user->user_email );
+		wp_mail( $user_email, $subject, $message, $headers );
+	}
+
+	public static function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() )	{
+		if ( 'admin_reviewer' === $role ) {
+			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
+		} elseif ( 'first_reviewer' === $role ) {
+			$email_template = get_option( 'first-reviewer-assigned-email-template' );
+		} elseif ( 'second_reviewer' === $role ) {
+			$email_template = get_option( 'second-reviewer-assigned-email-template' );
+		} else {
+			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
+		}
+		$subject = $email_template['subject'];
+		$body = $email_template['emailBody'];
+    	$salutation = $email_template['salutation'];
+		$to_be_replaced = array(
+			'{[firstname]}',
+			'{[date_of_course_submitted]}',
+			'{[package_name]}',
+			'{[package_type]}',
+			'{[package_identifier]}',
+			'{[module_identifier]}',
+			'{[study_level]}',
+			'{[course_level]}',
+			'{[institution_name]}',
+			'{[faculty]}',
+    	);
+    
+		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
+		return array(
+			'email_body' => $new_body,
+			'subject' => $subject,
+			'salutation' => $salutation,
+		);
+	}
 }
