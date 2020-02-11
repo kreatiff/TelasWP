@@ -1839,11 +1839,11 @@ class Telas_Assesments_Admin {
 			)
 		);
 		register_rest_field('telas_report',
-			'all_fields',
+			'report_details',
 			array(
 				'get_callback' => array( $this, 'prepare_get_telas_report_fields' ),
-				'update_callback' => array( $this, 'prepare_update_telas_report_fields' ),
-				'schema' => array( 'all_fields', 'All Custom Fields of Report' ),
+				'update_callback' => array( $this, 'update_combined_review_fields' ),
+				'schema' => array( 'report_details', 'All Custom Fields of Report' ),
 			)
 		);
 		register_rest_route( $namespace, '/' . 'email-template', array(
@@ -2135,7 +2135,8 @@ class Telas_Assesments_Admin {
 					update_post_meta( $assigned_course_id, 'compare_ready', 'yes' );
 					update_post_meta( $assigned_course_id, 'second_reviewer_completion_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
 					update_post_meta( $assigned_course_id, 'current_review_status', 'Second Review Completed' );
-					update_user_meta( $course_id, 'user_available', 'yes' );
+          update_user_meta( $course_id, 'user_available', 'yes' );
+          $this->create_combined_review( $assigned_course_id, $all_assessments );
 				break;
 				
 				default:
@@ -2372,7 +2373,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'current_review_status', 'Admin Reviewer Assigned');
 				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
 				// update_post_meta( $course_id, 'admin_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
-				update_user_meta( $course_id, 'user_available', 'no' );
+				update_user_meta( $reviewer_user_id, 'user_available', 'no' );
 			break;
 			case 'interim_reviewer':
 				$create_new_assessment_args = array(
@@ -2399,7 +2400,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'current_review_status', 'Interim Reviewer Assigned' );
 				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
 				// update_post_meta( $course_id, 'interim_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
-				update_user_meta( $course_id, 'user_available', 'no' );
+				update_user_meta( $reviewer_user_id, 'user_available', 'no' );
 			break;
 			case 'first_reviewer':
 				$create_new_assessment_args = array(
@@ -2426,7 +2427,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'current_review_status', 'First Reviewer Assigned' );
 				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
 				// update_post_meta( $course_id, 'first_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
-				update_user_meta( $course_id, 'user_available', 'no' );
+				update_user_meta( $reviewer_user_id, 'user_available', 'no' );
 			break;
 			case 'second_reviewer':
 				$create_new_assessment_args = array(
@@ -2454,7 +2455,7 @@ class Telas_Assesments_Admin {
 				update_post_meta( $course_id, 'current_review_status', 'First Reviewer Assigned' );
 				update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
 				// update_post_meta( $course_id, 'second_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
-				update_user_meta( $course_id, 'user_available', 'no' );
+				update_user_meta( $reviewer_user_id, 'user_available', 'no' );
 			break;
 			
 			default:
@@ -2874,39 +2875,6 @@ class Telas_Assesments_Admin {
 		update_user_meta( $user_object->ID, 'mail_sent_for_approval', 'yes' );
 	}
 
-	function course_reviewer_assigned_email_notification( $user_id, $course_id, $assessment_id, $role ) {
-		$message_title = 'You have been assigned a course to review.';
-		$header_image = '';
-		$course_title = get_the_title( $course_id );
-		$role = ucfirst( str_replace( '_', ' ', $role ) );
-		$message_heading = "You have been assigned {$course_title} to review as {$role}.";
-		$email_replacement_array = array(
-			'firstname' =>  get_user_meta( $user_id, 'firstname', true ),
-			'date_of_course_submitted' =>  get_the_date( get_option( 'date_format' ), get_post_meta( $course_id, 'courseSubmissionDateString', true ) ),
-			'package_name' =>  get_post_meta( $course_id, 'coursePackageName', true ),
-			'package_type' =>  get_post_meta( $course_id, 'coursePackageType', true ),
-			'package_identifier' =>  get_post_meta( $course_id, 'coursePackageIdentifier', true ),
-			'module_identifier' =>  get_post_meta( $course_id, 'courseModuleIdentifier', true ),
-			'study_level' =>  get_post_meta( $course_id, 'studyLevel', true ),
-			'course_level' =>  get_post_meta( $course_id, 'courseLevel', true ),
-			'institution_name' =>  get_post_meta( $course_id, 'institutionName', true ),
-			'faculty' =>  get_post_meta( $course_id, 'facultyDept', true ),
-		);
-		$email_template_data = $this->prepare_course_assigned_email_data( $role, $email_replacement_array );
-
-		$message_body = $email_template_data['email_body'];
-		$signature = $email_template_data['salutation'];
-		$button_link = 'https://app.telas.edu.au/assessment/' . $assessment_id;
-		$button_text = 'Start';
-		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-   		$blogname = get_option('blogname');
-    	$subject = "[{$blogname}] {$email_template_data['subject']}";
-		// $subject = sprintf( '[%s] You have been assigned a course to review.', $blogname );
-		$headers = array('Content-Type: text/html; charset=UTF-8');
-		$user = new WP_User( $user_id );
-		$user_email = stripslashes( $user->user_email );
-		wp_mail( $user_email, $subject, $message, $headers );
-	}
 	
 	function assessment_completed_admin_notification( $assessment_level, $assigned_course_id, $assessment_id ) {
 		$message_title = 'Assessment Completed';
@@ -2979,7 +2947,21 @@ class Telas_Assesments_Admin {
 
 
 	function prepare_get_telas_report_fields( $report_object, $field_name, $request ) {
-		return get_post_meta( $report_object['id'], $field_name, true );
+		$report_id = $report_object['id'];
+		return array(
+			'assessment_data' => get_post_meta( $report_id, 'assessment_data', true ),
+			'admin_reviewer_assessment_data' => get_post_meta( $report_id, 'admin_reviewer_assessment_data', true ),
+			'first_reviewer_assessment_data' => get_post_meta( $report_id, 'first_reviewer_assessment_data', true ),
+			'second_reviewer_assessment_data' => get_post_meta( $report_id, 'second_reviewer_assessment_data', true ),
+			'first_reviewer_id' => get_post_meta( $report_id, 'first_reviewer_id', true ),
+			'admin_reviewer_id' => get_post_meta( $report_id, 'admin_reviewer_id', true ),
+			'second_reviewer_id' => get_post_meta( $report_id, 'second_reviewer_id', true ),
+			'first_reviewer_name' => get_post_meta( $report_id, 'first_reviewer_name', true ),
+			'admin_reviewer_name' => get_post_meta( $report_id, 'admin_reviewer_name', true ),
+			'second_reviewer_name' => get_post_meta( $report_id, 'second_reviewer_name', true ),
+			'assessment_status' => get_post_meta( $report_id, 'assessment_status', true ) ? get_post_meta( $report_id, 'assessment_status', true ) : 'assigned',
+			'course_id' => get_post_meta( $report_id, 'course_id', true ),
+		);
 	}
 
 	function prepare_update_telas_report_fields( $value, $report_object, $field_name ) {
@@ -3109,37 +3091,62 @@ class Telas_Assesments_Admin {
 		$all_params = $request->get_params();
 		$template_id = $all_params['templateId'];
 		return get_option( $template_id );
-	}
+  }
+  
+  function create_combined_review( $course_id, $assessment_data ) {
+    $first_reviewer_id = get_post_meta( $course_id, 'assigned_first_reviewer_user_id', true );
+    $admin_reviewer_id = get_post_meta( $course_id, 'assigned_admin_reviewer_user_id', true );
+    $second_reviewer_id = get_post_meta( $course_id, 'assigned_second_reviewer_user_id', true );
+    
+    $first_reviewer_user_obj = get_userdata( $first_reviewer_id );
+    $first_reviewer_name = $first_reviewer_user_obj->first_name . ' ' . $first_reviewer_user_obj->last_name;
+    
+    $admin_reviewer_user_obj = get_userdata( $admin_reviewer_id );
+    $admin_reviewer_name = $admin_reviewer_user_obj->first_name . ' ' . $admin_reviewer_user_obj->last_name;
+    
+    $second_reviewer_user_obj = get_userdata( $second_reviewer_id );
+    $second_reviewer_name = $second_reviewer_user_obj->first_name . ' ' . $second_reviewer_user_obj->last_name;
+    
+    $course_title = get_the_title( $course_id );
+    $new_combined_review_args = array(
+      'post_type' => 'telas_report',
+      'post_title' => 'Combined Review Of ' . $course_title,
+      'post_status' => 'publish',
+      'post_author' => $first_reviewer_id,
+    );
+    $new_combined_review_id = wp_insert_post( $new_combined_review_args );
+    update_post_meta( $course_id, 'report_post_id', $new_combined_review_id );
+	update_post_meta( $course_id, 'has_report_created', 'yes' );
+	update_post_meta( $course_id, 'current_review_status', 'Combined Review Started' );
+	update_post_meta( $course_id, 'last_status_update', date( $date_format, current_time( 'timestamp', 0 ) ) );
+    update_post_meta( $course_id, 'combined_review_created_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+    update_post_meta( $new_combined_review_id, 'assessment_data', $assessment_data );
+    update_post_meta( $new_combined_review_id, 'admin_reviewer_assessment_data', $assessment_data['admin_reviewer'] );
+    update_post_meta( $new_combined_review_id, 'first_reviewer_assessment_data', $assessment_data['first_reviewer'] );
+    update_post_meta( $new_combined_review_id, 'second_reviewer_assessment_data', $assessment_data['second_reviewer'] );
+    update_post_meta( $new_combined_review_id, 'first_reviewer_id', $first_reviewer_id );
+    update_post_meta( $new_combined_review_id, 'admin_reviewer_id', $admin_reviewer_id );
+    update_post_meta( $new_combined_review_id, 'second_reviewer_id', $second_reviewer_id );
+    update_post_meta( $new_combined_review_id, 'first_reviewer_name', $first_reviewer_name );
+    update_post_meta( $new_combined_review_id,  'admin_reviewer_name', $admin_reviewer_name );
+	update_post_meta( $new_combined_review_id,  'second_reviewer_name', $second_reviewer_name );
+	update_post_meta( $new_combined_review_id, 'course_id', $course_id );
+	update_post_meta( $new_combined_review_id, 'assessment_status', 'assigned' );
+  }
 
+  function update_combined_review_fields( $report_object, $report_post_obj ) {
+	$assessment_data = get_post_meta( $report_post_obj->ID, 'assessment_data', true );
+	$first_assessment_data = get_post_meta( $report_post_obj->ID, 'first_reviewer_assessment_data', true );
+	$first_assessment_data['review_data'] = $report_object['firstReviewerAnswers'];
+	$assessment_data['first_reviewer']['review_data'] = $report_object['firstReviewerAnswers'];
+	$first_assessment_data['status'] = 'completed';
+	update_post_meta( $report_post_obj->ID, 'assessment_data', $assessment_data );
+	update_post_meta( $report_post_obj->ID, 'first_reviewer_assessment_data', $first_assessment_data );
+	update_post_meta( $report_post_obj->ID, 'assessment_status', $report_object['assessmentStatus'] );
+	if ( $report_object['assessmentStatus'] === 'complete' ) {
+		update_post_meta( $report_post_obj->ID, 'completed_date', get_the_date( get_option( 'date_format' ) ) );
+	}
+  }
 	
-	function test_email_function() {
-		$user_id = 55;
-		$course_id = 294;
-		$role = 'admin_reviewer';
-		$message_title = 'You have been assigned a course to review.';
-		$header_image = '';
-		$course_title = get_the_title( $course_id );
-		$role = ucfirst( str_replace( '_', ' ', $role ) );
-		$message_heading = "You have been assigned {$course_title} to review as {$role}.";
-		$email_replacement_array = array(
-			'firstname' =>  get_user_meta( $user_id, 'firstname', true ),
-			'date_of_course_submitted' =>  get_the_date( get_option( 'date_format' ), get_post_meta( $course_id, 'courseSubmissionDateString', true ) ),
-			'package_name' =>  get_post_meta( $course_id, 'coursePackageName', true ),
-			'package_type' =>  get_post_meta( $course_id, 'coursePackageType', true ),
-			'package_identifier' =>  get_post_meta( $course_id, 'coursePackageIdentifier', true ),
-			'module_identifier' =>  get_post_meta( $course_id, 'courseModuleIdentifier', true ),
-			'study_level' =>  get_post_meta( $course_id, 'studyLevel', true ),
-			'course_level' =>  get_post_meta( $course_id, 'courseLevel', true ),
-			'institution_name' =>  get_post_meta( $course_id, 'institutionName', true ),
-			'faculty' =>  get_post_meta( $course_id, 'facultyDept', true ),
-		);
-		$email_template_data = $this->prepare_course_assigned_email_data( $role, $email_replacement_array );
-
-		$message_body = $email_template_data['email_body'];
-		$signature = $email_template_data['salutation'];
-		$button_link = 'https://app.telas.edu.au/assessment/';
-		$button_text = 'Start';
-		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-		echo $message;
-	}
 }
+
