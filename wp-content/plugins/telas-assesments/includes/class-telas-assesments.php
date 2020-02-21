@@ -1,12 +1,11 @@
 <?php
-
 /**
  * The file that defines the core plugin class
  *
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       www.telas.edu.au 
+ * @link       www.telas.edu.au
  * @since      1.0.0
  *
  * @package    Telas_Assesments
@@ -157,40 +156,27 @@ class Telas_Assesments {
 		$plugin_admin = new Telas_Assesments_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		
 		$this->loader->add_action( 'init', $plugin_admin, 'register_post_types' );
-		
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_post_type_relationship_fields' );
-		
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_assessment_field' );
-		
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_acf_field_for_users' );
 		$this->loader->add_action( 'acf/init', $plugin_admin, 'register_acf_field_for_course_details' );
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_telas_administrator_role' );
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_course_submitters_role' );
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_assessor_role' );
-		
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_post_type_capabilites_for_super_admin', 999 );
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_course_submitters_role', 999 );
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_cap_for_telas_assessor_role', 999 );
-		
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'add_custom_post_type_capabilites_for_telas_telas_administrator', 999 );
-		
 		$this->loader->add_action( 'rest_api_init', $plugin_admin, 'register_routes' );
-
 		$this->loader->add_filter( 'jwt_auth_token_before_dispatch', $plugin_admin, 'modify_jwt_authentication_response', 10, 2 );
 		$this->loader->add_filter( 'wp_new_user_notification_email', $plugin_admin, 'new_user_notification', 10, 3 );
-		$this->loader->add_filter( 'authenticate', $plugin_admin, 'check_login_submit', 40 , 3 );
+		$this->loader->add_filter( 'authenticate', $plugin_admin, 'check_login_submit', 40, 3 );
 		$this->loader->add_filter( 'rest_user_query', $plugin_admin, 'prefix_remove_has_published_posts_from_wp_api_user_query', 10, 2 );
 		$this->loader->add_filter( 'rest_user_query', $plugin_admin, 'modify_rest_user_query', 20, 2 );
+		$this->loader->add_filter( 'manage_users_columns', $plugin_admin, 'fc_new_modify_user_table' );
+		$this->loader->add_filter( 'manage_users_custom_column', $plugin_admin, 'fc_new_modify_user_table_row', 10, 3 );
 	}
 
 	/**

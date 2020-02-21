@@ -3,7 +3,7 @@
 /**
  * The helper functionality of the plugin.
  *
- * @link       www.telas.edu.au 
+ * @link       www.telas.edu.au
  * @since      1.0.0
  *
  * @package    Telas_Assesments
@@ -21,8 +21,8 @@
  * @author     TELAS <telas@contactus.com>
  */
 class Telas_Assesments_Helper {
-    public static function get_email_body( $title = 'TELAS Notification' , $header_image = '', $message_heading = '', $message_body = '', $signature = '', $has_aside = true, $button_link = '', $button_text = '' ) {
-        ob_start();
+	public static function get_email_body( $title = 'TELAS Notification', $header_image = '', $message_heading = '', $message_body = '', $signature = '', $has_aside = true, $button_link = '', $button_text = '' ) {
+		ob_start();
 		?>
 		<!doctype html>
 		<html lang="en">
@@ -40,13 +40,13 @@ class Telas_Assesments_Helper {
 					<!-- Container -->
 					<table border="0" cellpadding="0" cellspacing="0" class="container" style="border-collapse: collapse; border-spacing: 0; padding: 0; vertical-align: top; mso-table-lspace: 0pt; mso-table-rspace: 0pt; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; width: 600px; margin: 0 auto 0 auto; Margin: 0 auto 0 auto; text-align: inherit;">
 						<!-- Header -->
-                        <?php if ( ! empty( $header_image ) ) : ?>
-                            <tr style="padding: 0; vertical-align: top; text-align: left;">
-                                <td align="center" valign="middle" class="header" style="word-wrap: break-word; -webkit-hyphens: auto; -moz-hyphens: auto; hyphens: auto; border-collapse: collapse !important; vertical-align: top; mso-table-lspace: 0pt; mso-table-rspace: 0pt; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; margin: 0; Margin: 0; font-size: 14px; mso-line-height-rule: exactly; line-height: 140%; text-align: center; padding: 30px 30px 22px 30px;">
-                                    <img src="<?php echo esc_url( $header_image ); ?>" width="250" alt="WP Mail SMTP Logo" style="outline: none; text-decoration: none; max-width: 100%; clear: both; -ms-interpolation-mode: bicubic; display: inline-block !important; width: 250px;">
-                                </td>
-                            </tr>
-                        <?php endif; ?>
+						<?php if ( ! empty( $header_image ) ) : ?>
+							<tr style="padding: 0; vertical-align: top; text-align: left;">
+								<td align="center" valign="middle" class="header" style="word-wrap: break-word; -webkit-hyphens: auto; -moz-hyphens: auto; hyphens: auto; border-collapse: collapse !important; vertical-align: top; mso-table-lspace: 0pt; mso-table-rspace: 0pt; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; margin: 0; Margin: 0; font-size: 14px; mso-line-height-rule: exactly; line-height: 140%; text-align: center; padding: 30px 30px 22px 30px;">
+									<img src="<?php echo esc_url( $header_image ); ?>" width="250" alt="WP Mail SMTP Logo" style="outline: none; text-decoration: none; max-width: 100%; clear: both; -ms-interpolation-mode: bicubic; display: inline-block !important; width: 250px;">
+								</td>
+							</tr>
+						<?php endif; ?>
 						<!-- Content -->
 						<tr style="padding: 0; vertical-align: top; text-align: left;">
 							<td align="left" valign="top" class="content" style="word-wrap: break-word; -webkit-hyphens: auto; -moz-hyphens: auto; hyphens: auto; border-collapse: collapse !important; vertical-align: top; mso-table-lspace: 0pt; mso-table-rspace: 0pt; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; margin: 0; Margin: 0; text-align: left; font-size: 14px; mso-line-height-rule: exactly; line-height: 140%; background-color: #ffffff; padding: 60px 75px 45px 75px; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; border-left: 1px solid #ddd; border-top: 3px solid #809eb0;">
@@ -55,10 +55,10 @@ class Telas_Assesments_Helper {
 									<p class="text-extra-large text-center congrats" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; padding: 0; mso-line-height-rule: exactly; line-height: 140%; font-size: 20px; text-align: center; margin: 0 0 20px 0; Margin: 0 0 20px 0;">
 										<?php echo $message_heading; ?>
 									</p>
-                                    <?php endif; if ( ! empty( $message_body ) ) : ?>
-                                        <p class="text-large" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; padding: 0; text-align: left; mso-line-height-rule: exactly; line-height: 140%; margin: 0 0 15px 0; Margin: 0 0 15px 0; font-size: 16px;">
-                                            <?php echo $message_body; ?>
-                                        </p>
+									<?php endif; if ( ! empty( $message_body ) ) : ?>
+										<p class="text-large" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; padding: 0; text-align: left; mso-line-height-rule: exactly; line-height: 140%; margin: 0 0 15px 0; Margin: 0 0 15px 0; font-size: 16px;">
+											<?php echo $message_body; ?>
+										</p>
 										<?php if ( ! empty( $signature ) ) : ?>
 											<p class="signature" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #444; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: normal; padding: 0; font-size: 14px; mso-line-height-rule: exactly; line-height: 140%; text-align: left; margin: 20px 0 0 0; Margin: 20px 0 0 0;">
 											</p>
@@ -66,7 +66,7 @@ class Telas_Assesments_Helper {
 												<?php echo $signature; ?>
 											</p>
 										<?php endif; ?>
-                                    <?php endif; ?>
+									<?php endif; ?>
 								</div>
 							</td>
 						</tr>
@@ -106,53 +106,55 @@ class Telas_Assesments_Helper {
 
 		return $message;
 	}
-	
+
 	public static function get_telas_admin_emails() {
 		$all_telas_admin_emails = array();
-		$all_telas_admins = get_users( array( 'role' => 'telas_telas_administrator' ) );
-		foreach( $all_telas_admins as $telas_admin ) {
+		$all_telas_admins       = get_users( array( 'role' => 'telas_telas_administrator' ) );
+		foreach ( $all_telas_admins as $telas_admin ) {
 			array_push( $all_telas_admin_emails, $telas_admin->user_email );
 		}
 		return $all_telas_admin_emails;
-  	}
-  
-  	public static function send_new_user_welcome_email( $user_id ) {
-    	$new_user_welcome_email_options = get_option( 'new-user-welcome-email-template' );
-    	$subject = $new_user_welcome_email_options['subject'];
-    	$email_body = $new_user_welcome_email_options['emailBody'];
-    	$email_salutation = $new_user_welcome_email_options['salutation'];
-		$message_heading = $subject;
-		$button_link = 'https://app.telas.edu.au/login/';
-		$button_text = 'Login';
-		$message = Telas_Assesments_Helper::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, $has_aside = true, $button_link, $button_text );
-   		$blog_name = get_option('blogname');
-    	$subject = "[{$blog_name}] {$subject}";
-		$headers = array('Content-Type: text/html; charset=UTF-8');
-		$user = new WP_User( $user_id );
-		$user_email = stripslashes( $user->user_email );
+	}
+
+	public static function send_new_user_welcome_email( $user_id ) {
+		$new_user_welcome_email_options = get_option( 'new-user-welcome-email-template' );
+		$subject                        = $new_user_welcome_email_options['subject'];
+		$email_body                     = $new_user_welcome_email_options['emailBody'];
+		$email_salutation               = $new_user_welcome_email_options['salutation'];
+		$message_heading                = $subject;
+		$button_link                    = 'https://app.telas.edu.au/login/';
+		$button_text                    = 'Login';
+		$message                        = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, $has_aside = true, $button_link, $button_text );
+		$blog_name                      = get_option( 'blogname' );
+		$subject                        = "[{$blog_name}] {$subject}";
+		$headers                        = array( 'Content-Type: text/html; charset=UTF-8' );
+		$user                           = new WP_User( $user_id );
+		$user_email                     = stripslashes( $user->user_email );
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
 	public static function send_profile_completion_notification_email( $user_id ) {
 		$profile_completion_email_options = get_option( 'profile-completion-notification-email-template' );
-		$subject = $profile_completion_email_options['subject'];
-		$email_body = $profile_completion_email_options['emailBody'];
-		$email_salutation = $profile_completion_email_options['salutation'];
-		$message_heading = $subject;
-		$user_object = new WP_User( $user_id );
-		$replacement_array = array(
-			'first_name' =>  $user_object->first_name,
-			'last_name' =>  $user_object->last_name,
-			'email_address' =>  $user_object->user_email,
-			'position' =>  get_user_meta( $user_id, 'position', true ),
-			'faculty' =>  get_user_meta( $user_id, 'faculty', true ),
-			'institution_name' =>  get_user_meta( $user_id, 'institution_name', true ),
-			'institution_campus' =>  get_user_meta( $user_id, 'institution_campus', true ),
-			'institution_state' =>  get_user_meta( $user_id, 'institution_state', true ),
-			'institution_country' =>  get_user_meta( $user_id, 'institution_country', true ),
-			'selected_role' =>  reset($user_object->roles),
+		$subject                          = $profile_completion_email_options['subject'];
+		$email_body                       = $profile_completion_email_options['emailBody'];
+		$email_salutation                 = $profile_completion_email_options['salutation'];
+		$message_heading                  = $subject;
+		$user_object                      = new WP_User( $user_id );
+		$user_role                        = in_array( 'telas_assessor', $user_object->roles ) ? substr( get_user_meta( $user_object->ID, 'telas_assessor_level', true ), 0, -1 ) : substr( reset( $user_object->roles ), 0, -1 );
+		$user_role                        = ucfirst( str_replace( '_', ' ', $user_role ) );
+		$replacement_array                = array(
+			'first_name'          => $user_object->first_name,
+			'last_name'           => $user_object->last_name,
+			'email_address'       => $user_object->user_email,
+			'position'            => get_user_meta( $user_id, 'position', true ),
+			'faculty'             => get_user_meta( $user_id, 'faculty', true ),
+			'institution_name'    => get_user_meta( $user_id, 'institution_name', true ),
+			'institution_campus'  => get_user_meta( $user_id, 'institution_campus', true ),
+			'institution_state'   => get_user_meta( $user_id, 'institution_state', true ),
+			'institution_country' => get_user_meta( $user_id, 'institution_country', true ),
+			'selected_role'       => $user_role,
 		);
-		$to_be_replaced = array(
+		$to_be_replaced                   = array(
 			'{[first_name]}',
 			'{[last_name]}',
 			'{[email_address]}',
@@ -163,14 +165,15 @@ class Telas_Assesments_Helper {
 			'{[institution_state]}',
 			'{[institution_country]}',
 			'{[selected_role]}',
-    	);
-		$email_body = str_replace( $to_be_replaced, $replacement_array, $email_body );
-		$message = Telas_Assesments_Helper::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, false, $button_link, $button_text );
-		$blog_name = get_option('blogname');
-    	$subject = "[{$blog_name}] {$subject}";
-		$headers = array('Content-Type: text/html; charset=UTF-8');
-		$user = new WP_User( $user_id );
-		$user_email = stripslashes( $user->user_email );
+		);
+		$email_body                       = str_replace( $to_be_replaced, $replacement_array, $email_body );
+		$message                          = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, false, $button_link, $button_text );
+		$blog_name                        = get_option( 'blogname' );
+		$subject                          = "[{$blog_name}] {$subject}";
+		$headers                          = array( 'Content-Type: text/html; charset=UTF-8' );
+		$user                             = new WP_User( $user_id );
+		$user_email                       = stripslashes( $user->user_email );
+		// echo $message;
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
@@ -184,61 +187,61 @@ class Telas_Assesments_Helper {
 		} else {
 			return;
 		}
-		$subject = $approved_email_object['subject'];
-		$email_body = $approved_email_object['emailBody'];
+		$subject          = $approved_email_object['subject'];
+		$email_body       = $approved_email_object['emailBody'];
 		$email_salutation = $approved_email_object['salutation'];
-		$email_body = str_replace( '{[first_name]}', $user->first_name, $email_body );
-		$blog_name = get_option('blogname');
-		$subject = "[{$blog_name}] {$subject}";
-		$headers = array('Content-Type: text/html; charset=UTF-8');
-		$to = $user_email;
-		$message_title = $subject;
-		$header_image = '';
-		$message_heading = $subject;
-		$message_body = $email_body;
-		$signature = $email_salutation;
-		$has_aside = true;
-		$button_link = 'https://app.telas.edu.au/login';
-		$button_text = 'Login';
-		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-		$mail_flag = wp_mail( $to, $subject, $message, $headers );
+		$email_body       = str_replace( '{[first_name]}', $user->first_name, $email_body );
+		$blog_name        = get_option( 'blogname' );
+		$subject          = "[{$blog_name}] {$subject}";
+		$headers          = array( 'Content-Type: text/html; charset=UTF-8' );
+		$to               = $user_email;
+		$message_title    = $subject;
+		$header_image     = '';
+		$message_heading  = $subject;
+		$message_body     = $email_body;
+		$signature        = $email_salutation;
+		$has_aside        = true;
+		$button_link      = 'https://app.telas.edu.au/login';
+		$button_text      = 'Login';
+		$message          = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$mail_flag        = wp_mail( $to, $subject, $message, $headers );
 	}
 
 	function reviewer_assigned_notification( $user_id, $course_id, $assessment_id, $role ) {
-		$message_title = 'You have been assigned a course to review.';
-		$header_image = '';
-		$course_title = get_the_title( $course_id );
-		$role_string = ucfirst( str_replace( '_', ' ', $role ) );
-		$message_heading = "You have been assigned {$course_title} to review as {$role_string}.";
+		$message_title           = 'You have been assigned a course to review.';
+		$header_image            = '';
+		$course_title            = get_the_title( $course_id );
+		$role_string             = ucfirst( str_replace( '_', ' ', $role ) );
+		$message_heading         = "You have been assigned {$course_title} to review as {$role_string}.";
 		$email_replacement_array = array(
-			'firstname' =>  get_user_meta( $user_id, 'first_name', true ),
-			'date_of_course_submitted' =>  get_the_date( get_option( 'date_format' ), get_post_meta( $course_id, 'courseSubmissionDateString', true ) ),
-			'package_name' =>  get_post_meta( $course_id, 'coursePackageName', true ),
-			'package_type' =>  get_post_meta( $course_id, 'coursePackageType', true ),
-			'package_identifier' =>  get_post_meta( $course_id, 'coursePackageIdentifier', true ),
-			'module_identifier' =>  get_post_meta( $course_id, 'courseModuleIdentifier', true ),
-			'study_level' =>  get_post_meta( $course_id, 'studyLevel', true ),
-			'course_level' =>  get_post_meta( $course_id, 'courseLevel', true ),
-			'institution_name' =>  get_post_meta( $course_id, 'institutionName', true ),
-			'faculty' =>  get_post_meta( $course_id, 'facultyDept', true ),
+			'firstname'                => get_user_meta( $user_id, 'first_name', true ),
+			'date_of_course_submitted' => get_post_meta( $course_id, 'courseSubmissionDateString', true ),
+			'package_name'             => get_post_meta( $course_id, 'coursePackageName', true ),
+			'package_type'             => get_post_meta( $course_id, 'coursePackageType', true ),
+			'package_identifier'       => get_post_meta( $course_id, 'coursePackageIdentifier', true ),
+			'module_identifier'        => get_post_meta( $course_id, 'courseModuleIdentifier', true ),
+			'study_level'              => get_post_meta( $course_id, 'studyLevel', true ),
+			'course_level'             => get_post_meta( $course_id, 'courseLevel', true ),
+			'institution_name'         => get_post_meta( $course_id, 'institutionName', true ),
+			'faculty'                  => get_post_meta( $course_id, 'facultyDept', true ),
 		);
-		$email_template_data = Telas_Assesments_Helper::prepare_course_assigned_email_data( $role, $email_replacement_array );
+		$email_template_data     = self::prepare_course_assigned_email_data( $role, $email_replacement_array );
 
 		$message_body = $email_template_data['email_body'];
-		$signature = $email_template_data['salutation'];
-		$button_link = 'https://app.telas.edu.au/assessment/' . $assessment_id;
-		$button_text = 'Start';
-		$message = Telas_Assesments_Helper::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
-   		$blog_name = get_option('blogname');
-    	$subject = "[{$blog_name}] {$email_template_data['subject']}";
+		$signature    = $email_template_data['salutation'];
+		$button_link  = 'https://app.telas.edu.au/assessment/' . $assessment_id;
+		$button_text  = 'Start';
+		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$blog_name    = get_option( 'blogname' );
+		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
 		// $subject = sprintf( '[%s] You have been assigned a course to review.', $blog_name );
-		$headers = array('Content-Type: text/html; charset=UTF-8');
-		$user = new WP_User( $user_id );
+		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
+		$user       = new WP_User( $user_id );
 		$user_email = stripslashes( $user->user_email );
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
-	public static function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() )	{
+	public static function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() ) {
 		if ( 'admin_reviewer' === $role ) {
 			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
 		} elseif ( 'first_reviewer' === $role ) {
@@ -248,9 +251,9 @@ class Telas_Assesments_Helper {
 		} else {
 			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
 		}
-		$subject = $email_template['subject'];
-		$body = $email_template['emailBody'];
-    	$salutation = $email_template['salutation'];
+		$subject        = $email_template['subject'];
+		$body           = $email_template['emailBody'];
+		$salutation     = $email_template['salutation'];
 		$to_be_replaced = array(
 			'{[firstname]}',
 			'{[date_of_course_submitted]}',
@@ -262,12 +265,12 @@ class Telas_Assesments_Helper {
 			'{[course_level]}',
 			'{[institution_name]}',
 			'{[faculty]}',
-    	);
-    
+		);
+
 		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
 		return array(
 			'email_body' => $new_body,
-			'subject' => $subject,
+			'subject'    => $subject,
 			'salutation' => $salutation,
 		);
 	}
