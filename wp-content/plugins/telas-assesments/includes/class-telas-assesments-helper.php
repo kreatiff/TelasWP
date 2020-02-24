@@ -177,7 +177,7 @@ class Telas_Assesments_Helper {
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
-	function profile_approved_notification_email( $user, $user_role ) {
+	public static function profile_approved_notification_email( $user, $user_role ) {
 		$user_login = stripslashes( $user->user_login );
 		$user_email = stripslashes( $user->user_email );
 		if ( $user_role === 'telas_interim_reviewers' ) {
@@ -207,7 +207,7 @@ class Telas_Assesments_Helper {
 		$mail_flag        = wp_mail( $to, $subject, $message, $headers );
 	}
 
-	function reviewer_assigned_notification( $user_id, $course_id, $assessment_id, $role ) {
+	public static function reviewer_assigned_notification( $user_id, $course_id, $assessment_id, $role ) {
 		$message_title           = 'You have been assigned a course to review.';
 		$header_image            = '';
 		$course_title            = get_the_title( $course_id );
@@ -240,7 +240,13 @@ class Telas_Assesments_Helper {
 		$user_email = stripslashes( $user->user_email );
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
-
+	/**
+	 *  function
+	 *
+	 * @param string $role
+	 * @param array $replacement_array
+	 * @return array $email_body, $subject, $salutation
+	 */
 	public static function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() ) {
 		if ( 'admin_reviewer' === $role ) {
 			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
@@ -274,4 +280,108 @@ class Telas_Assesments_Helper {
 			'salutation' => $salutation,
 		);
 	}
+	/**
+	 * Undocumented function
+	 *
+	 * @param array $replacement_array array.
+	 * @return array .
+	 */
+	public static function prepare_combined_reviewer_assigned_email( $replacement_array = array() ) {
+		$email_template = get_option( 'combined-review-request-email-template' );
+		$subject        = $email_template['subject'];
+		$body           = $email_template['emailBody'];
+		$salutation     = $email_template['salutation'];
+		$to_be_replaced = array(
+			'{[firstname]}',
+			'{[get_course_name]}',
+			'{[get_institution_name]}',
+			'{[second_reviewer_firstname]}',
+			'{[second_reviewer_lastname]}',
+			'{[second_reviewer_position]}',
+			'{[second_reviewer_faculty_name]}',
+			'{[second_reviewer_institution_name]}',
+			'{[second_reviewer_institution_country]}',
+			'{[second_reviewer_email]}',
+			'{[date_of_course_submitted]}',
+			'{[package_name]}',
+			'{[package_type]}',
+			'{[package_identifier]}',
+			'{[module_identifier]}',
+			'{[study_level]}',
+			'{[course_level]}',
+			'{[institution_name]}',
+			'{[faculty]}',
+		);
+		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
+		return array(
+			'email_body' => $new_body,
+			'subject'    => $subject,
+			'salutation' => $salutation,
+		);
+	}
+
+	public static function combined_reviewer_assigned_notification( $course_id ) {
+		$report_id = get_post_meta( $course_id, 'report_post_id', true );
+		$message_title           = 'You have been assigned a course to review.';
+		$header_image            = '';
+		$course_title            = get_the_title( $course_id );
+		$first_reviewer_id = get_post_meta( $course_id, 'assigned_first_reviewer_user_id', true );
+		$second_reviewer_id = get_post_meta( $course_id, 'assigned_second_reviewer_user_id', true );
+		$first_reviewer_object       = new WP_User( $first_reviewer_id );
+		$second_reviewer_object       = new WP_User( $second_reviewer_id );
+		$first_reviewer_email = stripslashes( $first_reviewer_object->user_email );
+		$second_reviewer_email = stripslashes( $second_reviewer_object->user_email );
+		$second_reviewer_first_name = get_user_meta( $second_reviewer_id, 'first_name', true );
+		$second_reviewer_last_name = get_user_meta( $second_reviewer_id, 'last_name', true );
+		$second_reviewer_position = get_user_meta( $second_reviewer_id, 'position', true );
+		$second_reviewer_faculty = get_user_meta( $second_reviewer_id, 'faculty', true );
+		$second_reviewer_institution_name = get_user_meta( $second_reviewer_id, 'institution_name', true );
+		$second_reviewer_institution_country = get_user_meta( $second_reviewer_id, 'institution_country', true );
+		$date_of_course_submission = get_post_meta( $course_id, 'courseSubmissionDate', true );
+		$course_package_name = get_post_meta( $course_id, 'coursePackageName', true );
+		$course_package_type = get_post_meta( $course_id, 'coursePackageType', true );
+		$course_package_identifier = get_post_meta( $course_id, 'coursePackageIdentifier', true );
+		$course_module_identifier = get_post_meta( $course_id, 'courseModuleIdentifier', true );
+		$course_study_level = get_post_meta( $course_id, 'studyLevel', true );
+		$course_level = get_post_meta( $course_id, 'courseLevel', true );
+		$course_faculty = get_post_meta( $course_id, 'faculty', true );
+		$course_institution_name = get_post_meta( $course_id, 'institutionName', true );
+		$first_reviewer_first_name = get_user_meta( $first_reviewer_id, 'first_name', true );
+		$formatted_date_of_course_submission = new DateTimeImmutable( $date_of_course_submission );
+		$email_replacement_array = array(
+			'firstname' => $first_reviewer_first_name,
+			'get_course_name' => $course_title,
+			'get_institution_name' => $second_reviewer_institution_name,
+			'second_reviewer_firstname' => $second_reviewer_first_name,
+			'second_reviewer_lastname' => $second_reviewer_last_name,
+			'second_reviewer_position' => $second_reviewer_position,
+			'second_reviewer_faculty_name' => $second_reviewer_faculty,
+			'second_reviewer_institution_name' => $second_reviewer_institution_name,
+			'second_reviewer_institution_country' => $second_reviewer_institution_country,
+			'second_reviewer_email' => $second_reviewer_email,
+			'date_of_course_submitted' => $formatted_date_of_course_submission->format( get_option( 'date_format' ) ),
+			'package_name' => $course_package_name,
+			'package_type' => $course_package_type,
+			'package_identifier' => $course_package_identifier,
+			'module_identifier' => $course_module_identifier,
+			'study_level' => $course_study_level,
+			'course_level' => $course_study_level,
+			'institution_name' => $course_institution_name,
+			'faculty' => $course_faculty,
+		);
+		$email_template_data     = self::prepare_combined_reviewer_assigned_email( $email_replacement_array );
+
+		$message_body = $email_template_data['email_body'];
+		$signature    = $email_template_data['salutation'];
+		$button_link  = 'https://app.telas.edu.au/dashboard/report/' . $report_id;
+		$button_text  = 'Start';
+		$message_heading = $email_template_data['subject'];
+		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$blog_name    = get_option( 'blogname' );
+		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
+		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
+		wp_mail( $first_reviewer_email, $subject, $message, $headers );
+	}
 }
+
+
