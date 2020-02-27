@@ -2076,6 +2076,7 @@ class Telas_Assesments_Admin {
 			'interim_assessment_assigned_date'            => get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_interim_reviewer_assessment', true ) ) : 'none',
 			'first_assessment_assigned_date'              => get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_first_reviewer_assessment', true ) ) : 'none',
 			'second_assessment_assigned_date'             => get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ? get_the_date( get_option( 'date_format' ), get_post_meta( $post_id, 'assigned_second_reviewer_assessment', true ) ) : 'none',
+			'combined_review_status' => get_post_meta( $post_id, 'combined_review_status', true ) ? get_post_meta( $post_id, 'combined_review_status', true ) : 'assigned',
 		);
 
 	}
@@ -3196,8 +3197,8 @@ class Telas_Assesments_Admin {
 		update_post_meta( $course_id, 'report_post_id', $new_combined_review_id );
 		update_post_meta( $course_id, 'has_report_created', 'yes' );
 		update_post_meta( $course_id, 'current_review_status', 'Combined Review Started' );
-		update_post_meta( $course_id, 'last_status_update', date( get_option('date_format'), current_time( 'timestamp', 0 ) ) );
-		update_post_meta( $course_id, 'combined_review_created_date', date( get_option('date_format'), current_time( 'timestamp', 0 ) ) );
+		update_post_meta( $course_id, 'last_status_update', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
+		update_post_meta( $course_id, 'combined_review_created_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
 		update_post_meta( $new_combined_review_id, 'assessment_data', $assessment_data );
 		update_post_meta( $new_combined_review_id, 'admin_reviewer_assessment_data', $assessment_data['admin_reviewer'] );
 		update_post_meta( $new_combined_review_id, 'first_reviewer_assessment_data', $assessment_data['first_reviewer'] );
@@ -3210,6 +3211,7 @@ class Telas_Assesments_Admin {
 		update_post_meta( $new_combined_review_id, 'second_reviewer_name', $second_reviewer_name );
 		update_post_meta( $new_combined_review_id, 'course_id', $course_id );
 		update_post_meta( $new_combined_review_id, 'assessment_status', 'assigned' );
+		update_post_meta( $course_id, 'combined_review_status', 'assigned' );
 		Telas_Assesments_Helper::combined_reviewer_assigned_notification( $course_id );
 	}
 
@@ -3222,17 +3224,20 @@ class Telas_Assesments_Admin {
 		$combined_review_commencement_date                = get_post_meta( $course_id, 'combined_review_commencement_date', true );
 
 		if ( empty( $combined_review_commencement_date ) ) {
-			update_post_meta( $course_id, 'combined_review_commencement_date', date( get_option('date_format'), current_time( 'timestamp', 0 ) ) );
-			update_post_meta( $report_post_obj->ID, 'combined_review_commencement_date', date( get_option('date_format'), current_time( 'timestamp', 0 ) ) );
+			update_post_meta( $course_id, 'combined_review_commencement_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
+			update_post_meta( $report_post_obj->ID, 'combined_review_commencement_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
 		}
-
+		update_post_meta( $course_id, 'combined_review_status', 'in-progress' );
+		update_post_meta( $report_post_obj->ID, 'review_status', 'in-progress' );
 		$first_assessment_data['status'] = 'completed';
 		update_post_meta( $report_post_obj->ID, 'assessment_data', $assessment_data );
 		update_post_meta( $report_post_obj->ID, 'first_reviewer_assessment_data', $first_assessment_data );
 		update_post_meta( $report_post_obj->ID, 'assessment_status', $report_object['assessmentStatus'] );
 		if ( 'complete' === $report_object['assessmentStatus'] ) {
-			update_post_meta( $report_post_obj->ID, 'combined_review_completion_date', date( get_option('date_format'), current_time( 'timestamp', 0 ) ) );
-			update_post_meta( $course_id, 'combined_review_completion_date', date( get_option('date_format'), current_time( 'timestamp', 0 ) ) );
+			update_post_meta( $report_post_obj->ID, 'combined_review_completion_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
+			update_post_meta( $course_id, 'combined_review_completion_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
+			update_post_meta( $report_post_obj->ID, 'review_status', 'completed' );
+			update_post_meta( $course_id, 'combined_review_status', 'completed' );
 		}
 	}
 
@@ -3260,5 +3265,10 @@ class Telas_Assesments_Admin {
 
 	function send_profile_completion_notification_email() {
 		// Telas_Assesments_Helper::reviewer_assigned_notification(54, 329, 331, 'admin_reviewer');.
+	}
+	
+	function lost_password_redirect() {
+		wp_redirect( 'https://app.telas.edu.au/login' );
+		exit;
 	}
 }
