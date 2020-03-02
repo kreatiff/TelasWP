@@ -2923,7 +2923,7 @@ class Telas_Assesments_Admin {
 		$message_title   = 'Please verify this newly created Account';
 		$header_image    = '';
 		$message_heading = 'User Details:';
-		$user_role       = in_array( 'telas_assessor', $user_data->roles ) ? substr( get_user_meta( $user_data->ID, 'telas_assessor_level', true ), 0, -2 ) : substr( $user_data->roles, 0, -2 );
+		$user_role       = in_array( 'telas_assessor', $user_object->roles ) ? substr( get_user_meta( $user_object->ID, 'telas_assessor_level', true ), 0, -2 ) : substr( $user_object->roles, 0, -2 );
 		$user_role       = str_replace( '_', ' ', $user_role );
 		$message_body    = '<table rules="all" style="border-color: #666;" cellpadding="10">';
 		$message_body   .= "<tr style='background: #eee;'><td><strong>First Name:</strong> </td><td>" . $user_object->first_name . '</td></tr>';
