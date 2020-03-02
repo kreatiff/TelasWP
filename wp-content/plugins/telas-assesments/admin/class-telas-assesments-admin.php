@@ -344,6 +344,7 @@ class Telas_Assesments_Admin {
 		$role->add_cap( 'edit_published_telas_courses' );
 		$role->add_cap( 'publish_telas_courses' );
 		$role->add_cap( 'delete_others_telas_courses' );
+		$role->add_cap( 'delete_telas_courses' );
 		$role->add_cap( 'delete_private_telas_courses' );
 		$role->add_cap( 'delete_published_telas_courses' );
 		// Cap for assessments
@@ -2323,15 +2324,17 @@ class Telas_Assesments_Admin {
 	public function update_user_callback( $request ) {
 		$all_params       = $request->get_params();
 		$user_id          = $all_params['user_id'];
-		$role             = $all_params['telasRole'] === 'telas_course_submitters' ? 'telas_course_submitters' : 'telas_assessor';
+		$role             = 'telas_course_submitters' === $all_params['telasRole'] ? 'telas_course_submitters' : 'telas_assessor';
 		$update_user_args = array(
 			'ID'           => $user_id,
 			'first_name'   => $all_params['firstName'],
 			'last_name'    => $all_params['lastName'],
 			'nickname'     => $all_params['firstName'] . ' ' . $all_params['lastName'],
 			'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
-			'role'         => $role,
 		);
+		if ( ! empty( $all_params['telasRole'] ) ) {
+			$update_user_args['role'] = $role;
+		}
 		$updated_user_id  = wp_update_user( $update_user_args );
 		if ( is_wp_error( $updated_user_id ) ) {
 			$error_code = $updated_user_id->get_error_code();
@@ -2359,13 +2362,13 @@ class Telas_Assesments_Admin {
 				$user_object->remove_role( $role );
 			}
 			$user_object->add_role( $role );
+			update_user_meta( $updated_user_id, 'user_available', 'yes' );
 			update_user_meta( $updated_user_id, 'is_first_time_updating', 'no' );
-			if ( $role === 'telas_assessor' ) {
-				update_user_meta( $updated_user_id, 'telas_assessor_level', $all_params['telasRole'] );
-				update_user_meta( $updated_user_id, 'user_available', 'yes' );
-			}
 			$this->send_notification_to_telas_admin( $user_object );
 			Telas_Assesments_Helper::send_profile_completion_notification_email( $updated_user_id );
+		}
+		if ( 'telas_assessor' === $role && ! empty( $all_params['telasRole'] ) ) {
+			update_user_meta( $updated_user_id, 'telas_assessor_level', $all_params['telasRole'] );
 		}
 		if ( in_array( 'telas_assessor', $user_data->roles ) ) {
 			$user_role = ! empty( get_user_meta( $updated_user_id, 'telas_assessor_level', true ) ) ? get_user_meta( $updated_user_id, 'telas_assessor_level', true ) : 'telas_interim_reviewers';
