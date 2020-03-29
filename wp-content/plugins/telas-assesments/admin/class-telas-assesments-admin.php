@@ -2049,12 +2049,12 @@ class Telas_Assesments_Admin
         $first_assessment_id   = array_intersect($completed_assessments, $assigned_first_reviewer_assessment_ids);
         $second_assessment_id  = array_intersect($completed_assessments, $assigned_second_reviewer_assessment_ids);
         $interim_assessment_id = array_intersect($completed_assessments, $assigned_interim_reviewer_assessment_ids);
-        $is_test_course = (get_post_meta( $post_id, 'forTest', true ) && get_post_meta( $post_id, 'forTest', true ) === 'yes');
+        $is_test_course = (get_post_meta($post_id, 'forTest', true) && get_post_meta($post_id, 'forTest', true) === 'yes');
         
         $interim_reviewer_data = $is_test_course ? array(
-            'assigned_interim_reviewer_user_ids' => get_post_meta( $post_id, 'assigned_interim_reviewer_user_ids', true ),
-            'assigned_interim_review_ids' => get_post_meta( $post_id, 'assigned_interim_review_ids', true ),
-            'assigned_interim_reviews_obj' => get_post_meta( $post_id, 'assigned_interim_reviews_obj', true ),
+            'assigned_interim_reviewer_user_ids' => get_post_meta($post_id, 'assigned_interim_reviewer_user_ids', true),
+            'assigned_interim_review_ids' => get_post_meta($post_id, 'assigned_interim_review_ids', true),
+            'assigned_interim_reviews_obj' => get_post_meta($post_id, 'assigned_interim_reviews_obj', true),
         ) : false;
         return array(
             'current_assessment_level'                    => get_post_meta($post_id, 'assessment_level', true),
@@ -2191,12 +2191,13 @@ class Telas_Assesments_Admin
             update_post_meta($assigned_course_id, $assessment_level . '_commencement_date', $all_params['assessmentStartDate']);
         }
         $post_author_id = get_post_meta($assessment_id, 'assigned_reviewer_user_id', true);
-        $is_test_course = (get_post_meta( $assigned_course_id, 'forTest', true ) && get_post_meta( $assigned_course_id, 'forTest', true ) === 'yes');
-        if ( $is_test_course && $assessment_level === 'interim_reviewer' ) {
-            $assigned_interim_reviews_obj = get_post_meta( $assigned_course_id, 'assigned_interim_reviews_obj', true );
+        $is_test_course = (get_post_meta($assigned_course_id, 'forTest', true) && get_post_meta($assigned_course_id, 'forTest', true) === 'yes');
+        if ($is_test_course && $assessment_level === 'interim_reviewer' ) {
+            $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);
             $assigned_interim_reviews_obj[$post_author_id]['status'] = 'in_progress';
             $assigned_interim_reviews_obj[$post_author_id]['commencement_date'] =  date($date_format, current_time('timestamp', 0));
-            update_post_meta( $assigned_course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj );
+            $assigned_interim_reviews_obj[$post_author_id]['review_data'] = $assessment_data;
+            update_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj);
         }
         if ($all_params['action'] === 'complete' ) {
             update_post_meta($assessment_id, 'assessment_status', 'completed');
@@ -2206,55 +2207,56 @@ class Telas_Assesments_Admin
             update_post_meta($assigned_course_id, 'completed_assessments', array_unique($all_completed_assessments));
             update_user_meta($post_author_id, 'user_available', 'yes');
             switch ( $assessment_level ) {
-                case 'admin_reviewer':
-                    $all_assessments['admin_reviewer']['status']      = 'completed';
-                    $all_assessments['admin_reviewer']['review_data'] = $assessment_data;
-                    update_post_meta($assigned_course_id, 'assessments', $all_assessments);
-                    update_post_meta($assigned_course_id, 'assigned_admin_reviewer_status', 'completed');
-                    update_post_meta($assigned_course_id, 'assessment_progress', 'in-progress');
-                    update_post_meta($assigned_course_id, 'admin_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
-                    update_post_meta($assigned_course_id, 'current_review_status', 'Admin Review Completed');
-                    // update_user_meta($course_id, 'user_available', 'yes');
-                    break;
-                case 'interim_reviewer':
-                    $assigned_interim_reviews_obj = get_post_meta( $assigned_course_id, 'assigned_interim_reviews_obj', true );
-                    $assigned_interim_reviews_obj[$post_author_id]['status'] = 'completed';
-                    $assigned_interim_reviews_obj[$post_author_id]['completed_date'] =  date($date_format, current_time('timestamp', 0));
-                    update_post_meta( $assigned_course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj );
-                    // $all_assessments['interim_reviewer']['status']      = 'completed';
-                    // $all_assessments['interim_reviewer']['review_data'] = $assessment_data;
-                    // update_post_meta($assigned_course_id, 'assessments', $all_assessments);
-                    // update_post_meta($assigned_course_id, 'assigned_interim_reviewer_status', 'completed');
-                    // update_post_meta($assigned_course_id, 'assessment_progress', 'complete');
-                    // update_post_meta($assigned_course_id, 'interim_review_completion_date', date($date_format, current_time('timestamp', 0)));
-                    // update_post_meta($assigned_course_id, 'current_review_status', 'Interim Review Completed');
-                    break;
-                case 'first_reviewer':
-                    $all_assessments['first_reviewer']['status']      = 'completed';
-                    $all_assessments['first_reviewer']['review_data'] = $assessment_data;
-                    update_post_meta($assigned_course_id, 'assessments', $all_assessments);
-                    update_post_meta($assigned_course_id, 'assigned_first_reviewer_status', 'completed');
-                    update_post_meta($assigned_course_id, 'assessment_progress', 'in-progress');
-                    update_post_meta($assigned_course_id, 'first_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
-                    update_post_meta($assigned_course_id, 'current_review_status', 'First Review Completed');
-                    // update_user_meta($course_id, 'user_available', 'yes');
-                    break;
-                case 'second_reviewer':
-                    $all_assessments['second_reviewer']['status']      = 'completed';
-                    $all_assessments['second_reviewer']['review_data'] = $assessment_data;
-                    update_post_meta($assigned_course_id, 'assessments', $all_assessments);
-                    update_post_meta($assigned_course_id, 'assigned_second_reviewer_status', 'completed');
-                    update_post_meta($assigned_course_id, 'assessment_progress', 'complete');
-                    update_post_meta($assigned_course_id, 'compare_ready', 'yes');
-                    update_post_meta($assigned_course_id, 'second_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
-                    update_post_meta($assigned_course_id, 'current_review_status', 'Second Review Completed');
-                    // update_user_meta($course_id, 'user_available', 'yes');
-                    $this->create_combined_review($assigned_course_id, $all_assessments);
-                    break;
+            case 'admin_reviewer':
+                $all_assessments['admin_reviewer']['status']      = 'completed';
+                $all_assessments['admin_reviewer']['review_data'] = $assessment_data;
+                update_post_meta($assigned_course_id, 'assessments', $all_assessments);
+                update_post_meta($assigned_course_id, 'assigned_admin_reviewer_status', 'completed');
+                update_post_meta($assigned_course_id, 'assessment_progress', 'in-progress');
+                update_post_meta($assigned_course_id, 'admin_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
+                update_post_meta($assigned_course_id, 'current_review_status', 'Admin Review Completed');
+                // update_user_meta($course_id, 'user_available', 'yes');
+                break;
+            case 'interim_reviewer':
+                $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);
+                $assigned_interim_reviews_obj[$post_author_id]['status'] = 'completed';
+                $assigned_interim_reviews_obj[$post_author_id]['completed_date'] =  date($date_format, current_time('timestamp', 0));
+                update_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj);
+                $this->create_interim_reviewer_report($assigned_course_id, $assigned_interim_reviews_obj, $post_author_id);
+                // $all_assessments['interim_reviewer']['status']      = 'completed';
+                // $all_assessments['interim_reviewer']['review_data'] = $assessment_data;
+                // update_post_meta($assigned_course_id, 'assessments', $all_assessments);
+                // update_post_meta($assigned_course_id, 'assigned_interim_reviewer_status', 'completed');
+                // update_post_meta($assigned_course_id, 'assessment_progress', 'complete');
+                // update_post_meta($assigned_course_id, 'interim_review_completion_date', date($date_format, current_time('timestamp', 0)));
+                // update_post_meta($assigned_course_id, 'current_review_status', 'Interim Review Completed');
+                break;
+            case 'first_reviewer':
+                $all_assessments['first_reviewer']['status']      = 'completed';
+                $all_assessments['first_reviewer']['review_data'] = $assessment_data;
+                update_post_meta($assigned_course_id, 'assessments', $all_assessments);
+                update_post_meta($assigned_course_id, 'assigned_first_reviewer_status', 'completed');
+                update_post_meta($assigned_course_id, 'assessment_progress', 'in-progress');
+                update_post_meta($assigned_course_id, 'first_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
+                update_post_meta($assigned_course_id, 'current_review_status', 'First Review Completed');
+                // update_user_meta($course_id, 'user_available', 'yes');
+                break;
+            case 'second_reviewer':
+                $all_assessments['second_reviewer']['status']      = 'completed';
+                $all_assessments['second_reviewer']['review_data'] = $assessment_data;
+                update_post_meta($assigned_course_id, 'assessments', $all_assessments);
+                update_post_meta($assigned_course_id, 'assigned_second_reviewer_status', 'completed');
+                update_post_meta($assigned_course_id, 'assessment_progress', 'complete');
+                update_post_meta($assigned_course_id, 'compare_ready', 'yes');
+                update_post_meta($assigned_course_id, 'second_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
+                update_post_meta($assigned_course_id, 'current_review_status', 'Second Review Completed');
+                // update_user_meta($course_id, 'user_available', 'yes');
+                $this->create_combined_review($assigned_course_id, $all_assessments);
+                break;
 
-                default:
-                    // code...
-                    break;
+            default:
+                // code...
+                break;
             }
             $this->assessment_completed_admin_notification($assessment_level, $assigned_course_id, $assessment_id);
         }
@@ -2412,8 +2414,8 @@ class Telas_Assesments_Admin
             $user_object->add_role($role);
             update_user_meta($updated_user_id, 'user_available', 'yes');
             update_user_meta($updated_user_id, 'is_first_time_updating', 'no');
-            $this->send_notification_to_telas_admin($user_object);
-            Telas_Assesments_Helper::send_profile_completion_notification_email($updated_user_id);
+            $this->send_notification_to_telas_admin($user_object, $role);
+            Telas_Assesments_Helper::send_profile_completion_notification_email($updated_user_id, $role);
         }
         if ('telas_assessor' === $role && ! empty($all_params['telasRole']) ) {
             update_user_meta($updated_user_id, 'telas_assessor_level', $all_params['telasRole']);
@@ -2453,6 +2455,7 @@ class Telas_Assesments_Admin
         $course_has_assessment        = $all_params['courseHasAssesment'];
         $course_title                 = get_the_title($course_id);
         $reviewer_level               = $all_params['reviewerLevel'];
+        $re_assign_flag = $all_params['reAssign'];
         $courses_assigned_to_the_user = get_user_meta($reviewer_user_id, 'courses_assigned', true);
         if (empty($courses_assigned_to_the_user) ) {
             $courses_assigned_to_the_user = array( $course_id );
@@ -2467,33 +2470,36 @@ class Telas_Assesments_Admin
             $assigned_reviewers_to_a_course = array_unique($assigned_reviewers_to_a_course);
         }
         $assigned_assessments = empty(get_user_meta($reviewer_user_id, 'assigned_assessments', true)) ? array() : get_user_meta($reviewer_user_id, 'assigned_assessments', true);
+        if ($re_assign_flag === 'yes') {
+            $this->re_assign_reviewer($course_id, $reviewer_level, $reviewer_user_id);
+        }
         switch ( $reviewer_level ) {
-        case 'admin_reviewer':
-            $create_new_assessment_args = array(
-            'post_type'   => 'telas_assessment',
-            'post_title'  => 'Admin Reviewer Assessment for ' . $course_title,
-            'post_status' => 'publish',
-            'post_author' => $reviewer_user_id,
-            );
-            $new_assessment_id          = wp_insert_post($create_new_assessment_args);
-            update_post_meta($new_assessment_id, 'assigned_course', $course_id);
-            update_post_meta($course_id, 'assigned_admin_reviewer_user_id', $reviewer_user_id);
-            update_post_meta($course_id, 'assigned_admin_reviewer_status', 'assigned');
-            update_post_meta($course_id, 'assigned_admin_reviewer_assessment', $new_assessment_id);
-            update_user_meta($reviewer_user_id, 'assigned_courses', $courses_assigned_to_the_user);
-            update_post_meta($course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course);
-            update_user_meta($reviewer_user_id, 'assigned_reviewer_role', 'admin_reviewer');
-            update_post_meta($new_assessment_id, 'assessment_status', 'assigned');
-            update_post_meta($new_assessment_id, 'assessment_assigned_user_level', 'admin_reviewer');
-            update_post_meta($course_id, 'assessment_level', 'admin_reviewer');
-            array_push($assigned_assessments, $new_assessment_id);
-            update_user_meta($reviewer_user_id, 'assigned_assessments', $assigned_assessments);
-            update_post_meta($course_id, 'assessment_progress', 'in-progress');
-            update_post_meta($course_id, 'current_review_status', 'Admin Reviewer Assigned');
-            update_post_meta($course_id, 'last_status_update', date($date_format, current_time('timestamp', 0)));
-            update_post_meta($new_assessment_id, 'assigned_reviewer_user_id', $reviewer_user_id);
-            // update_post_meta( $course_id, 'admin_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
-            update_user_meta($reviewer_user_id, 'user_available', 'no');
+            case 'telas_admin_reviewers':
+                $create_new_assessment_args = array(
+                'post_type'   => 'telas_assessment',
+                'post_title'  => 'Admin Reviewer Assessment for ' . $course_title,
+                'post_status' => 'publish',
+                'post_author' => $reviewer_user_id,
+                );
+                $new_assessment_id          = wp_insert_post($create_new_assessment_args);
+                update_post_meta($new_assessment_id, 'assigned_course', $course_id);
+                update_post_meta($course_id, 'assigned_admin_reviewer_user_id', $reviewer_user_id);
+                update_post_meta($course_id, 'assigned_admin_reviewer_status', 'assigned');
+                update_post_meta($course_id, 'assigned_admin_reviewer_assessment', $new_assessment_id);
+                update_user_meta($reviewer_user_id, 'assigned_courses', $courses_assigned_to_the_user);
+                update_post_meta($course_id, 'reviewers_assigned', $assigned_reviewers_to_a_course);
+                update_user_meta($reviewer_user_id, 'assigned_reviewer_role', 'admin_reviewer');
+                update_post_meta($new_assessment_id, 'assessment_status', 'assigned');
+                update_post_meta($new_assessment_id, 'assessment_assigned_user_level', 'admin_reviewer');
+                update_post_meta($course_id, 'assessment_level', 'admin_reviewer');
+                array_push($assigned_assessments, $new_assessment_id);
+                update_user_meta($reviewer_user_id, 'assigned_assessments', $assigned_assessments);
+                update_post_meta($course_id, 'assessment_progress', 'in-progress');
+                update_post_meta($course_id, 'current_review_status', 'Admin Reviewer Assigned');
+                update_post_meta($course_id, 'last_status_update', date($date_format, current_time('timestamp', 0)));
+                update_post_meta($new_assessment_id, 'assigned_reviewer_user_id', $reviewer_user_id);
+                // update_post_meta( $course_id, 'admin_review_commencement_date', date( $date_format, current_time( 'timestamp', 0 ) ) );
+                update_user_meta($reviewer_user_id, 'user_available', 'no');
             break;
         case 'interim_reviewer':
             $this->assign_interim_reviewer($reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course);
@@ -2949,13 +2955,13 @@ class Telas_Assesments_Admin
         wp_mail($to, $subject, $message, $headers);
     }
 
-    public function send_notification_to_telas_admin( $user_object )
+    public function send_notification_to_telas_admin( $user_object, $user_role )
     {
         $message_title   = 'Please verify this newly created Account';
         $header_image    = '';
         $message_heading = 'User Details:';
-        $user_role       = in_array('telas_assessor', $user_object->roles) ? substr(get_user_meta($user_object->ID, 'telas_assessor_level', true), 0, -2) : substr($user_object->roles, 0, -2);
-        $user_role       = str_replace('_', ' ', $user_role);
+        $user_role       = $user_role === 'telas_assessor' ? substr( get_user_meta( $user_object->ID, 'telas_assessor_level', true ), 0, -1 ) : substr( $user_role, 0, -1 );
+		$user_role       = ucfirst( str_replace( '_', ' ', $user_role ) );
         $message_body    = '<table rules="all" style="border-color: #666;" cellpadding="10">';
         $message_body   .= "<tr style='background: #eee;'><td><strong>First Name:</strong> </td><td>" . $user_object->first_name . '</td></tr>';
         $message_body   .= '<tr><td><strong>Last Name:</strong> </td><td>' . $user_object->last_name . '</td></tr>';
@@ -3317,8 +3323,7 @@ class Telas_Assesments_Admin
         exit;
     }
 
-    function assign_interim_reviewer( $reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course )
-    {
+    function assign_interim_reviewer( $reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course ) {
         $create_new_assessment_args = array(
         'post_type'   => 'telas_assessment',
         'post_title'  => 'Interim Reviewer Assessment for ' . $course_title,
@@ -3334,7 +3339,7 @@ class Telas_Assesments_Admin
         $assigned_interim_reviews_obj[$reviewer_user_id] = array(
             'assessment_id' => $new_assessment_id,
             'status' => 'assigned',
-            'reviewer_name' => get_user_meta( $reviewer_user_id, 'nickname', true ),
+            'reviewer_name' => get_user_meta($reviewer_user_id, 'nickname', true),
             'assigned_date' => date($date_format, current_time('timestamp', 0)),
         );
         update_post_meta($course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj);
@@ -3356,5 +3361,76 @@ class Telas_Assesments_Admin
         update_post_meta($course_id, 'last_status_update', date($date_format, current_time('timestamp', 0)));
         update_post_meta($new_assessment_id, 'assigned_reviewer_user_id', $reviewer_user_id);
         update_user_meta($reviewer_user_id, 'user_available', 'no');
+    }
+
+    function create_interim_reviewer_report( $course_id, $assigned_interim_reviews_obj, $interim_reviewer_id ) {
+        
+        $interim_reviewer_id = $interim_reviewer_id;
+        $admin_reviewer_id  = get_post_meta($course_id, 'assigned_admin_reviewer_user_id', true);
+
+        $interim_reviewer_user_id = get_userdata($interim_reviewer_id);
+        $interim_reviewer_name     = $interim_reviewer_user_id->first_name . ' ' . $interim_reviewer_user_id->last_name;
+
+        $admin_reviewer_user_obj = get_userdata($admin_reviewer_id);
+        $admin_reviewer_name     = $admin_reviewer_user_obj->first_name . ' ' . $admin_reviewer_user_obj->last_name;
+
+        $assessments_obj = get_post_meta($course_id, 'assessments', true);
+        $admin_assessment_data = $assessments_obj['admin_reviewer']['review_data'];
+        $interim_reviewer_assessment_data = $assigned_interim_reviews_obj[$interim_reviewer_id]['review_data'];
+        $assessment_data = array(
+            'admin_reviewer' => array(
+                'status' => 'completed',
+                'review_data' => $admin_assessment_data,
+            ),
+            'first_reviewer' => array(
+                'status' => 'completed',
+                'review_data' => $interim_reviewer_assessment_data
+            ),
+        );
+
+        $course_title             = get_the_title($course_id);
+        $new_combined_review_args = array(
+        'post_type'   => 'telas_report',
+        'post_title'  => 'Combined Review of Test course ' . $course_title . 'By ' . $interim_reviewer_name,
+        'post_status' => 'publish',
+        'post_author' => $interim_reviewer_id,
+        );
+        $new_combined_review_id   = wp_insert_post($new_combined_review_args);
+        update_post_meta($course_id, 'report_post_id', $new_combined_review_id);
+        update_post_meta($course_id, 'has_report_created', 'yes');
+        update_post_meta($course_id, 'current_review_status', 'Combined Review Started');
+        update_post_meta($course_id, 'last_status_update', date(get_option('date_format'), current_time('timestamp', 0)));
+        update_post_meta($course_id, 'combined_review_created_date', date(get_option('date_format'), current_time('timestamp', 0)));
+        update_post_meta($new_combined_review_id, 'assessment_data', $assessment_data);
+        update_post_meta($new_combined_review_id, 'admin_reviewer_assessment_data', $assessment_data['admin_reviewer']);
+        update_post_meta($new_combined_review_id, 'first_reviewer_assessment_data', $assessment_data['first_reviewer']);
+        update_post_meta($new_combined_review_id, 'first_reviewer_id', $interim_reviewer_id);
+        update_post_meta($new_combined_review_id, 'admin_reviewer_id', $admin_reviewer_id);
+        update_post_meta($new_combined_review_id, 'first_reviewer_name', $interim_reviewer_name);
+        update_post_meta($new_combined_review_id, 'admin_reviewer_name', $admin_reviewer_name);
+        update_post_meta($new_combined_review_id, 'course_id', $course_id);
+        update_post_meta($new_combined_review_id, 'assessment_status', 'completed');
+        update_post_meta($course_id, 'combined_review_status', 'completed');
+        update_post_meta($new_combined_review_id, 'review_status', 'completed');
+        update_post_meta($new_combined_review_id, 'combined_review_completion_date', date(get_option('date_format'), current_time('timestamp', 0)));
+    }
+    function re_assign_reviewer( $course_id, $reviewer_level, $reviewer_user_id ) {
+        $previously_assigned_user_id = get_post_meta($course_id, 'assigned_' . $reviewer_level . '_user_id', true);
+        update_user_meta($previously_assigned_user_id, 'user_available', 'yes');
+        $previously_assigned_assessment_id = get_post_meta($course_id, 'assigned_' . $reviewer_level . '_assessment', true);
+        global $wpdb;
+        if (! $assessment_object = get_post($previously_assigned_assessment_id) ) { return;
+        }
+        
+        if ('draft' == $assessment_object->post_status ) { return;
+        }
+            
+        $wpdb->update($wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $assessment_object->ID ));
+        
+        clean_post_cache($assessment_object->ID);
+            
+        $old_status = $assessment_object->post_status;
+        $assessment_object->post_status = 'draft';
+        wp_transition_post_status('draft', $old_status, $assessment_object);
     }
 }

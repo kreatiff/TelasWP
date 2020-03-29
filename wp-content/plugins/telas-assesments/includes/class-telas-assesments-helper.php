@@ -133,14 +133,14 @@ class Telas_Assesments_Helper {
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
-	public static function send_profile_completion_notification_email( $user_id ) {
+	public static function send_profile_completion_notification_email( $user_id, $user_role ) {
 		$profile_completion_email_options = get_option( 'profile-completion-notification-email-template' );
 		$subject                          = $profile_completion_email_options['subject'];
 		$email_body                       = $profile_completion_email_options['emailBody'];
 		$email_salutation                 = $profile_completion_email_options['salutation'];
 		$message_heading                  = $subject;
 		$user_object                      = new WP_User( $user_id );
-		$user_role                        = in_array( 'telas_assessor', $user_object->roles ) ? substr( get_user_meta( $user_object->ID, 'telas_assessor_level', true ), 0, -1 ) : substr( reset( $user_object->roles ), 0, -1 );
+		$user_role                        = $user_role === 'telas_assessor' ? substr( get_user_meta( $user_object->ID, 'telas_assessor_level', true ), 0, -1 ) : substr( $user_role, 0, -1 );
 		$user_role                        = ucfirst( str_replace( '_', ' ', $user_role ) );
 		$replacement_array                = array(
 			'first_name'          => $user_object->first_name,
