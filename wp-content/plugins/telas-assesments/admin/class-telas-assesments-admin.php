@@ -54,8 +54,7 @@ class Telas_Assesments_Admin
 
         $this->plugin_name = $plugin_name;
         $this->version     = $version;
-
-        add_action('before_delete_post', array( $this, 'delete_course_action' ));
+        
     }
 
     /**
