@@ -178,6 +178,7 @@ class Telas_Assesments {
 		$this->loader->add_filter( 'manage_users_columns', $plugin_admin, 'fc_new_modify_user_table' );
 		$this->loader->add_filter( 'manage_users_custom_column', $plugin_admin, 'fc_new_modify_user_table_row', 10, 3 );
 		$this->loader->add_action( 'after_password_reset', $plugin_admin, 'lost_password_redirect' );
+		$this->loader->add_action( 'before_delete_post', $plugin_admin, 'delete_course_action' );
 	}
 
 	/**
