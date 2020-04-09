@@ -212,7 +212,7 @@ class Telas_Assesments_Helper {
 		$header_image            = '';
 		$course_title            = get_the_title( $course_id );
 		$role_string             = ucfirst( str_replace( '_', ' ', $role ) );
-		$message_heading         = "You have been assigned {$course_title} to review as {$role_string}.";
+		$message_heading         = "You have been assigned {$course_title} to review as a {$role_string}.";
 		$email_replacement_array = array(
 			'firstname'                => get_user_meta( $user_id, 'first_name', true ),
 			'date_of_course_submitted' => get_post_meta( $course_id, 'courseSubmissionDateString', true ),
@@ -247,15 +247,15 @@ class Telas_Assesments_Helper {
 	 * @param array $replacement_array
 	 * @return array $email_body, $subject, $salutation
 	 */
-	public static function prepare_course_assigned_email_data( $role = 'admin_reviewer', $replacement_array = array() ) {
-		if ( 'admin_reviewer' === $role ) {
+	public static function prepare_course_assigned_email_data( $role = 'telas_admin_reviewers', $replacement_array = array() ) {
+		if ( 'telas_admin_reviewers' === $role ) {
 			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
 		} elseif ( 'first_reviewer' === $role ) {
 			$email_template = get_option( 'first-reviewer-assigned-email-template' );
 		} elseif ( 'second_reviewer' === $role ) {
 			$email_template = get_option( 'second-reviewer-assigned-email-template' );
 		} else {
-			$email_template = get_option( 'admin-reviewer-assigned-email-template' );
+			$email_template = get_option( 'interim-reviewer-assigned-email-template' );
 		}
 		$subject        = $email_template['subject'];
 		$body           = $email_template['emailBody'];
@@ -344,7 +344,7 @@ class Telas_Assesments_Helper {
 		$course_module_identifier = get_post_meta( $course_id, 'courseModuleIdentifier', true );
 		$course_study_level = get_post_meta( $course_id, 'studyLevel', true );
 		$course_level = get_post_meta( $course_id, 'courseLevel', true );
-		$course_faculty = get_post_meta( $course_id, 'faculty', true );
+		$course_faculty = get_post_meta( $course_id, 'facultyDept', true );
 		$course_institution_name = get_post_meta( $course_id, 'institutionName', true );
 		$first_reviewer_first_name = get_user_meta( $first_reviewer_id, 'first_name', true );
 		$formatted_date_of_course_submission = new DateTimeImmutable( $date_of_course_submission );
@@ -382,6 +382,74 @@ class Telas_Assesments_Helper {
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		wp_mail( $first_reviewer_email, $subject, $message, $headers );
 	}
+
+	public static function accreditation_email( $course_id, $domain_entries, $eligible ) {
+		$course_submitter_first_name = get_post_meta( $course_id, 'courseSubmitterName', true );
+		$course_submitter_user_id = get_post_meta( $course_id, 'courseSubmitterId', true );
+		$course_submitter_user_data = get_userdata( $course_submitter_user_id );
+		$course_submitter_user_email = $course_submitter_user_data->user_login;
+		$email_replacement_array = array(
+			'firstname' => $course_submitter_first_name,
+			'course_name' => get_post_meta( $course_id, 'coursePackageName', true ),
+			'date_of_course_submission' => date( get_option( 'date_format' ), strtotime( get_post_meta( $course_id, 'courseSubmissionDate', true ) ) ),
+			'course_package_name' => get_post_meta( $course_id, 'coursePackageName', true ),
+			'course_package_type' => get_post_meta( $course_id, 'coursePackageType', true ),
+			'course_package_identifier' => get_post_meta( $course_id, 'coursePackageIdentifier', true ),
+			'course_module_identifier' => get_post_meta( $course_id, 'courseModuleIdentifier', true ),
+			'study_level' => get_post_meta( $course_id, 'studyLevel', true ),
+			'course_level' => get_post_meta( $course_id, 'courseLevel', true ),
+			'institution_name' => get_post_meta( $course_id, 'institutionName', true ),
+			'faculty' => get_post_meta( $course_id, 'facultyDept', true ),
+			'bold' => '<strong>',
+			'/bold'	=> '</strong>',
+			'online_eligible_badge' => $domain_entries['first']['badge'],
+			'learner_eligible_badge' => $domain_entries['second']['badge'],
+			'learning_eligible_badge' => $domain_entries['third']['badge'],
+			'learning_resources_eligible_badge' => $domain_entries['fourth']['badge'],
+			'overall_eligible_badge' => $domain_entries['accreditation_badge'],
+		);
+		$email_template_data     = self::prepare_accreditation_application_email( $email_replacement_array, $eligible );
+		// var_dump( $email_template_data );
+		$message_body = $email_template_data['email_body'];
+		$signature    = $email_template_data['salutation'];
+		$message_heading = $email_template_data['subject'];
+		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, false, false, false );
+		$blog_name    = get_option( 'blogname' );
+		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
+		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
+		return wp_mail( $course_submitter_user_email, $subject, $message, $headers );
+	}
+
+	public static function prepare_accreditation_application_email( $replacement_array = array(), $eligible = true ) {
+		$course_accreditation_application_email_template = $eligible ? get_option( 'course-accreditation-application-email-template' ) : get_option( 'minimum-accreditation-score-fails-email-template' );
+		$subject        = $course_accreditation_application_email_template['subject'];
+		$body           = $course_accreditation_application_email_template['emailBody'];
+		$salutation     = $course_accreditation_application_email_template['salutation'];
+		$to_be_replaced = array(
+			'{[firstname]}',
+			'{[course_name]}',
+			'{[date_of_course_submission]}',
+			'{[course_package_name]}',
+			'{[course_package_type]}',
+			'{[course_package_identifier]}',
+			'{[course_module_identifier]}',
+			'{[study_level]}',
+			'{[course_level]}',
+			'{[institution_name]}',
+			'{[faculty]}',
+			'{[bold]}',	
+			'{[/bold]}',
+			'{[online_eligible_badge]}',
+			'{[learner_eligible_badge]}',
+			'{[learning_eligible_badge]}',
+			'{[learning_resources_eligible_badge]}',
+			'{[overall_eligible_badge]}',
+		);
+		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
+		return array(
+			'email_body' => $new_body,
+			'subject'    => $subject,
+			'salutation' => $salutation,
+		);
+	}
 }
-
-

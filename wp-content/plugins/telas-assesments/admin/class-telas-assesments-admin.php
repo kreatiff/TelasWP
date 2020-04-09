@@ -1839,6 +1839,15 @@ class Telas_Assesments_Admin
 
             )
         );
+        register_rest_route(
+            $namespace,
+            '/' . 'send-accreditation',
+            array(
+            'methods'  => WP_REST_Server::CREATABLE,
+            'callback' => array( $this, 'send_accreditation_badge' ),
+            'permission_callback' => array( $this, 'assign_assessors_permission_callback' ),
+            )
+        );
         register_rest_field(
             'telas_courses',
             'post_meta', // Add it to the response
@@ -3106,18 +3115,26 @@ class Telas_Assesments_Admin
     {
         $report_id = $report_object['id'];
         return array(
-        'assessment_data'                 => get_post_meta($report_id, 'assessment_data', true),
-        'admin_reviewer_assessment_data'  => get_post_meta($report_id, 'admin_reviewer_assessment_data', true),
-        'first_reviewer_assessment_data'  => get_post_meta($report_id, 'first_reviewer_assessment_data', true),
-        'second_reviewer_assessment_data' => get_post_meta($report_id, 'second_reviewer_assessment_data', true),
-        'first_reviewer_id'               => get_post_meta($report_id, 'first_reviewer_id', true),
-        'admin_reviewer_id'               => get_post_meta($report_id, 'admin_reviewer_id', true),
-        'second_reviewer_id'              => get_post_meta($report_id, 'second_reviewer_id', true),
-        'first_reviewer_name'             => get_post_meta($report_id, 'first_reviewer_name', true),
-        'admin_reviewer_name'             => get_post_meta($report_id, 'admin_reviewer_name', true),
-        'second_reviewer_name'            => get_post_meta($report_id, 'second_reviewer_name', true),
-        'assessment_status'               => get_post_meta($report_id, 'assessment_status', true) ? get_post_meta($report_id, 'assessment_status', true) : 'assigned',
-        'course_id'                       => get_post_meta($report_id, 'course_id', true),
+            'assessment_data'                 => get_post_meta($report_id, 'assessment_data', true),
+            'admin_reviewer_assessment_data'  => get_post_meta($report_id, 'admin_reviewer_assessment_data', true),
+            'first_reviewer_assessment_data'  => get_post_meta($report_id, 'first_reviewer_assessment_data', true),
+            'second_reviewer_assessment_data' => get_post_meta($report_id, 'second_reviewer_assessment_data', true),
+            'first_reviewer_id'               => get_post_meta($report_id, 'first_reviewer_id', true),
+            'admin_reviewer_id'               => get_post_meta($report_id, 'admin_reviewer_id', true),
+            'second_reviewer_id'              => get_post_meta($report_id, 'second_reviewer_id', true),
+            'first_reviewer_name'             => get_post_meta($report_id, 'first_reviewer_name', true),
+            'admin_reviewer_name'             => get_post_meta($report_id, 'admin_reviewer_name', true),
+            'second_reviewer_name'            => get_post_meta($report_id, 'second_reviewer_name', true),
+            'assessment_status'               => get_post_meta($report_id, 'assessment_status', true) ? get_post_meta($report_id, 'assessment_status', true) : 'assigned',
+            'course_id'                       => get_post_meta($report_id, 'course_id', true),
+            'parent_course_title'             => get_post_meta($report_id, 'course_title', true),
+            'commencement_date'               => get_post_meta( $report_id, 'combined_review_commencement_date', true ),
+            'completion_date'                 => get_post_meta( $report_id, 'combined_review_completion_date', true ),
+            'report_id'                       => $report_id,
+            'assigned_date'                   => get_post_meta( get_post_meta( $report_id, 'course_id', true ), 'combined_review_created_date', true ),
+            'submit_for_accreditation'        => get_post_meta( get_post_meta($report_id, 'course_id', true), 'submitForAccreditation', true ),
+            'combined_review_status'          => get_post_meta( $report_id, 'review_status', true ),
+            'accreditation_email_sent'        => get_post_meta( get_post_meta( $report_id, 'course_id', true ), 'accreditation_email_sent', true ),
         );
     }
 
@@ -3218,6 +3235,111 @@ class Telas_Assesments_Admin
         );
     }
 
+    function send_accreditation_badge( $request ) {
+        $all_params                 = $request->get_params();
+        $course_id                  = $all_params['course_id'];
+        $has_report_created = get_post_meta( $course_id, 'has_report_created', true );
+        if ( empty( $has_report_created ) || $has_report_created === 'no' ) {
+            return false;
+        }
+        $report_id = get_post_meta( $course_id, 'report_post_id', true );
+
+        $assigned_course_id         = get_post_meta($report_id, 'assigned_course', true);
+        $current_report_status = get_post_meta($report_id, 'assessment_status', true);
+        if ($current_report_status !== 'complete' ) {
+            return false;
+        }
+        $all_completed_assessments          = get_post_meta( $report_id, 'assessment_data', true );
+        $combined_review_assessments_value  = $all_completed_assessments['first_reviewer']['review_data'];
+        $pattern                      = '/domain*/';
+        $all_domain_entry_keys        = array_filter(
+            array_keys($combined_review_assessments_value),
+            function ( $entry ) use ( $pattern ) {
+                return preg_match($pattern, $entry);
+            }
+        );
+        $all_domain_entry_keys        = array_values($all_domain_entry_keys);
+        $all_domain_entries           = array();
+        $first_domain_selected_total  = 0;
+        $second_domain_selected_total = 0;
+        $third_domain_selected_total  = 0;
+        $fourth_domain_selected_total = 0;
+        foreach ( $all_domain_entry_keys as $domain_entry_key ) {
+            $domain_entry_key_segment = explode('_', $domain_entry_key);
+            if ($domain_entry_key_segment[1] === '1' ) {
+                $all_domain_entries['first']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $first_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            } elseif ($domain_entry_key_segment[1] === '2' ) {
+                $all_domain_entries['second']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $second_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            } elseif ($domain_entry_key_segment[1] === '3' ) {
+                $all_domain_entries['third']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $third_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            } else {
+                $all_domain_entries['fourth']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $fourth_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            }
+        }
+        
+        $all_domain_entries['first']['selected_total']  = round($first_domain_selected_total, 2);
+        $all_domain_entries['second']['selected_total'] = round($second_domain_selected_total, 2);
+        $all_domain_entries['third']['selected_total']  = round($third_domain_selected_total, 2);
+        $all_domain_entries['fourth']['selected_total'] = round($fourth_domain_selected_total, 2);
+
+        $first_domain_badge_level  = round(( $first_domain_selected_total / 25 ) * 100);
+        $first_domain_badge = $this->get_badge_value( $first_domain_badge_level );
+        
+        $second_domain_badge_level = round(( $second_domain_selected_total / 25 ) * 100);
+        $second_domain_badge = $this->get_badge_value( $second_domain_badge_level );
+        
+        $third_domain_badge_level  = round(( $third_domain_selected_total / 25 ) * 100);
+        $third_domain_badge = $this->get_badge_value( $third_domain_badge_level );
+        
+        $fourth_domain_badge_level = round(( $fourth_domain_selected_total / 25 ) * 100);
+        $fourth_domain_badge = $this->get_badge_value( $fourth_domain_badge_level );
+        
+        $accreditation_percentage  = round(( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ));
+        
+        $overall_badge = $this->get_badge_value( $accreditation_percentage );
+        
+
+        $all_domain_entries['first']['badge_level']     = $first_domain_badge_level;
+        $all_domain_entries['first']['badge']     = $first_domain_badge;
+
+        $all_domain_entries['second']['badge_level']    = $second_domain_badge_level;
+        $all_domain_entries['second']['badge']    = $second_domain_badge;
+        
+        $all_domain_entries['third']['badge_level']     = $third_domain_badge_level;
+        $all_domain_entries['third']['badge']     = $third_domain_badge;
+        
+        $all_domain_entries['fourth']['badge_level']    = $fourth_domain_badge_level;
+        $all_domain_entries['fourth']['badge']    = $fourth_domain_badge;
+        
+        $all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
+        $all_domain_entries['accreditation_badge']      = $overall_badge;
+
+        if ( $accreditation_percentage <= 49 ) {
+            update_post_meta( $course_id, 'accreditation_eligibility_status', 'Not eligible at this time' );
+            $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, false );
+        } else {
+            update_post_meta( $course_id, 'accreditation_eligibility_status', 'Eligible' );
+            $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, true );
+        }
+
+        if ( $mail_status ) {
+            update_post_meta( $course_id, 'accreditation_email_sent', 'yes' );
+            return array(
+                'message'   => 'Course accreditation application email has been sent to the course submitter.',
+                'status'    => 200,
+            );
+        } else {
+            return array(
+                'message' => 'Course accreditation application email can not be sent to the course submitter. Please try again.',
+                'status' => 403,
+            );
+        }
+    }
+
     function get_badge_value( $domain_score ) {
         $badge = 'No Badge';
         if ($domain_score >= 0 && $domain_score <= 49 ) {
@@ -3284,10 +3406,10 @@ class Telas_Assesments_Admin
 
         $course_title             = get_the_title($course_id);
         $new_combined_review_args = array(
-        'post_type'   => 'telas_report',
-        'post_title'  => 'Combined Review of ' . $course_title,
-        'post_status' => 'publish',
-        'post_author' => $first_reviewer_id,
+            'post_type'   => 'telas_report',
+            'post_title'  => 'Combined Review of ' . $course_title,
+            'post_status' => 'publish',
+            'post_author' => $first_reviewer_id,
         );
         $new_combined_review_id   = wp_insert_post($new_combined_review_args);
         update_post_meta($course_id, 'report_post_id', $new_combined_review_id);
@@ -3308,6 +3430,9 @@ class Telas_Assesments_Admin
         update_post_meta($new_combined_review_id, 'course_id', $course_id);
         update_post_meta($new_combined_review_id, 'assessment_status', 'assigned');
         update_post_meta($course_id, 'combined_review_status', 'assigned');
+        update_post_meta($new_combined_review_id, 'course_title', get_the_title($course_id));
+        update_post_meta( $new_combined_review_id, 'reviewers_assigned', array( $first_reviewer_id, $admin_reviewer_id, $second_reviewer_id ) );
+        update_post_meta($new_combined_review_id, 'review_status', 'assigned');
         Telas_Assesments_Helper::combined_reviewer_assigned_notification($course_id);
     }
 
@@ -3460,6 +3585,9 @@ class Telas_Assesments_Admin
         update_post_meta($course_id, 'combined_review_status', 'completed');
         update_post_meta($new_combined_review_id, 'review_status', 'completed');
         update_post_meta($new_combined_review_id, 'combined_review_completion_date', date(get_option('date_format'), current_time('timestamp', 0)));
+        update_post_meta( $new_combined_review_id, 'for_test', 'yes' );
+         update_post_meta($new_combined_review_id, 'course_title', get_the_title($course_id));
+        update_post_meta( $new_combined_review_id, 'reviewers_assigned', array( $interim_reviewer_id, $admin_reviewer_id ) );
     }
     function re_assign_reviewer( $course_id, $reviewer_level, $reviewer_user_id )
     {
@@ -3500,7 +3628,6 @@ class Telas_Assesments_Admin
             wp_delete_post( $linked_assessment, true );
         }
         if ('completed' !== $current_assessment_status ) {
-            var_dump( $current_assessment_level_user_id );
             update_user_meta($current_assessment_level_user_id, 'user_available', 'yes');
         }
     }
