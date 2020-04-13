@@ -3563,7 +3563,7 @@ class Telas_Assesments_Admin
         $course_title             = get_the_title($course_id);
         $new_combined_review_args = array(
         'post_type'   => 'telas_report',
-        'post_title'  => 'Combined Review of Test course ' . $course_title . 'By ' . $interim_reviewer_name,
+        'post_title'  => 'Combined Review of Test course ' . $course_title . ' By ' . $interim_reviewer_name,
         'post_status' => 'publish',
         'post_author' => $interim_reviewer_id,
         );
