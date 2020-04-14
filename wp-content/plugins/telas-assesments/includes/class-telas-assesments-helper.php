@@ -130,6 +130,10 @@ class Telas_Assesments_Helper {
 		$headers                        = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user                           = new WP_User( $user_id );
 		$user_email                     = stripslashes( $user->user_email );
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
@@ -174,6 +178,10 @@ class Telas_Assesments_Helper {
 		$user                             = new WP_User( $user_id );
 		$user_email                       = stripslashes( $user->user_email );
 		// echo $message;
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 
@@ -204,6 +212,10 @@ class Telas_Assesments_Helper {
 		$button_link      = 'https://app.telas.edu.au/login';
 		$button_text      = 'Login';
 		$message          = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
 		$mail_flag        = wp_mail( $to, $subject, $message, $headers );
 	}
 
@@ -238,6 +250,10 @@ class Telas_Assesments_Helper {
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user       = new WP_User( $user_id );
 		$user_email = stripslashes( $user->user_email );
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
 		wp_mail( $user_email, $subject, $message, $headers );
 	}
 	/**
@@ -380,6 +396,10 @@ class Telas_Assesments_Helper {
 		$blog_name    = get_option( 'blogname' );
 		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
 		wp_mail( $first_reviewer_email, $subject, $message, $headers );
 	}
 
@@ -417,6 +437,10 @@ class Telas_Assesments_Helper {
 		$blog_name    = get_option( 'blogname' );
 		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
 		return wp_mail( $course_submitter_user_email, $subject, $message, $headers );
 	}
 

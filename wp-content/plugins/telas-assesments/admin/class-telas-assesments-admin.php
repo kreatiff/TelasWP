@@ -2414,11 +2414,11 @@ class Telas_Assesments_Admin
         $user_id          = $all_params['user_id'];
         $role             = 'telas_course_submitters' === $all_params['telasRole'] ? 'telas_course_submitters' : 'telas_assessor';
         $update_user_args = array(
-        'ID'           => $user_id,
-        'first_name'   => $all_params['firstName'],
-        'last_name'    => $all_params['lastName'],
-        'nickname'     => $all_params['firstName'] . ' ' . $all_params['lastName'],
-        'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
+            'ID'           => $user_id,
+            'first_name'   => $all_params['firstName'],
+            'last_name'    => $all_params['lastName'],
+            'nickname'     => $all_params['firstName'] . ' ' . $all_params['lastName'],
+            'display_name' => $all_params['firstName'] . ' ' . $all_params['lastName'],
         );
         if (! empty($all_params['telasRole']) ) {
             $update_user_args['role'] = $role;
@@ -2452,8 +2452,8 @@ class Telas_Assesments_Admin
             $user_object->add_role($role);
             update_user_meta($updated_user_id, 'user_available', 'yes');
             update_user_meta($updated_user_id, 'is_first_time_updating', 'no');
-            $this->send_notification_to_telas_admin($user_object, $role);
-            Telas_Assesments_Helper::send_profile_completion_notification_email($updated_user_id, $role);
+            $this->send_notification_to_telas_admin($user_object, $all_params['telasRole']);
+            Telas_Assesments_Helper::send_profile_completion_notification_email($updated_user_id, $all_params['telasRole']);
         }
         if ('telas_assessor' === $role && ! empty($all_params['telasRole']) ) {
             update_user_meta($updated_user_id, 'telas_assessor_level', $all_params['telasRole']);
