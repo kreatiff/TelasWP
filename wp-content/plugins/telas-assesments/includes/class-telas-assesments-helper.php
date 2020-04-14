@@ -373,7 +373,7 @@ class Telas_Assesments_Helper {
 
 		$message_body = $email_template_data['email_body'];
 		$signature    = $email_template_data['salutation'];
-		$button_link  = 'https://app.telas.edu.au/dashboard/report/' . $report_id;
+		$button_link  = 'https://app.telas.edu.au/dashboard/reports?tab=assigned';
 		$button_text  = 'Start';
 		$message_heading = $email_template_data['subject'];
 		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );

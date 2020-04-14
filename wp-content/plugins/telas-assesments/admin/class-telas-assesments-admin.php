@@ -1967,20 +1967,21 @@ class Telas_Assesments_Admin
     {
         $all_params = $request->get_params();
         if ($all_params['action'] === 'approve' ) {
+            $user_role = $all_params['user_role'];
             update_user_meta($all_params['user_id'], 'activated_by_admin', 'yes');
             $user_data = get_userdata($all_params['user_id']);
-            $user_role = in_array('telas_assessor', $user_data->roles) ? get_user_meta($user_data->ID, 'telas_assessor_level', true) : $user_data->roles;
-            $user_role = in_array('telas_course_submitters', $user_data->roles) ? 'telas_course_submitters' : $user_data->roles;
-            $user_role = in_array('telas_telas_administrator', $user_data->roles) ? 'telas_telas_administrator' : $user_data->roles;
-            if (in_array('telas_assessor', $user_data->roles) ) {
-                $user_role = ! empty(get_user_meta($user_data->ID, 'telas_assessor_level', true)) ? get_user_meta($user_data->ID, 'telas_assessor_level', true) : 'telas_interim_reviewers';
-            } elseif (in_array('telas_course_submitters', $user_data->roles) ) {
-                $user_role = 'telas_course_submitters';
-            } elseif (in_array('telas_telas_administrator', $user_data->roles) ) {
-                $user_role = 'telas_telas_administrator';
-            } else {
-                $user_role = '';
-            }
+            // $user_role = in_array('telas_assessor', $user_data->roles) ? get_user_meta($user_data->ID, 'telas_assessor_level', true) : $user_data->roles;
+            // $user_role = in_array('telas_course_submitters', $user_data->roles) ? 'telas_course_submitters' : $user_data->roles;
+            // $user_role = in_array('telas_telas_administrator', $user_data->roles) ? 'telas_telas_administrator' : $user_data->roles;
+            // if (in_array('telas_assessor', $user_data->roles) ) {
+            //     $user_role = ! empty(get_user_meta($user_data->ID, 'telas_assessor_level', true)) ? get_user_meta($user_data->ID, 'telas_assessor_level', true) : 'telas_interim_reviewers';
+            // } elseif (in_array('telas_course_submitters', $user_data->roles) ) {
+            //     $user_role = 'telas_course_submitters';
+            // } elseif (in_array('telas_telas_administrator', $user_data->roles) ) {
+            //     $user_role = 'telas_telas_administrator';
+            // } else {
+            //     $user_role = '';
+            // }
             $user_details_meta_fields['first_name']          = $user_data->first_name;
             $user_details_meta_fields['last_name']           = $user_data->last_name;
             $user_details_meta_fields['user_email']          = $user_data->user_email;
@@ -3324,6 +3325,10 @@ class Telas_Assesments_Admin
         } else {
             update_post_meta( $course_id, 'accreditation_eligibility_status', 'Eligible' );
             $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, true );
+            if ( $mail_status ) {
+                update_post_meta( $report_id, 'review_status', 'accredited' );
+                update_post_meta( $report_id, 'accredited_mail_sent_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );
+            }
         }
 
         if ( $mail_status ) {
