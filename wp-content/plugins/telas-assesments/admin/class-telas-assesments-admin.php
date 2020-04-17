@@ -3136,6 +3136,16 @@ class Telas_Assesments_Admin
             'submit_for_accreditation'        => get_post_meta( get_post_meta($report_id, 'course_id', true), 'submitForAccreditation', true ),
             'combined_review_status'          => get_post_meta( $report_id, 'review_status', true ),
             'accreditation_email_sent'        => get_post_meta( get_post_meta( $report_id, 'course_id', true ), 'accreditation_email_sent', true ),
+            'comments' => get_post_meta( $report_id , 'comments', true )  ?  get_post_meta( $report_id , 'comments', true )  : array(
+                'standard_0_comment' => '',
+                'standard_1_comment' => '',
+                'standard_2_comment' => '',
+                'standard_3_comment' => '',
+                'standard_4_comment' => '',
+                'standard_5_comment' => '',
+                'standard_6_comment' => '',
+                'standard_7_comment' => '',
+            ),
         );
     }
 
@@ -3460,6 +3470,7 @@ class Telas_Assesments_Admin
         update_post_meta($report_post_obj->ID, 'assessment_data', $assessment_data);
         update_post_meta($report_post_obj->ID, 'first_reviewer_assessment_data', $first_assessment_data);
         update_post_meta($report_post_obj->ID, 'assessment_status', $report_object['assessmentStatus']);
+        update_post_meta( $report_post_obj->ID, 'comments', $report_object['comments'] );
         if ('complete' === $report_object['assessmentStatus'] ) {
             update_post_meta($report_post_obj->ID, 'combined_review_completion_date', date(get_option('date_format'), current_time('timestamp', 0)));
             update_post_meta($course_id, 'combined_review_completion_date', date(get_option('date_format'), current_time('timestamp', 0)));
@@ -3568,7 +3579,7 @@ class Telas_Assesments_Admin
         $course_title             = get_the_title($course_id);
         $new_combined_review_args = array(
         'post_type'   => 'telas_report',
-        'post_title'  => 'Combined Review of Test course ' . $course_title . ' By ' . $interim_reviewer_name,
+        'post_title'  => 'Test Assessment of course ' . $course_title . ' by ' . $interim_reviewer_name,
         'post_status' => 'publish',
         'post_author' => $interim_reviewer_id,
         );
