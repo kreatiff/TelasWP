@@ -1790,19 +1790,19 @@ class Telas_Assesments_Admin
             'user',
             'user_extra',
             array(
-            'get_callback'    => array( $this, 'get_user_meta_callback' ),
-            'update_callback' => null,
-            'schema'          => null,
+                'get_callback'    => array( $this, 'get_user_meta_callback' ),
+                'update_callback' => null,
+                'schema'          => null,
             )
         );
         register_rest_route(
             $namespace,
             '/' . 'update-user',
             array(
-            array(
-            'methods'  => WP_REST_Server::CREATABLE,
-            'callback' => array( $this, 'update_user_callback' ),
-            ),
+                array(
+                    'methods'  => WP_REST_Server::CREATABLE,
+                    'callback' => array( $this, 'update_user_callback' ),
+                ),
             )
         );
         register_rest_route(
@@ -1845,7 +1845,6 @@ class Telas_Assesments_Admin
             array(
             'methods'  => WP_REST_Server::CREATABLE,
             'callback' => array( $this, 'send_accreditation_badge' ),
-            'permission_callback' => array( $this, 'assign_assessors_permission_callback' ),
             )
         );
         register_rest_field(
@@ -1888,22 +1887,22 @@ class Telas_Assesments_Admin
             $namespace,
             '/' . 'create-assessment',
             array(
-            array(
-            'methods'             => WP_REST_Server::CREATABLE,
-            'callback'            => array( $this, 'assign_assessors_callback' ),
-            'permission_callback' => array( $this, 'assign_assessors_permission_callback' ),
-            ),
+                array(
+                    'methods'             => WP_REST_Server::CREATABLE,
+                    'callback'            => array( $this, 'assign_assessors_callback' ),
+                    'permission_callback' => array( $this, 'assign_assessors_permission_callback' ),
+                ),
             )
         );
         register_rest_route(
             $namespace,
             '/' . 'user-actions',
             array(
-            array(
-            'methods'             => WP_REST_Server::CREATABLE,
-            'callback'            => array( $this, 'user_actions_callback' ),
-            'permission_callback' => array( $this, 'user_actions_permission_callback' ),
-            ),
+                array(
+                    'methods'             => WP_REST_Server::CREATABLE,
+                    'callback'            => array( $this, 'user_actions_callback' ),
+                    'permission_callback' => array( $this, 'user_actions_permission_callback' ),
+                ),
             )
         );
         register_rest_route(
@@ -1911,8 +1910,8 @@ class Telas_Assesments_Admin
             '/' . 'update-assessment',
             array(
             array(
-            'methods'  => WP_REST_Server::CREATABLE,
-            'callback' => array( $this, 'update_assessment_callback' ),
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array( $this, 'update_assessment_callback' ),
             ),
             )
         );
@@ -1920,32 +1919,32 @@ class Telas_Assesments_Admin
             'telas_courses',
             'assesment_data',
             array(
-            'get_callback'    => array( $this, 'prepare_assessment_data' ),
-            'update_callback' => null,
-            'schema'          => null,
+                'get_callback'    => array( $this, 'prepare_assessment_data' ),
+                'update_callback' => null,
+                'schema'          => null,
             )
         );
         register_rest_field(
             'telas_report',
             'report_details',
             array(
-            'get_callback'    => array( $this, 'prepare_get_telas_report_fields' ),
-            'update_callback' => array( $this, 'update_combined_review_fields' ),
-            'schema'          => array( 'report_details', 'All Custom Fields of Report' ),
+                'get_callback'    => array( $this, 'prepare_get_telas_report_fields' ),
+                'update_callback' => array( $this, 'update_combined_review_fields' ),
+                'schema'          => array( 'report_details', 'All Custom Fields of Report' ),
             )
         );
         register_rest_route(
             $namespace,
             '/' . 'email-template',
             array(
-            array(
-            'methods'  => WP_REST_Server::CREATABLE,
-            'callback' => array( $this, 'email_template_create_callback' ),
-            ),
-            array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'email_template_get_callback' ),
-            ),
+                array(
+                    'methods'  => WP_REST_Server::CREATABLE,
+                    'callback' => array( $this, 'email_template_create_callback' ),
+                ),
+                array(
+                        'methods'  => WP_REST_Server::READABLE,
+                        'callback' => array( $this, 'email_template_get_callback' ),
+                ),
             )
         );
     }
@@ -2331,8 +2330,7 @@ class Telas_Assesments_Admin
         );
     }
 
-    public function submit_course_callback( $request )
-    {
+    public function submit_course_callback( $request ) {
         $all_params = $request->get_params();
         if (! current_user_can('publish_telas_courses') ) {
             return new WP_Error(
@@ -2361,11 +2359,12 @@ class Telas_Assesments_Admin
             );
         }
         $data = array(
-        'course_title' => $all_params['coursePackageName'],
-        'message'      => 'Course Submitted',
-        'status'       => 200,
+            'course_title' => $all_params['coursePackageName'],
+            'message'      => 'Course Submitted',
+            'status'       => 200,
         );
 
+        Telas_Assesments_Helper::new_course_submitted_notification($new_course_id, $all_params);
         return apply_filters('extend_telas_before_dispatch', $data);
     }
 
@@ -2408,11 +2407,11 @@ class Telas_Assesments_Admin
         return apply_filters('extend_telas_new_user_before_dispatch', $data);
     }
 
-    public function update_user_callback( $request )
-    {
+    public function update_user_callback( $request ) {
         $all_params       = $request->get_params();
         $user_id          = $all_params['user_id'];
         $role             = 'telas_course_submitters' === $all_params['telasRole'] ? 'telas_course_submitters' : 'telas_assessor';
+        $role_changed_flag = (! empty( $request['roleChanged'] ) && $request['roleChanged'] === 'yes');
         $update_user_args = array(
             'ID'           => $user_id,
             'first_name'   => $all_params['firstName'],
@@ -2481,6 +2480,9 @@ class Telas_Assesments_Admin
         $user_details_meta_fields['institution_country'] = $all_params['institutionCountry'];
         $user_details_meta_fields['is_first_time']       = get_user_meta($updated_user_id, 'is_first_time_updating', true);
         $user_details_meta_fields['activated_by_admin']  = get_user_meta($updated_user_id, 'activated_by_admin', true);
+        if ($role_changed_flag) {
+            Telas_Assesments_Helper::send_role_changed_notification($updated_user_id, $all_params['telasRole']);
+        }
         return apply_filters('extend_telas_update_before_dispatch', $user_details_meta_fields);
     }
 
@@ -3646,5 +3648,5 @@ class Telas_Assesments_Admin
         if ('completed' !== $current_assessment_status ) {
             update_user_meta($current_assessment_level_user_id, 'user_available', 'yes');
         }
-    }
+    }   
 }

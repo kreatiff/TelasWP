@@ -407,7 +407,7 @@ class Telas_Assesments_Helper {
 		$course_submitter_first_name = get_post_meta( $course_id, 'courseSubmitterName', true );
 		$course_submitter_user_id = get_post_meta( $course_id, 'courseSubmitterId', true );
 		$course_submitter_user_data = get_userdata( $course_submitter_user_id );
-		$course_submitter_user_email = $course_submitter_user_data->user_login;
+		$course_submitter_user_email = $course_submitter_user_data->user_email;
 		$email_replacement_array = array(
 			'firstname' => $course_submitter_first_name,
 			'course_name' => get_post_meta( $course_id, 'coursePackageName', true ),
@@ -429,15 +429,20 @@ class Telas_Assesments_Helper {
 			'overall_eligible_badge' => $domain_entries['accreditation_badge'],
 		);
 		$email_template_data     = self::prepare_accreditation_application_email( $email_replacement_array, $eligible );
-		// var_dump( $email_template_data );
 		$message_body = $email_template_data['email_body'];
 		$signature    = $email_template_data['salutation'];
 		$message_heading = $email_template_data['subject'];
-		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, false, false, false );
+		$message_title = $message_heading;
+		$header_image = '';
+		$has_aside = false;
+		$button_link = '';
+		$button_text = '';
+		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside, $button_link, $button_text );
 		$blog_name    = get_option( 'blogname' );
 		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		$ta_emails = self::get_telas_admin_emails();
+
 		foreach ( $ta_emails as $ta_email ) {
 			array_push( $headers, 'Cc: ' . $ta_email );
 		}
@@ -445,7 +450,7 @@ class Telas_Assesments_Helper {
 	}
 
 	public static function prepare_accreditation_application_email( $replacement_array = array(), $eligible = true ) {
-		$course_accreditation_application_email_template = $eligible ? get_option( 'course-accreditation-application-email-template' ) : get_option( 'minimum-accreditation-score-fails-email-template' );
+		$course_accreditation_application_email_template = $eligible ? get_option( 'eligibility-for-course-accreditation-email-template' ) : get_option( 'non-eligible-for-course-accreditation-email-template' );
 		$subject        = $course_accreditation_application_email_template['subject'];
 		$body           = $course_accreditation_application_email_template['emailBody'];
 		$salutation     = $course_accreditation_application_email_template['salutation'];
@@ -475,5 +480,99 @@ class Telas_Assesments_Helper {
 			'subject'    => $subject,
 			'salutation' => $salutation,
 		);
+	}
+
+	public static function send_role_changed_notification( $user_id, $user_role ) {
+		$profile_completion_email_options = get_option( 'user-role-change-email-template' );
+		$subject                          = $profile_completion_email_options['subject'];
+		$email_body                       = $profile_completion_email_options['emailBody'];
+		$email_salutation                 = $profile_completion_email_options['salutation'];
+		$message_heading                  = $subject;
+		$user_object                      = new WP_User( $user_id );
+		$user_role                        = $user_role === 'telas_assessor' ? substr( get_user_meta( $user_object->ID, 'telas_assessor_level', true ), 0, -1 ) : substr( $user_role, 0, -1 );
+		$user_role                        = ucfirst( str_replace( '_', ' ', $user_role ) );
+		$replacement_array                = array(
+			'first_name'          => $user_object->first_name,
+			'last_name'           => $user_object->last_name,
+			'email_address'       => $user_object->user_email,
+			'position'            => get_user_meta( $user_id, 'position', true ),
+			'faculty'             => get_user_meta( $user_id, 'faculty', true ),
+			'institution_name'    => get_user_meta( $user_id, 'institution_name', true ),
+			'institution_campus'  => get_user_meta( $user_id, 'institution_campus', true ),
+			'institution_state'   => get_user_meta( $user_id, 'institution_state', true ),
+			'institution_country' => get_user_meta( $user_id, 'institution_country', true ),
+			'selected_role'       => $user_role,
+		);
+		$to_be_replaced                   = array(
+			'{[first_name]}',
+			'{[last_name]}',
+			'{[email_address]}',
+			'{[position]}',
+			'{[faculty]}',
+			'{[institution_name]}',
+			'{[institution_campus]}',
+			'{[institution_state]}',
+			'{[institution_country]}',
+			'{[selected_role]}',
+		);
+		$email_body                       = str_replace( $to_be_replaced, $replacement_array, $email_body );
+		$message                          = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, false, $button_link, $button_text );
+		$blog_name                        = get_option( 'blogname' );
+		$subject                          = "[{$blog_name}] {$subject}";
+		$headers                          = array( 'Content-Type: text/html; charset=UTF-8' );
+		$user                             = new WP_User( $user_id );
+		$user_email                       = stripslashes( $user->user_email );
+		// echo $message;
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			array_push( $headers, 'Cc: ' . $ta_email );
+		}
+		wp_mail( $user_email, $subject, $message, $headers );
+	}
+
+	public static function new_course_submitted_notification($course_id, $course_data) {
+		$new_course_submitted = get_option( 'new-course-submitted-email-template' );
+		$subject                          = $new_course_submitted['subject'];
+		$email_body                       = $new_course_submitted['emailBody'];
+		$email_salutation                 = $new_course_submitted['salutation'];
+		$message_heading                  = $subject;
+		$replacement_array                = array(
+			'course_submitter_name'          => $course_data['courseSubmitterName'],
+			'date_of_course_submitted'           => $course_data['courseSubmissionDateString'],
+			'course_name'       => $course_data['coursePackageName'],
+			'package_type'            =>  $course_data['coursePackageType'],
+			'package_identifier'             => $course_data['coursePackageIdentifier'],
+			'module_identifier'    => $course_data['courseModuleIdentifier'],
+			'study_level'  => $course_data['studyLevel'],
+			'course_level'   => $course_data['courseLevel'],
+			'institution_name' => $course_data['institutionName'],
+			'faculty'       => $course_data['facultyDept'],
+		);
+		$to_be_replaced       = array(
+			'{[course_submitter_name]}',
+			'{[date_of_course_submitted]}',
+			'{[course_name]}',
+			'{[package_type]}',
+			'{[package_identifier]}',
+			'{[module_identifier]}',
+			'{[study_level]}',
+			'{[course_level]}',
+			'{[institution_name]}',
+			'{[faculty]}',
+		);
+		$email_body                       = str_replace( $to_be_replaced, $replacement_array, $email_body );
+		$button_link  = "https://app.telas.edu.au/courses/{$course_id}";
+		$button_text  = 'View Course';
+		$message                          = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, true, $button_link, $button_text );
+		$blog_name                        = get_option( 'blogname' );
+		$subject                          = "[{$blog_name}] {$subject}";
+		$headers                          = array( 'Content-Type: text/html; charset=UTF-8' );
+		$user                             = new WP_User( $user_id );
+		$user_email                       = stripslashes( $user->user_email );
+		// echo $message;
+		$ta_emails = self::get_telas_admin_emails();
+		foreach ( $ta_emails as $ta_email ) {
+			wp_mail( $ta_email, $subject, $message, $headers );
+		}
 	}
 }
