@@ -123,6 +123,10 @@ class Telas_Assesments {
 
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-telas-assesments-helper.php';
 
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'pdf/class-generate-pdf.php';
+
 		$this->loader = new Telas_Assesments_Loader();
 
 	}

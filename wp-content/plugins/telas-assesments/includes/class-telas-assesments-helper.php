@@ -408,18 +408,29 @@ class Telas_Assesments_Helper {
 		$course_submitter_user_id = get_post_meta( $course_id, 'courseSubmitterId', true );
 		$course_submitter_user_data = get_userdata( $course_submitter_user_id );
 		$course_submitter_user_email = $course_submitter_user_data->user_email;
+		$course_name = get_post_meta( $course_id, 'coursePackageName', true );
+		$course_package_type = get_post_meta( $course_id, 'coursePackageType', true );
+		$course_package_identifier = get_post_meta( $course_id, 'coursePackageIdentifier', true );
+		$course_module_identifier = get_post_meta( $course_id, 'courseModuleIdentifier', true );
+		$study_level = get_post_meta( $course_id, 'studyLevel', true );
+		$course_level = get_post_meta( $course_id, 'courseLevel', true );
+		$institution_name = get_post_meta( $course_id, 'institutionName', true );
+		$faculty = get_post_meta( $course_id, 'facultyDept', true );
+		$combined_review_commencement_date = get_post_meta( $course_id, 'combined_review_commencement_date', true );
+		$combined_review_completion_date = get_post_meta( $course_id, 'combined_review_completion_date', true );
+		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true );
 		$email_replacement_array = array(
 			'firstname' => $course_submitter_first_name,
-			'course_name' => get_post_meta( $course_id, 'coursePackageName', true ),
+			'course_name' => $course_name,
 			'date_of_course_submission' => date( get_option( 'date_format' ), strtotime( get_post_meta( $course_id, 'courseSubmissionDate', true ) ) ),
-			'course_package_name' => get_post_meta( $course_id, 'coursePackageName', true ),
-			'course_package_type' => get_post_meta( $course_id, 'coursePackageType', true ),
-			'course_package_identifier' => get_post_meta( $course_id, 'coursePackageIdentifier', true ),
-			'course_module_identifier' => get_post_meta( $course_id, 'courseModuleIdentifier', true ),
-			'study_level' => get_post_meta( $course_id, 'studyLevel', true ),
-			'course_level' => get_post_meta( $course_id, 'courseLevel', true ),
-			'institution_name' => get_post_meta( $course_id, 'institutionName', true ),
-			'faculty' => get_post_meta( $course_id, 'facultyDept', true ),
+			'course_package_name' => $course_name,
+			'course_package_type' => $course_package_type,
+			'course_package_identifier' => $course_package_identifier,
+			'course_module_identifier' => $course_module_identifier,
+			'study_level' => $study_level,
+			'course_level' => $course_level,
+			'institution_name' => $institution_name,
+			'faculty' => $faculty,
 			'bold' => '<strong>',
 			'/bold'	=> '</strong>',
 			'online_eligible_badge' => $domain_entries['first']['badge'],
@@ -428,6 +439,25 @@ class Telas_Assesments_Helper {
 			'learning_resources_eligible_badge' => $domain_entries['fourth']['badge'],
 			'overall_eligible_badge' => $domain_entries['accreditation_badge'],
 		);
+		$assessment_pdf_data = array(
+			'course_name' => $course_name,
+			'course_package_type' => $course_package_type,
+			'course_package_identifier' => $course_package_identifier,
+			'course_module_identifier' => $course_module_identifier,
+			'study_area' => $study_level,
+			'course_level' => $course_level,
+			'institution_name' => $institution_name,
+			'faculty' => $faculty,
+			'combined_review_start_date' => $combined_review_commencement_date,
+			'combined_review_end_date' => $combined_review_completion_date,
+			'domain_one_badge' => $domain_entries['first']['badge'],
+			'domain_two_badge' => $domain_entries['second']['badge'],
+			'domain_three_badge' => $domain_entries['third']['badge'],
+			'domain_four_badge' => $domain_entries['fourth']['badge'],
+			'submit_for_accreditation' => $submit_for_accreditation,
+		);
+		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
+		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data );
 		$email_template_data     = self::prepare_accreditation_application_email( $email_replacement_array, $eligible );
 		$message_body = $email_template_data['email_body'];
 		$signature    = $email_template_data['salutation'];
@@ -442,11 +472,15 @@ class Telas_Assesments_Helper {
 		$subject      = "[{$blog_name}] {$email_template_data['subject']}";
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		$ta_emails = self::get_telas_admin_emails();
-
+		$attachments = array($assessment_attachment);
 		foreach ( $ta_emails as $ta_email ) {
 			array_push( $headers, 'Cc: ' . $ta_email );
 		}
-		return wp_mail( $course_submitter_user_email, $subject, $message, $headers );
+		$mail_flag = wp_mail( $course_submitter_user_email, $subject, $message, $headers, $attachments );
+		if ( $mail_flag ) {
+			unlink( $assessment_attachment );
+		}
+		return $mail_flag;
 	}
 
 	public static function prepare_accreditation_application_email( $replacement_array = array(), $eligible = true ) {
