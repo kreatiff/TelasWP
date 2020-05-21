@@ -126,7 +126,7 @@ class Telas_Assesments_Helper {
 		$button_text                    = 'Login';
 		$message                        = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, $has_aside = true, $button_link, $button_text );
 		$blog_name                      = get_option( 'blogname' );
-		$subject                        = "{$blog_name} {$subject}";
+		$subject                        = "{$new_user_welcome_email_options['subject']}";
 		$headers                        = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user                           = new WP_User( $user_id );
 		$user_email                     = stripslashes( $user->user_email );
@@ -173,7 +173,7 @@ class Telas_Assesments_Helper {
 		$email_body                       = str_replace( $to_be_replaced, $replacement_array, $email_body );
 		$message                          = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, false, $button_link, $button_text );
 		$blog_name                        = get_option( 'blogname' );
-		$subject                          = "{$blog_name} {$subject}";
+		$subject                          = "{$profile_completion_email_options['subject']}";
 		$headers                          = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user                             = new WP_User( $user_id );
 		$user_email                       = stripslashes( $user->user_email );
@@ -200,7 +200,7 @@ class Telas_Assesments_Helper {
 		$email_salutation = $approved_email_object['salutation'];
 		$email_body       = str_replace( '{[first_name]}', $user->first_name, $email_body );
 		$blog_name        = get_option( 'blogname' );
-		$subject          = "{$blog_name} {$subject}";
+		$subject          = "{$approved_email_object['subject']}";
 		$headers          = array( 'Content-Type: text/html; charset=UTF-8' );
 		$to               = $user_email;
 		$message_title    = $subject;
@@ -256,7 +256,7 @@ class Telas_Assesments_Helper {
 		$button_text  = 'Start';
 		$message      = self::get_email_body( $message_heading, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		$blog_name    = get_option( 'blogname' );
-		$subject      = "{$blog_name} {$email_template_data['subject']}";
+		$subject      = "{$email_template_data['subject']}";
 		// $subject = sprintf( '[%s] You have been assigned a course to review.', $blog_name );
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user       = new WP_User( $user_id );
@@ -342,6 +342,10 @@ class Telas_Assesments_Helper {
 			'{[course_level]}',
 			'{[institution_name]}',
 			'{[faculty]}',
+			'{[submit_for_accreditation]}',
+			'{[enroller_name]}',
+			'{[enroller_email]}',
+			'{[enroller_phone]}'
 		);
 		$new_body = str_replace( $to_be_replaced, $replacement_array, $body );
 		return array(
@@ -377,6 +381,10 @@ class Telas_Assesments_Helper {
 		$course_level = get_post_meta( $course_id, 'courseLevel', true );
 		$course_faculty = get_post_meta( $course_id, 'facultyDept', true );
 		$course_institution_name = get_post_meta( $course_id, 'institutionName', true );
+		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true);
+		$enroller_name = get_post_meta( $course_id, 'enrollerName', true);
+		$enroller_email = get_post_meta( $course_id, 'enrollerEmail', true);
+		$enroller_phone = get_post_meta( $course_id, 'enrollerPhone', true);
 		$first_reviewer_first_name = get_user_meta( $first_reviewer_id, 'first_name', true );
 		$formatted_date_of_course_submission = new DateTimeImmutable( $date_of_course_submission );
 		$email_replacement_array = array(
@@ -399,6 +407,10 @@ class Telas_Assesments_Helper {
 			'course_level' => $course_study_level,
 			'institution_name' => $course_institution_name,
 			'faculty' => $course_faculty,
+			'submit_for_accreditation' => $submit_for_accreditation,
+			'enroller_name' => $enroller_name,
+			'enroller_email' => $enroller_email,
+			'enroller_phone' => $enroller_phone,
 		);
 		$email_template_data     = self::prepare_combined_reviewer_assigned_email( $email_replacement_array );
 
@@ -409,7 +421,7 @@ class Telas_Assesments_Helper {
 		$message_heading = 'TELAS Combined Review request.';
 		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside = true, $button_link, $button_text );
 		$blog_name    = get_option( 'blogname' );
-		$subject      = "{$blog_name} {$email_template_data['subject']}";
+		$subject      = "{$email_template_data['subject']}";
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		$ta_emails = self::get_telas_admin_emails();
 		foreach ( $ta_emails as $ta_email ) {
@@ -431,6 +443,10 @@ class Telas_Assesments_Helper {
 		$course_level = get_post_meta( $course_id, 'courseLevel', true );
 		$institution_name = get_post_meta( $course_id, 'institutionName', true );
 		$faculty = get_post_meta( $course_id, 'facultyDept', true );
+		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true);
+		$enroller_name = get_post_meta( $course_id, 'enrollerName', true);
+		$enroller_email = get_post_meta( $course_id, 'enrollerEmail', true);
+		$enroller_phone = get_post_meta( $course_id, 'enrollerPhone', true);
 		$combined_review_commencement_date = get_post_meta( $course_id, 'combined_review_commencement_date', true );
 		$combined_review_completion_date = get_post_meta( $course_id, 'combined_review_completion_date', true );
 		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true );
@@ -446,6 +462,10 @@ class Telas_Assesments_Helper {
 			'course_level' => $course_level,
 			'institution_name' => $institution_name,
 			'faculty' => $faculty,
+			'submit_for_accreditation' => $submit_for_accreditation,
+			'enroller_name' => $enroller_name,
+			'enroller_email' => $enroller_email,
+			'enroller_phone' => $enroller_phone,
 			'bold' => '<strong>',
 			'/bold'	=> '</strong>',
 			'online_eligible_badge' => $domain_entries['first']['badge'],
@@ -472,7 +492,7 @@ class Telas_Assesments_Helper {
 			'submit_for_accreditation' => $submit_for_accreditation,
 		);
 		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
-		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data );
+		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible );
 		$email_template_data     = self::prepare_accreditation_application_email( $email_replacement_array, $eligible );
 		$message_body = $email_template_data['email_body'];
 		$signature    = $email_template_data['salutation'];
@@ -484,7 +504,7 @@ class Telas_Assesments_Helper {
 		$button_text = '';
 		$message      = self::get_email_body( $message_title, $header_image, $message_heading, $message_body, $signature, $has_aside, $button_link, $button_text );
 		$blog_name    = get_option( 'blogname' );
-		$subject      = "{$blog_name} {$email_template_data['subject']}";
+		$subject      = "{$email_template_data['subject']}";
 		$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 		$ta_emails = self::get_telas_admin_emails();
 		$attachments = array($assessment_attachment);
@@ -515,6 +535,10 @@ class Telas_Assesments_Helper {
 			'{[course_level]}',
 			'{[institution_name]}',
 			'{[faculty]}',
+			'{[submit_for_accreditation]}',
+			'{[enroller_name]}',
+			'{[enroller_email]}',
+			'{[enroller_phone]}',
 			'{[bold]}',	
 			'{[/bold]}',
 			'{[online_eligible_badge]}',
@@ -567,7 +591,7 @@ class Telas_Assesments_Helper {
 		$email_body                       = str_replace( $to_be_replaced, $replacement_array, $email_body );
 		$message                          = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, false, $button_link, $button_text );
 		$blog_name                        = get_option( 'blogname' );
-		$subject                          = "{$blog_name} {$subject}";
+		$subject                          = "{$profile_completion_email_options['subject']}";
 		$headers                          = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user                             = new WP_User( $user_id );
 		$user_email                       = stripslashes( $user->user_email );
@@ -625,7 +649,7 @@ class Telas_Assesments_Helper {
 		$button_text  = 'View Course';
 		$message                          = self::get_email_body( $message_heading, $header_image, $message_heading, $email_body, $email_salutation, true, $button_link, $button_text );
 		$blog_name                        = get_option( 'blogname' );
-		$subject                          = "{$blog_name} {$subject}";
+		$subject                          = "{$new_course_submitted['subject']}";
 		$headers                          = array( 'Content-Type: text/html; charset=UTF-8' );
 		$user                             = new WP_User( $user_id );
 		$user_email                       = stripslashes( $user->user_email );

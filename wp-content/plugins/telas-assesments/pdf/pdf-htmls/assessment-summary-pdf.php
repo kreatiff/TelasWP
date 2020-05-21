@@ -155,8 +155,8 @@ echo "<html>
                 </td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Accreditation Certificate date</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${combined_review_end_date}</td>
+                <td style='width: 50%; border-bottom: 1px solid #0000;'>Accreditation Certificate Status</td>
+                <td style='width: 50%; border-bottom: 1px solid #0000;'>${eligibility_text}</td>
             </tr>
 
         </tbody>

@@ -2191,9 +2191,9 @@ class Telas_Assesments_Admin
         update_post_meta($assessment_id, 'percentage_completed', $percentage_completed);
         update_post_meta($assessment_id, 'assessment_status', 'in-progress');
         update_post_meta($assigned_course_id, 'last_status_update', date($date_format, current_time('timestamp', 0)));
+        $assessment_level      = get_post_meta($assessment_id, 'assessment_assigned_user_level', true);
         update_post_meta($assigned_course_id, 'current_review_status', str_replace('er', '', str_replace('_', ' ', $assessment_level)) . 'In Progress');
         $assessment_start_date = get_post_meta($assessment_id, 'assessment_start_date', true);
-        $assessment_level      = get_post_meta($assessment_id, 'assessment_assigned_user_level', true);
         if (empty($assessment_start_date) ) {
             update_post_meta($assessment_id, 'assessment_start_date', $all_params['assessmentStartDate']);
         }
@@ -3064,8 +3064,13 @@ class Telas_Assesments_Admin
         $subject                = sprintf('[%s]  Assessment Completed', $blogname);
         $headers                = array( 'Content-Type: text/html; charset=UTF-8' );
         $all_telas_admin_emails = Telas_Assesments_Helper::get_telas_admin_emails();
+        $assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
+        $assessment_attachment = $assessment_pdf_instance->generate_assessment_report_pdf( $assessment_id );
+        $attachments = array($assessment_attachment);
         foreach ( $all_telas_admin_emails as $to_emails ) {
-            wp_mail($to_emails, $subject, $message, $headers);
+            if ( wp_mail($to_emails, $subject, $message, $headers, $attachments) ) {
+                unlink( $assessment_attachment );
+            }
         }
     }
 
@@ -3661,5 +3666,12 @@ class Telas_Assesments_Admin
         if ('completed' !== $current_assessment_status ) {
             update_user_meta($current_assessment_level_user_id, 'user_available', 'yes');
         }
-    }   
+    }
+    function override_sender_email( $original_email_address ) {
+        return get_option('admin_email');
+    }
+    
+    function override_sender_name( $original_email_from ) {
+        return get_option('blogname');
+    }
 }
