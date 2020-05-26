@@ -1947,6 +1947,30 @@ class Telas_Assesments_Admin
                 ),
             )
         );
+        register_rest_route(
+            $namespace,
+            '/' . 'assessment-questions',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::CREATABLE,
+                    'callback' => array( $this, 'assessment_questions_create_callback' ),
+                ),
+                array(
+                    'methods'  => WP_REST_Server::READABLE,
+                    'callback' => array( $this, 'assessment_questions_get_callback' ),
+                ),
+            )
+        );
+    }
+
+    public function assessment_questions_get_callback( $request ) {
+        return get_option( 'telas_admin_domain_answers' );
+    }
+    public function assessment_questions_create_callback( $request ) {
+        $all_params = $request->get_params();
+        $steps = $all_params['steps'];
+        update_option( 'telas_admin_domain_answers', $steps );
+        return get_option( 'telas_admin_domain_answers' );
     }
     public function get_user_meta_callback( $user )
     {
