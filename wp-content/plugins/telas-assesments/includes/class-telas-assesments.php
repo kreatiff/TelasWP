@@ -184,7 +184,11 @@ class Telas_Assesments {
 		$this->loader->add_action( 'after_password_reset', $plugin_admin, 'lost_password_redirect' );
 		$this->loader->add_action( 'before_delete_post', $plugin_admin, 'delete_course_action' );
 		$this->loader->add_filter( 'wp_mail_from', $plugin_admin, 'override_sender_email' );
-    	$this->loader->add_filter( 'wp_mail_from_name', $plugin_admin, 'override_sender_name' );
+		$this->loader->add_filter( 'wp_mail_from_name', $plugin_admin, 'override_sender_name' );
+		// $this->loader->add_action( 'rest_api_init', $plugin_admin, 'rest_filter_incoming_connections', 15 );
+		// $this->loader->add_action( 'init', $plugin_admin, 'handle_preflight' );
+		// $this->loader->add_filter( 'rest_authentication_errors', $plugin_admin, 'rest_filter_incoming_connections' );
+		// $this->loader->add_filer( 'rest_pre_serve_request', $plugin_admin, 'rest_send_cors_header', );
 	}
 
 	/**
