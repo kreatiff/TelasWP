@@ -52,7 +52,7 @@ class Telas_Assesments_Admin {
 
         $this->plugin_name = $plugin_name;
         $this->version     = $version;
-        // add_action( 'admin_init', array( $this, 'download_pdf_callback' ) );
+        // add_action( 'init', array( $this, 'remove_old_pdf_files_hook_callback' ) );
     }
 
     /**
@@ -1954,6 +1954,15 @@ class Telas_Assesments_Admin {
                 'permission_callback' => array( $this, 'download_pdf_permission_callback' ),
             )
         );
+        register_rest_route(
+            $namespace,
+            '/' . 'remove-pdf',
+            array(
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => array( $this, 'remove_pdf_callback' ),
+                'permission_callback' => array( $this, 'download_pdf_permission_callback' ),
+            )
+        );
         
     }
     public function download_pdf_callback( $request ) {
@@ -1972,7 +1981,15 @@ class Telas_Assesments_Admin {
         $assessment_data['faculty'] = get_post_meta( $course_id, 'facultyDept', true );
         $pdf_helper = new Telas_Generate_Pdf_Helper();
         $pdf_data = $pdf_helper->generate_assessment_pdf($assessment_data);
-        return array( 'fileName' => $pdf_data );
+        return $pdf_data;
+    }
+    public function remove_pdf_callback( $request ) {
+        $params = $request->get_params();
+        $file_name = plugin_dir_path( dirname( __FILE__ ) ) . 'pdf/' . $params['fileName'];
+        // sleep(30);
+        // plugin_dir_path( __FILE__ ) . $file_name
+        unlink($file_name);
+        return true;
     }
 
     public function download_pdf_permission_callback() {
@@ -3723,8 +3740,10 @@ class Telas_Assesments_Admin {
 
     function handle_preflight() {
         $origin = get_http_origin();
-        if ($origin === 'http://localhost:8080') {
-            header("Access-Control-Allow-Origin: " . 'http://localhost:8080');
+        $allowed_origins = [ 'http://telasweb.test', 'http://telasweb.test:8080', 'localhost:8080' ];
+        if ( $origin && in_array( $origin, $allowed_origins ) ) {
+            header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
+            // header("Access-Control-Allow-Origin: " . 'http://telasweb.test*');
             header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
             header("Access-Control-Allow-Credentials: true");
             header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
@@ -3737,9 +3756,36 @@ class Telas_Assesments_Admin {
     function rest_filter_incoming_connections($errors) {
         $request_server = $_SERVER['REMOTE_ADDR'];
         $origin = get_http_origin();
-        if ($origin !== 'http://localhost:8080') return new WP_Error('forbidden_access', $origin, array(
+        if ($origin !== 'http://telasweb.test:8080') return new WP_Error('forbidden_access', $origin, array(
             'status' => 403
         ));
         return $errors;
     }
+    
+    public static function remove_old_pdf_files_hook_callback() {
+        $pdf_files = glob( plugin_dir_path( dirname( __FILE__ ) ) . 'pdf/generated-pdfs/*.pdf' );
+        foreach( $pdf_files as $file ) {
+            if ( file_exists( $file ) ) {
+                unlink($file);
+                clearstatcache();
+            }
+        }
+        // wp_mail( 'vishalbasnet23@gmail.com', 'run', 'CORN' );
+    }
+
+    function my_cron_schedules($schedules){
+        if(!isset($schedules["5min"])){
+            $schedules["5min"] = array(
+                'interval' => 5*60,
+                'display' => __('Once every 5 minutes'));
+        }
+        if(!isset($schedules["30min"])){
+            $schedules["30min"] = array(
+                'interval' => 30*60,
+                'display' => __('Once every 30 minutes'));
+        }
+        return $schedules;
+    }
+
+
 }

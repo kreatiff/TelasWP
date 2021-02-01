@@ -189,6 +189,9 @@ class Telas_Assesments {
 		// $this->loader->add_action( 'init', $plugin_admin, 'handle_preflight' );
 		// $this->loader->add_filter( 'rest_authentication_errors', $plugin_admin, 'rest_filter_incoming_connections' );
 		// $this->loader->add_filer( 'rest_pre_serve_request', $plugin_admin, 'rest_send_cors_header', );
+
+		$this->loader->add_filter('cron_schedules', $plugin_admin, 'my_cron_schedules' );
+		$this->loader->add_action( 'remove_old_pdf_files_hook', $plugin_admin, 'remove_old_pdf_files_hook_callback' );
 	}
 
 	/**

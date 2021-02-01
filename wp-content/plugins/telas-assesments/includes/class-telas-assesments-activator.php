@@ -30,7 +30,9 @@ class Telas_Assesments_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
+        if ( !wp_next_scheduled( 'remove_old_pdf_files_hook' ) ) {
+            wp_schedule_event(time(), '5min', 'remove_old_pdf_files_hook' );
+		}
 	}
 
 }

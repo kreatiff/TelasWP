@@ -53,7 +53,7 @@ class Telas_Generate_Pdf_Helper {
         $mpdf_instance->SetDisplayMode('fullpage');
         $file_name = 'generated-pdfs/assessment-' . str_replace(' ', '-', $assessment_data['assessment_title'] ). '.pdf';
         $mpdf_instance->Output(plugin_dir_path( __FILE__ ) . $file_name, 'F');
-        return plugin_dir_url( __FILE__ ) . $file_name; 
+        return array( 'filePath' => $file_name, 'fileURL' => plugin_dir_url( __FILE__ ) . $file_name, 'fileName' => str_replace(' ', '-', $assessment_data['assessment_title'] ). '.pdf'  );
     }
 
     function get_question_answer_html( $assessment_answer_value ) {
