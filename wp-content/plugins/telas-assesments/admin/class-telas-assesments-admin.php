@@ -2449,6 +2449,15 @@ class Telas_Assesments_Admin {
         $new_user_id = wp_insert_user($new_user_data);
         if (is_wp_error($new_user_id) ) {
             $error_code = $new_user_id->get_error_code();
+            if ( $error_code === 'existing_user_login' ) {
+                return new WP_Error(
+                    '[extend_telas] ' . 'existing_user_email',
+                    'Sorry, that email address is already used!',
+                    array(
+                        'status' => 403,
+                    )
+                );
+            } 
             return new WP_Error(
                 '[extend_telas] ' . $error_code,
                 $new_user_id->get_error_message($error_code),
