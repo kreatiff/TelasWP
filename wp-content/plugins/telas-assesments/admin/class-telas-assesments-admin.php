@@ -2281,6 +2281,7 @@ class Telas_Assesments_Admin {
             switch ( $assessment_level ) {
                 case 'admin_reviewer':
                     $all_assessments['admin_reviewer']['status']      = 'completed';
+                    $all_assessments['admin_reviewer']['assessment_id'] = $assessment_id;
                     $all_assessments['admin_reviewer']['review_data'] = $assessment_data;
                     update_post_meta($assigned_course_id, 'assessments', $all_assessments);
                     update_post_meta($assigned_course_id, 'assigned_admin_reviewer_status', 'completed');
@@ -2305,6 +2306,7 @@ class Telas_Assesments_Admin {
                     break;
                 case 'first_reviewer':
                     $all_assessments['first_reviewer']['status']      = 'completed';
+                    $all_assessments['first_reviewer']['assessment_id'] = $assessment_id;
                     $all_assessments['first_reviewer']['review_data'] = $assessment_data;
                     update_post_meta($assigned_course_id, 'assessments', $all_assessments);
                     update_post_meta($assigned_course_id, 'assigned_first_reviewer_status', 'completed');
@@ -2322,6 +2324,7 @@ class Telas_Assesments_Admin {
                     break;
                 case 'second_reviewer':
                     $all_assessments['second_reviewer']['status']      = 'completed';
+                    $all_assessments['second_reviewer']['assessment_id'] = $assessment_id;
                     $all_assessments['second_reviewer']['review_data'] = $assessment_data;
                     update_post_meta($assigned_course_id, 'assessments', $all_assessments);
                     update_post_meta($assigned_course_id, 'assigned_second_reviewer_status', 'completed');
@@ -3200,6 +3203,7 @@ class Telas_Assesments_Admin {
     public function prepare_get_telas_report_fields( $report_object, $field_name, $request )
     {
         $report_id = $report_object['id'];
+        $course_id = get_post_meta( $report_id, 'course_id', true );
         return array(
             'assessment_data'                 => get_post_meta($report_id, 'assessment_data', true),
             'admin_reviewer_assessment_data'  => get_post_meta($report_id, 'admin_reviewer_assessment_data', true),
@@ -3232,6 +3236,23 @@ class Telas_Assesments_Admin {
                 'standard_7_comment' => '',
             ),
             'is_pending' => get_post_meta( $report_id, 'is_pending', true ) ? get_post_meta( $report_id, 'is_pending', true) : 'no',
+            'original_assessments_data' => $this->prepare_assessments_data_by_course_id( $course_id ),
+        );
+    }
+
+    function prepare_assessments_data_by_course_id( $course_id ) {
+        $completed_assessments = get_post_meta( $course_id, 'completed_assessments', true );
+        $assessments_data = get_post_meta( $course_id, 'assessments', true );
+        $admin_assessment_comments = get_post_meta( $assessments_data['admin_reviewer']['assessment_id'], 'comment', true );
+        $first_assessment_comments = get_post_meta( $assessments_data['first_reviewer']['assessment_id'], 'comment', true );
+        $second_assessment_comments = get_post_meta( $assessments_data['second_reviewer']['assessment_id'], 'comment', true );
+        return array(
+            'admin_reviewer_data'   => $assessments_data['admin_reviewer']['review_data'],
+            'first_reviewer_data'   => $assessments_data['first_reviewer']['review_data'],
+            'second_reviewer_data'  => $assessments_data['second_reviewer']['review_data'],
+            'admin_reviewer_comments' => $admin_assessment_comments,
+            'first_reviewer_comments' => $first_assessment_comments,
+            'second_reviewer_comments' => $second_assessment_comments,
         );
     }
 
