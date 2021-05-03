@@ -20,7 +20,7 @@ class Telas_Generate_Pdf_Helper {
         return $mpdf;
     }
     
-    function generate_assessment_summary_pdf($assessment_data, $eligible) {
+    function generate_assessment_summary_pdf($assessment_data, $eligible, $return_file_url = false ) {
 		$mpdf_instance = $this->get_mdpf_instance();
 		// Write some HTML code:
 		$html = $this->course_assessment_summary_pdf_generate($assessment_data, $eligible);
@@ -35,7 +35,11 @@ class Telas_Generate_Pdf_Helper {
         $mpdf_instance->SetDisplayMode('fullpage');
         $file_name = 'generated-pdfs/assessment-summary-of-' . $assessment_data['course_name'] . '.pdf';
         $mpdf_instance->Output(plugin_dir_path( __FILE__ ) . $file_name, 'F');
-        return plugin_dir_path( __FILE__ ) . $file_name; 
+        if ( $return_file_url ) {
+            return array( 'filePath' => $file_name, 'fileURL' => plugin_dir_url( __FILE__ ) . $file_name, 'fileName' => str_replace(' ', '-', $assessment_data['course_name'] ). '.pdf'  );
+        } else {
+            return plugin_dir_path( __FILE__ ) . $file_name; 
+        }
     }
     
     function generate_assessment_pdf($assessment_data) {

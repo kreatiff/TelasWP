@@ -1956,6 +1956,15 @@ class Telas_Assesments_Admin {
         );
         register_rest_route(
             $namespace,
+            '/' . 'download-combined-report-pdf',
+            array(
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => array( $this, 'download_combined_review_pdf_callback' ),
+                'permission_callback' => array( $this, 'download_pdf_permission_callback' ),
+            )
+        );
+        register_rest_route(
+            $namespace,
             '/' . 'remove-pdf',
             array(
                 'methods'             => WP_REST_Server::CREATABLE,
@@ -1967,20 +1976,165 @@ class Telas_Assesments_Admin {
     }
     public function download_pdf_callback( $request ) {
         $params = $request->get_params();
-        $assessment_id = $params['assessmentId'];
-        $assessment_data = get_post_meta( $assessment_id );
-        $course_id = $assessment_data['assigned_course'][0];
-        $assessment_data['assessment_title'] = get_the_title( $assessment_id );
-        $assessment_data['course_name'] = get_the_title( $course_id );
-        $assessment_data['course_package_type'] = get_post_meta( $course_id, 'coursePackageType', true );
-        $assessment_data['course_package_identifier'] = get_post_meta( $course_id, 'coursePackageIdentifier', true );
-        $assessment_data['course_module_identifier'] = get_post_meta( $course_id, 'courseModuleIdentifier', true );
-        $assessment_data['study_area'] = get_post_meta( $course_id, 'studyLevel', true );
-        $assessment_data['course_level'] = get_post_meta( $course_id, 'courseLevel', true );
-        $assessment_data['institutionName'] = get_post_meta( $course_id, 'institution_Name', true );
-        $assessment_data['faculty'] = get_post_meta( $course_id, 'facultyDept', true );
-        $pdf_helper = new Telas_Generate_Pdf_Helper();
-        $pdf_data = $pdf_helper->generate_assessment_pdf($assessment_data);
+        if ( $params['isReport'] !== 'yes' ) {
+            $assessment_id = $params['assessmentId'];
+            $assessment_data = get_post_meta( $assessment_id );
+            $course_id = $assessment_data['assigned_course'][0];
+            $assessment_data['assessment_title'] = get_the_title( $assessment_id );
+            $assessment_data['course_name'] = get_the_title( $course_id );
+            $assessment_data['course_package_type'] = get_post_meta( $course_id, 'coursePackageType', true );
+            $assessment_data['course_package_identifier'] = get_post_meta( $course_id, 'coursePackageIdentifier', true );
+            $assessment_data['course_module_identifier'] = get_post_meta( $course_id, 'courseModuleIdentifier', true );
+            $assessment_data['study_area'] = get_post_meta( $course_id, 'studyLevel', true );
+            $assessment_data['course_level'] = get_post_meta( $course_id, 'courseLevel', true );
+            $assessment_data['institutionName'] = get_post_meta( $course_id, 'institution_Name', true );
+            $assessment_data['faculty'] = get_post_meta( $course_id, 'facultyDept', true );
+            $pdf_helper = new Telas_Generate_Pdf_Helper();
+            $pdf_data = $pdf_helper->generate_assessment_pdf($assessment_data);
+            return $pdf_data;
+        } else {
+            $assessment_id = $params['assessmentId'];
+            $pdf_data = $this->prepare_combined_review_summary_pdf_data( $assessment_id );
+            return $pdf_data;
+        }
+    }
+
+    function prepare_combined_review_summary_pdf_data( $assessment_id ) {
+        $course_id = get_post_meta( $assessment_id, 'course_id', true );
+        // var_dump( $course_id );
+        // die;
+        $course_submitter_first_name = get_post_meta( $course_id, 'courseSubmitterName', true );
+		$course_submitter_user_id = get_post_meta( $course_id, 'courseSubmitterId', true );
+		$course_submitter_user_data = get_userdata( $course_submitter_user_id );
+		$course_submitter_user_email = $course_submitter_user_data->user_email;
+		$course_name = get_post_meta( $course_id, 'coursePackageName', true );
+		$course_package_type = get_post_meta( $course_id, 'coursePackageType', true );
+		$course_package_identifier = get_post_meta( $course_id, 'coursePackageIdentifier', true );
+		$course_module_identifier = get_post_meta( $course_id, 'courseModuleIdentifier', true );
+		$study_level = get_post_meta( $course_id, 'studyLevel', true );
+		$course_level = get_post_meta( $course_id, 'courseLevel', true );
+		$institution_name = get_post_meta( $course_id, 'institutionName', true );
+		$faculty = get_post_meta( $course_id, 'facultyDept', true );
+		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true);
+		$enroller_name = get_post_meta( $course_id, 'enrollerName', true);
+		$enroller_email = get_post_meta( $course_id, 'enrollerEmail', true);
+		$enroller_phone = get_post_meta( $course_id, 'enrollerPhone', true);
+		$combined_review_commencement_date = get_post_meta( $course_id, 'combined_review_commencement_date', true );
+		$combined_review_completion_date = get_post_meta( $course_id, 'combined_review_completion_date', true );
+		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true );
+       
+        $has_report_created = get_post_meta( $course_id, 'has_report_created', true );
+        if ( empty( $has_report_created ) || $has_report_created === 'no' ) {
+            return false;
+        }
+        $report_id = get_post_meta( $course_id, 'report_post_id', true );
+
+        $assigned_course_id         = get_post_meta($report_id, 'assigned_course', true);
+        $current_report_status = get_post_meta($report_id, 'assessment_status', true);
+        if ($current_report_status !== 'complete' ) {
+            return false;
+        }
+        $all_completed_assessments          = get_post_meta( $report_id, 'assessment_data', true );
+        $combined_review_assessments_value  = $all_completed_assessments['first_reviewer']['review_data'];
+        $pattern                      = '/domain*/';
+        $all_domain_entry_keys        = array_filter(
+            array_keys($combined_review_assessments_value),
+            function ( $entry ) use ( $pattern ) {
+                return preg_match($pattern, $entry);
+            }
+        );
+        $all_domain_entry_keys        = array_values($all_domain_entry_keys);
+        $all_domain_entries           = array();
+        $first_domain_selected_total  = 0;
+        $second_domain_selected_total = 0;
+        $third_domain_selected_total  = 0;
+        $fourth_domain_selected_total = 0;
+        foreach ( $all_domain_entry_keys as $domain_entry_key ) {
+            $domain_entry_key_segment = explode('_', $domain_entry_key);
+            if ($domain_entry_key_segment[1] === '1' ) {
+                $all_domain_entries['first']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $first_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            } elseif ($domain_entry_key_segment[1] === '2' ) {
+                $all_domain_entries['second']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $second_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            } elseif ($domain_entry_key_segment[1] === '3' ) {
+                $all_domain_entries['third']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $third_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            } else {
+                $all_domain_entries['fourth']['values'][ $domain_entry_key ] = (float) $combined_review_assessments_value[ $domain_entry_key ];
+                $fourth_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
+            }
+        }
+        
+        $all_domain_entries['first']['selected_total']  = round($first_domain_selected_total, 2);
+        $all_domain_entries['second']['selected_total'] = round($second_domain_selected_total, 2);
+        $all_domain_entries['third']['selected_total']  = round($third_domain_selected_total, 2);
+        $all_domain_entries['fourth']['selected_total'] = round($fourth_domain_selected_total, 2);
+
+        $first_domain_badge_level  = round(( $first_domain_selected_total / 25 ) * 100);
+        $first_domain_badge = $this->get_badge_value( $first_domain_badge_level );
+        
+        $second_domain_badge_level = round(( $second_domain_selected_total / 25 ) * 100);
+        $second_domain_badge = $this->get_badge_value( $second_domain_badge_level );
+        
+        $third_domain_badge_level  = round(( $third_domain_selected_total / 25 ) * 100);
+        $third_domain_badge = $this->get_badge_value( $third_domain_badge_level );
+        
+        $fourth_domain_badge_level = round(( $fourth_domain_selected_total / 25 ) * 100);
+        $fourth_domain_badge = $this->get_badge_value( $fourth_domain_badge_level );
+        
+        $accreditation_percentage  = round(( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ));
+        
+        $overall_badge = $this->get_badge_value( $accreditation_percentage );
+        
+
+        $all_domain_entries['first']['badge_level']     = $first_domain_badge_level;
+        $all_domain_entries['first']['badge']     = $first_domain_badge;
+
+        $all_domain_entries['second']['badge_level']    = $second_domain_badge_level;
+        $all_domain_entries['second']['badge']    = $second_domain_badge;
+        
+        $all_domain_entries['third']['badge_level']     = $third_domain_badge_level;
+        $all_domain_entries['third']['badge']     = $third_domain_badge;
+        
+        $all_domain_entries['fourth']['badge_level']    = $fourth_domain_badge_level;
+        $all_domain_entries['fourth']['badge']    = $fourth_domain_badge;
+        
+        $all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
+        $all_domain_entries['accreditation_badge']      = $overall_badge;
+
+        if ( $accreditation_percentage <= 49 ) {
+            $eligible = false;
+        } else {
+           $eligible = true;
+        }
+        $assessment_pdf_data = array(
+			'course_name' => $course_name,
+			'course_package_type' => $course_package_type,
+			'course_package_identifier' => $course_package_identifier,
+			'course_module_identifier' => $course_module_identifier,
+			'study_area' => $study_level,
+			'course_level' => $course_level,
+			'institution_name' => $institution_name,
+			'faculty' => $faculty,
+			'combined_review_start_date' => $combined_review_commencement_date,
+			'combined_review_end_date' => $combined_review_completion_date,
+			'domain_one_badge' => $all_domain_entries['first']['badge'],
+			'domain_two_badge' => $all_domain_entries['second']['badge'],
+			'domain_three_badge' => $all_domain_entries['third']['badge'],
+			'domain_four_badge' => $all_domain_entries['fourth']['badge'],
+			'submit_for_accreditation' => $submit_for_accreditation,
+		);
+		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
+		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible, true );
+        return $assessment_attachment;
+    }
+
+    public function download_combined_review_pdf_callback( $request ) {
+        $params = $request->get_params();
+        $assessment_id = $params['reportId'];
+        $assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
+        $assessment_attachment = $assessment_pdf_instance->generate_assessment_report_pdf( $assessment_id );
         return $pdf_data;
     }
     public function remove_pdf_callback( $request ) {
