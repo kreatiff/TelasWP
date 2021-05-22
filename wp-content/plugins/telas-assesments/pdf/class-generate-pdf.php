@@ -81,9 +81,28 @@ class Telas_Generate_Pdf_Helper {
         return $question_answer_html;
     }
 
+    function get_comments_html( $comments ) {
+        $comment_html = "";
+        foreach( unserialize($comments) as $comment_key => $comment ) {
+            $comment_title_array = explode( '_', $comment_key );
+            $comment_html .= "<tr class='comments'>";
+            $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>";
+            $comment_html .= strtoupper($comment_title_array[0]) . " " . (int)$comment_title_array[1]+1 . ":";
+            $comment_html .= "</td>";
+            $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>${comment}</td>";
+            $comment_html .= "</tr>";
+        }
+        return $comment_html;
+    }
+
     function get_question_by_question_key($step_index, $tab_index, $question_index) {
         $questions = get_option( 'telas_admin_domain_answers' );
         return $questions[$step_index]['content'][$tab_index]['questions'][$question_index]['question'];
+    }
+
+    function get_section_heading( $step_index, $tab_index ) {
+        $questions = get_option( 'telas_admin_domain_answers' );
+        return $questions[$step_index]['content'][$tab_index]['heading'];
     }
 
     function assessment_pdf_generate($assessment_data = array()) {
@@ -97,6 +116,10 @@ class Telas_Generate_Pdf_Helper {
             $course_level = $assessment_data['course_level'];
             $faculty = $assessment_data['faculty'];
             $question_answer_html = $this->get_question_answer_html( $assessment_data['assessment_answer_data'][0] );
+            $comments = $assessment_data['comment'][0];
+            $comments_html = $this->get_comments_html( $comments );
+            $commencement_date = date(get_option('date_format'), strtotime($assessment_data['commencement_date']));
+            $completion_date =$assessment_data['completion_date'];
             include( plugin_dir_path( __FILE__ ) . 'pdf-htmls/assessment-pdf.php' );
 		$content = ob_get_clean();
 		return $content;
@@ -120,6 +143,7 @@ class Telas_Generate_Pdf_Helper {
         $domain_four_badge = $assessment_data['domain_four_badge'];
         $combined_review_end_date = $assessment_data['combined_review_end_date'];
         $submit_for_accreditation = $assessment_data['submit_for_accreditation'];
+        $comment_html = $this->get_comments_html($assessment_data['comments']);
         $eligibility_text = $eligible ? 'Eligible' : 'Not Eligible';
 		include( plugin_dir_path( __FILE__ ) . 'pdf-htmls/assessment-summary-pdf.php' );
 		$content = ob_get_clean();

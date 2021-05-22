@@ -1,5 +1,4 @@
 <?php
-
 echo "<html>
 
 <head>
@@ -111,15 +110,29 @@ echo "<html>
                 <td style='width: 50%; border: 1px solid #000;'>Faculty / Dept ( if applicable )</td>
                 <td style='width: 50%; border: 1px solid #000;'>${faculty}</td>
             </tr>
+            <tr>
+                <td style='width: 50%; border: 1px solid #000;'>Review Commencement Date</td>
+                <td style='width: 50%; border: 1px solid #000;'>${commencement_date}</td>
+            </tr>
+            <tr>
+                <td style='width: 50%; border: 1px solid #000;'>Review Completion Date</td>
+                <td style='width: 50%; border: 1px solid #000;'>${completion_date}</td>
+            </tr>
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
                     Assessment Data
                 </td>
 			</tr>
 			${question_answer_html}
-
+            <tr class='pdf-subheading'>
+                <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                    Comments
+                </td>
+			</tr>
+            ${comments_html}
         </tbody>
     </table>
+    
     <div id='summary-pdf-footer'>
         <div>
             TELAS<br/>

@@ -52,7 +52,7 @@ class Telas_Assesments_Admin {
 
         $this->plugin_name = $plugin_name;
         $this->version     = $version;
-        // add_action( 'init', array( $this, 'remove_old_pdf_files_hook_callback' ) );
+        // add_action( 'init', array( $this, 'download_pdf_callback' ) );
     }
 
     /**
@@ -1989,6 +1989,11 @@ class Telas_Assesments_Admin {
             $assessment_data['course_level'] = get_post_meta( $course_id, 'courseLevel', true );
             $assessment_data['institutionName'] = get_post_meta( $course_id, 'institution_Name', true );
             $assessment_data['faculty'] = get_post_meta( $course_id, 'facultyDept', true );
+            $review_level = get_post_meta( $assessment_id, 'assessment_assigned_user_level', true );
+            $assessment_start_date = get_post_meta( $course_id, $review_level . '_commencement_date', true  );
+            $assessment_end_date = get_post_meta( $course_id, $review_level . '_completion_date', true  );
+            $assessment_data['commencement_date'] = $assessment_start_date;
+            $assessment_data['completion_date'] = $assessment_end_date;
             $pdf_helper = new Telas_Generate_Pdf_Helper();
             $pdf_data = $pdf_helper->generate_assessment_pdf($assessment_data);
             return $pdf_data;
@@ -2001,8 +2006,6 @@ class Telas_Assesments_Admin {
 
     function prepare_combined_review_summary_pdf_data( $assessment_id ) {
         $course_id = get_post_meta( $assessment_id, 'course_id', true );
-        // var_dump( $course_id );
-        // die;
         $course_submitter_first_name = get_post_meta( $course_id, 'courseSubmitterName', true );
 		$course_submitter_user_id = get_post_meta( $course_id, 'courseSubmitterId', true );
 		$course_submitter_user_data = get_userdata( $course_submitter_user_id );
@@ -2124,6 +2127,7 @@ class Telas_Assesments_Admin {
 			'domain_three_badge' => $all_domain_entries['third']['badge'],
 			'domain_four_badge' => $all_domain_entries['fourth']['badge'],
 			'submit_for_accreditation' => $submit_for_accreditation,
+            'comments'=> serialize(get_post_meta( $assessment_id, 'comments', true )),
 		);
 		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
 		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible, true );
@@ -2135,7 +2139,7 @@ class Telas_Assesments_Admin {
         $assessment_id = $params['reportId'];
         $assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
         $assessment_attachment = $assessment_pdf_instance->generate_assessment_report_pdf( $assessment_id );
-        return $pdf_data;
+        // return $pdf_data;
     }
     public function remove_pdf_callback( $request ) {
         $params = $request->get_params();

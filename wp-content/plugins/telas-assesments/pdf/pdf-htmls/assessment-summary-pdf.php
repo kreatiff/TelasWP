@@ -158,13 +158,17 @@ echo "<html>
                 <td style='width: 50%; border-bottom: 1px solid #0000;'>Accreditation Certificate Status</td>
                 <td style='width: 50%; border-bottom: 1px solid #0000;'>${eligibility_text}</td>
             </tr>
-
+            <tr class='pdf-subheading'>
+                <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                    Comments
+                </td>
+			</tr>
+            ${comment_html}
         </tbody>
     </table>
     <div id='summary-pdf-footer'>
         <div class='disclaimer' style='font-size: 12pt;'>
             <div>* Badge levels rate (lowest to highest) Bronze, Silver, Gold, Platinum and Diamond.</div>
-            <div>The above report is a summary only. A detailed course assessment report is available upon request.</div>
         </div>
         <div>
             TELAS<br/>
