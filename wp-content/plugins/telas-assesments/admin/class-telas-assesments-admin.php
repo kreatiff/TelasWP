@@ -3378,6 +3378,7 @@ class Telas_Assesments_Admin {
             'parent_course_title'             => get_post_meta($report_id, 'course_title', true),
             'commencement_date'               => get_post_meta( $report_id, 'combined_review_commencement_date', true ),
             'completion_date'                 => get_post_meta( $report_id, 'combined_review_completion_date', true ),
+            'combined_review_data' => get_post_meta( $report_id, 'combined_review_data', true ) ? get_post_meta( $report_id, 'combined_reivew_data', true ) : array(),
             'report_id'                       => $report_id,
             'assigned_date'                   => get_post_meta( get_post_meta( $report_id, 'course_id', true ), 'combined_review_created_date', true ),
             'submit_for_accreditation'        => get_post_meta( get_post_meta($report_id, 'course_id', true), 'submitForAccreditation', true ),
@@ -3693,6 +3694,8 @@ class Telas_Assesments_Admin {
             'post_author' => $first_reviewer_id,
         );
         $new_combined_review_id   = wp_insert_post($new_combined_review_args);
+        $first_reviewer_data = $assessment_data['first_reviewer'];
+        $first_reviewer_data['review_data'] = array();
         update_post_meta($course_id, 'report_post_id', $new_combined_review_id);
         update_post_meta($course_id, 'has_report_created', 'yes');
         update_post_meta($course_id, 'current_review_status', 'Combined Review Started');
@@ -3700,7 +3703,7 @@ class Telas_Assesments_Admin {
         update_post_meta($course_id, 'combined_review_created_date', date(get_option('date_format'), current_time('timestamp', 0)));
         update_post_meta($new_combined_review_id, 'assessment_data', $assessment_data);
         update_post_meta($new_combined_review_id, 'admin_reviewer_assessment_data', $assessment_data['admin_reviewer']);
-        update_post_meta($new_combined_review_id, 'first_reviewer_assessment_data', $assessment_data['first_reviewer']);
+        update_post_meta($new_combined_review_id, 'first_reviewer_assessment_data', $first_reviewer_data);
         update_post_meta($new_combined_review_id, 'second_reviewer_assessment_data', $assessment_data['second_reviewer']);
         update_post_meta($new_combined_review_id, 'first_reviewer_id', $first_reviewer_id);
         update_post_meta($new_combined_review_id, 'admin_reviewer_id', $admin_reviewer_id);
