@@ -60,22 +60,58 @@ class Telas_Generate_Pdf_Helper {
         return array( 'filePath' => $file_name, 'fileURL' => plugin_dir_url( __FILE__ ) . $file_name, 'fileName' => str_replace(' ', '-', $assessment_data['assessment_title'] ). '.pdf'  );
     }
 
-    function get_question_answer_html( $assessment_answer_value ) {
+    function get_question_answer_html( $assessment_answer_value, $all_assessment_values =  array() ) {
         $actual_assessment_answers = unserialize( $assessment_answer_value );
         $question_answer_html = "";
+        $prev_step = -1;
+        $prev_tab = -1;
         foreach ( $actual_assessment_answers as $question_key => $answer ) {
             $exploded_question_key = explode('_', $question_key );
             $step_index = $exploded_question_key[1] - 1;
             $tab_index = $exploded_question_key[2] - 1;
             $question_index = $exploded_question_key[3] - 1;
             $question = $this->get_question_by_question_key( $step_index, $tab_index, $question_index );
-            $formatted_answer = ucwords( join( ' ', explode('_', $answer ) ) );
+            if ( $all_assessment_values['admin_reviewer']['status'] === 'completed' ) {
+                if ( !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key] ) ) {
+                    $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
+                } else {
+                    $admin_answer = '--';
+                }
+            }
+            if ( $all_assessment_values['first_reviewer']['status'] === 'completed' ) {
+                if ( !empty( $all_assessment_values['first_reviewer']['review_data'][$question_key] ) ) {
+                    $first_reviewer_answer = $all_assessment_values['first_reviewer']['review_data'][$question_key];
+                } else {
+                    $first_reviewer_answer = '--';
+                }
+            }
+            if ( $all_assessment_values['second_reviewer']['status'] === 'completed' ) {
+                if ( !empty( $all_assessment_values['second_reviewer']['review_data'][$question_key] ) ) {
+                    $second_reviewer_answer = $all_assessment_values['second_reviewer']['review_data'][$question_key];
+                } else {
+                    $second_reviewer_answer = '--';
+                }
+            }
+            $formatted_admin_answer = ucwords( join( ' ', explode('_', $admin_answer ) ) );
+            $formatted_first_reviewer_answer = ucwords( join( ' ', explode('_', $first_reviewer_answer ) ) );
+            $formatted__second_reviewer_answer = ucwords( join( ' ', explode('_', $second_reviewer_answer ) ) );
             $actual_step_index = $step_index + 1;
             $actual_tab_index = $tab_index + 1;
             $actual_question_index = $question_index + 1;
+            
+            if ($step_index != $prev_step || $tab_index != $prev_tab) {
+                $standard_heading = $this->get_section_heading($step_index, $tab_index);
+                $question_answer_html .= "<tr class='pdf-subheading'>
+                    <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                        ${standard_heading}
+                    </td>
+			    </tr>";
+            }
+            $prev_step = $step_index;
+            $prev_tab = $tab_index;
             $question_answer_html .= "<tr>
                 <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                <td style='width: 50%; border: 1px solid #000;'>${formatted_answer}</td>
+                <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer}* | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted__second_reviewer_answer}</td>
             </tr>";
         }
         return $question_answer_html;
@@ -105,8 +141,15 @@ class Telas_Generate_Pdf_Helper {
         return $questions[$step_index]['content'][$tab_index]['heading'];
     }
 
+    function get_standard_heading( $step_index, $tab_index  ) {
+        $questions = get_option( 'telas_admin_domain_answers' );
+        return $questions[$step_index]['content'][$tab_index]['heading'];
+    }
+    
+
     function assessment_pdf_generate($assessment_data = array()) {
         ob_start();
+            $course_assessment_details = get_post_meta($assessment_data['assigned_course'][0], 'assessments', true );
             $course_name = $assessment_data['course_name'];
             $assessment_title = $assessment_data['assessment_title'];
             $course_package_type = $assessment_data['course_package_type'];
@@ -115,7 +158,7 @@ class Telas_Generate_Pdf_Helper {
             $study_area = $assessment_data['study_area'];
             $course_level = $assessment_data['course_level'];
             $faculty = $assessment_data['faculty'];
-            $question_answer_html = $this->get_question_answer_html( $assessment_data['assessment_answer_data'][0] );
+            $question_answer_html = $this->get_question_answer_html( $assessment_data['assessment_answer_data'][0], $course_assessment_details );
             $comments = $assessment_data['comment'][0];
             $comments_html = $this->get_comments_html( $comments );
             $commencement_date = date(get_option('date_format'), strtotime($assessment_data['commencement_date']));
