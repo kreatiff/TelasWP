@@ -15,6 +15,7 @@ class Telas_Generate_Pdf_Helper {
 			'format' => 'A4',
 			'tempDir' => plugin_dir_path( __FILE__ ) . 'generated-pdfs',
 			'debug' => true,
+            'allow_output_buffering'    => true
 		);
         $mpdf = new \Mpdf\Mpdf($mpdf_config_array);
         return $mpdf;
@@ -59,60 +60,129 @@ class Telas_Generate_Pdf_Helper {
         $mpdf_instance->Output(plugin_dir_path( __FILE__ ) . $file_name, 'F');
         return array( 'filePath' => $file_name, 'fileURL' => plugin_dir_url( __FILE__ ) . $file_name, 'fileName' => str_replace(' ', '-', $assessment_data['assessment_title'] ). '.pdf'  );
     }
+    function get_question_answer_html_combined_review( $all_assessment_values = array(), $assessment_id ) {
+        $questions = get_option( 'telas_admin_domain_answers' );
+        $prev_step = -1;
+        $prev_tab = -1;
+        $question_answer_html = "";
+        foreach(  $questions as $step_index => $step ) {
+            foreach( $step['content'] as $tab_index => $tab ) {
+                foreach( $tab['questions'] as $question_index => $question ) {
+                    $question = $this->get_question_by_question_key($step_index, $tab_index, $question_index);
+                    $actual_step_index = $step_index + 1;
+                    $actual_tab_index = $tab_index + 1;
+                    $actual_question_index = $question_index + 1;
+                    $question_key = "question_${actual_step_index}_${actual_tab_index}_${actual_question_index}";
+                    if ($all_assessment_values['admin_reviewer']['status'] === 'completed') {
+                        if (
+                            !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key])
+                        ) {
+                            $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
+                        } else {
+                            $admin_answer = '--';
+                        }
+                    }
+                    if ($all_assessment_values['first_reviewer']['status'] === 'completed') {
+                        if (
+                            !empty($all_assessment_values['first_reviewer']['review_data'][$question_key])
+                        ) {
+                            $first_reviewer_answer = $all_assessment_values['first_reviewer']['review_data'][$question_key];
+                        } else {
+                            $first_reviewer_answer = '--';
+                        }
+                    }
+                    if ($all_assessment_values['second_reviewer']['status'] === 'completed') {
+                        if (
+                            !empty($all_assessment_values['second_reviewer']['review_data'][$question_key])
+                        ) {
+                            $second_reviewer_answer = $all_assessment_values['second_reviewer']['review_data'][$question_key];
+                        } else {
+                            $second_reviewer_answer = '--';
+                        }
+                    }
+                    $formatted_admin_answer = ucwords(join(' ', explode('_', $admin_answer)));
+                    $formatted_first_reviewer_answer = ucwords(join(' ', explode('_', $first_reviewer_answer)));
+                    $formatted_second_reviewer_answer = ucwords(join(' ', explode('_', $second_reviewer_answer)));
 
+                    if ($step_index != $prev_step || $tab_index != $prev_tab) {
+                        $standard_heading = $this->get_section_heading($step_index, $tab_index);
+                        $question_answer_html .= "<tr class='pdf-subheading'>
+                    <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                        ${standard_heading}
+                    </td>
+			    </tr>";
+                    }
+                    $prev_step = $step_index;
+                    $prev_tab = $tab_index;
+                    $question_answer_html .= "<tr>
+                <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
+                <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer}* | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
+            </tr>";
+                }
+            }
+        }
+        return $question_answer_html;
+    } 
+    
     function get_question_answer_html( $assessment_answer_value, $all_assessment_values =  array() ) {
         $actual_assessment_answers = unserialize( $assessment_answer_value );
         $question_answer_html = "";
         $prev_step = -1;
         $prev_tab = -1;
-        foreach ( $actual_assessment_answers as $question_key => $answer ) {
-            $exploded_question_key = explode('_', $question_key );
-            $step_index = $exploded_question_key[1] - 1;
-            $tab_index = $exploded_question_key[2] - 1;
-            $question_index = $exploded_question_key[3] - 1;
-            $question = $this->get_question_by_question_key( $step_index, $tab_index, $question_index );
-            if ( $all_assessment_values['admin_reviewer']['status'] === 'completed' ) {
-                if ( !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key] ) ) {
-                    $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
-                } else {
-                    $admin_answer = '--';
+        $questions = get_option('telas_admin_domain_answers');
+        foreach ($questions as $step_index => $step) {
+            foreach ($step['content'] as $tab_index => $tab) {
+                foreach ($tab['questions'] as $question_index => $question) {
+                    $actual_step_index = $step_index + 1;
+                    $actual_tab_index = $tab_index + 1;
+                    $actual_question_index = $question_index + 1;
+                    $question_key = "question_{$actual_step_index}_{$actual_tab_index}_{$actual_question_index}";
+                    $admin_answer = '';
+                    $first_reviewer_answer = '';
+                    $second_reviewer_answer = '';
+                    $question = $this->get_question_by_question_key( $step_index, $tab_index, $question_index );
+                    if ( ! empty($all_assessment_values['admin_reviewer']) && $all_assessment_values['admin_reviewer']['status'] === 'completed' ) {
+                        if ( !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key] ) ) {
+                            $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
+                        } else {
+                            $admin_answer = '--';
+                        }
+                    }
+                    if ( ! empty( $all_assessment_values['first_reviewer'] ) && $all_assessment_values['first_reviewer']['status'] === 'completed' ) {
+                        if ( !empty( $all_assessment_values['first_reviewer']['review_data'][$question_key] ) ) {
+                            $first_reviewer_answer = $all_assessment_values['first_reviewer']['review_data'][$question_key];
+                        } else {
+                            $first_reviewer_answer = '--';
+                        }
+                    }
+                    if ( ! empty( $all_assessment_values['second_reviewer'] ) && $all_assessment_values['second_reviewer']['status'] === 'completed' ) {
+                        if ( !empty( $all_assessment_values['second_reviewer']['review_data'][$question_key] ) ) {
+                            $second_reviewer_answer = $all_assessment_values['second_reviewer']['review_data'][$question_key];
+                        } else {
+                            $second_reviewer_answer = '--';
+                        }
+                    }
+                    $formatted_admin_answer = !empty( $admin_answer ) ? ucwords( join( ' ', explode('_', $admin_answer ) ) ) : '';
+                    $formatted_first_reviewer_answer = ! empty( $first_reviewer_answer ) ? ucwords( join( ' ', explode('_', $first_reviewer_answer ) ) ) : '';
+                    $formatted_second_reviewer_answer =! empty( $second_reviewer_answer ) ? ucwords( join( ' ', explode('_', $second_reviewer_answer ) ) ) : '';
+                   
+                    
+                    if ($step_index != $prev_step || $tab_index != $prev_tab) {
+                        $standard_heading = $this->get_section_heading($step_index, $tab_index);
+                        $question_answer_html .= "<tr class='pdf-subheading'>
+                            <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                                ${standard_heading}
+                            </td>
+                        </tr>";
+                    }
+                    $prev_step = $step_index;
+                    $prev_tab = $tab_index;
+                    $question_answer_html .= "<tr>
+                        <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
+                        <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer}* | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
+                    </tr>";
                 }
             }
-            if ( $all_assessment_values['first_reviewer']['status'] === 'completed' ) {
-                if ( !empty( $all_assessment_values['first_reviewer']['review_data'][$question_key] ) ) {
-                    $first_reviewer_answer = $all_assessment_values['first_reviewer']['review_data'][$question_key];
-                } else {
-                    $first_reviewer_answer = '--';
-                }
-            }
-            if ( $all_assessment_values['second_reviewer']['status'] === 'completed' ) {
-                if ( !empty( $all_assessment_values['second_reviewer']['review_data'][$question_key] ) ) {
-                    $second_reviewer_answer = $all_assessment_values['second_reviewer']['review_data'][$question_key];
-                } else {
-                    $second_reviewer_answer = '--';
-                }
-            }
-            $formatted_admin_answer = ucwords( join( ' ', explode('_', $admin_answer ) ) );
-            $formatted_first_reviewer_answer = ucwords( join( ' ', explode('_', $first_reviewer_answer ) ) );
-            $formatted__second_reviewer_answer = ucwords( join( ' ', explode('_', $second_reviewer_answer ) ) );
-            $actual_step_index = $step_index + 1;
-            $actual_tab_index = $tab_index + 1;
-            $actual_question_index = $question_index + 1;
-            
-            if ($step_index != $prev_step || $tab_index != $prev_tab) {
-                $standard_heading = $this->get_section_heading($step_index, $tab_index);
-                $question_answer_html .= "<tr class='pdf-subheading'>
-                    <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
-                        ${standard_heading}
-                    </td>
-			    </tr>";
-            }
-            $prev_step = $step_index;
-            $prev_tab = $tab_index;
-            $question_answer_html .= "<tr>
-                <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer}* | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted__second_reviewer_answer}</td>
-            </tr>";
         }
         return $question_answer_html;
     }
@@ -121,9 +191,11 @@ class Telas_Generate_Pdf_Helper {
         $comment_html = "";
         foreach( unserialize($comments) as $comment_key => $comment ) {
             $comment_title_array = explode( '_', $comment_key );
+            $comment_number = (int)$comment_title_array[1] + 1;
             $comment_html .= "<tr class='comments'>";
             $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>";
-            $comment_html .= strtoupper($comment_title_array[0]) . " " . (int)$comment_title_array[1]+1 . ":";
+            $comment_html .= strtoupper($comment_title_array[0]) . " " ;
+            $comment_html .=  $comment_number . ":";
             $comment_html .= "</td>";
             $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>${comment}</td>";
             $comment_html .= "</tr>";
@@ -187,11 +259,17 @@ class Telas_Generate_Pdf_Helper {
         $combined_review_end_date = $assessment_data['combined_review_end_date'];
         $submit_for_accreditation = $assessment_data['submit_for_accreditation'];
         $comment_html = $this->get_comments_html($assessment_data['comments']);
+        $assessment_id = $assessment_data['assessment_id'];
+        
+        $question_answer_html = $this->get_question_answer_html_combined_review($assessment_data['all_assessment_values'], $assessment_id);
+        // var_dump( $question_answer_html );
+        // return 'jhere';
         $eligibility_text = $eligible ? 'Eligible' : 'Not Eligible';
 		include( plugin_dir_path( __FILE__ ) . 'pdf-htmls/assessment-summary-pdf.php' );
 		$content = ob_get_clean();
 		return $content;
     }
+
     function get_questions_json() {
         return get_option('telas_admin_domain_answers');
     }

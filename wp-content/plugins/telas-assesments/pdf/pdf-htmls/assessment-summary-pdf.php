@@ -160,6 +160,12 @@ echo "<html>
             </tr>
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                    Assessment Data
+                </td>
+			</tr>
+			${question_answer_html}
+            <tr class='pdf-subheading'>
+                <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
                     Comments
                 </td>
 			</tr>
