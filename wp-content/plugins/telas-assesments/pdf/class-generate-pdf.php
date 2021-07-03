@@ -187,20 +187,40 @@ class Telas_Generate_Pdf_Helper {
         return $question_answer_html;
     }
 
-    function get_comments_html( $comments ) {
+    function get_comments_html( $comments, $previous_comments = array() ) {
         $comment_html = "";
-        foreach( unserialize($comments) as $comment_key => $comment ) {
-            $comment_title_array = explode( '_', $comment_key );
-            $comment_number = (int)$comment_title_array[1] + 1;
-            $comment_html .= "<tr class='comments'>";
-            $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>";
-            $comment_html .= strtoupper($comment_title_array[0]) . " " ;
-            $comment_html .=  $comment_number . ":";
-            $comment_html .= "</td>";
-            $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>${comment}</td>";
-            $comment_html .= "</tr>";
+        if ( ! empty( $previous_comments ) ) {
+            foreach( $previous_comments as $previous_comment_key => $previous_comment ) {
+                if ( ! empty( $previous_comment ) ) {
+                    $key_text = ucfirst( str_replace('_', ' ', $previous_comment_key) );
+                    $comment_html .= "<tr class='comments'>";
+                    $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>";
+                    $comment_html .= strtoupper($key_text) . " ";
+                    $comment_html .= "</td>";
+                    $comment_html .= $this->comment_actual_html( $previous_comment );
+                }
+            }
+        } else {
+            $comment_html .= $this->comment_actual_html( $comments );
         }
         return $comment_html;
+    }
+
+    function comment_actual_html( $comments ) {
+        $comment_data = ! empty( $comments ) && ! is_array( $comments ) && is_string( $comments ) ? unserialize( $comments ) : $comments;
+        $comments_actual_html = '';
+        foreach ($comment_data as $comment_key => $comment) {
+            $comment_title_array = explode('_', $comment_key);
+            $comment_number = (int)$comment_title_array[1] + 1;
+            $comments_actual_html .= "<tr class='comments'>";
+            $comments_actual_html .= "<td style='width: 50%; border: 1px solid #000;'>";
+            $comments_actual_html .= strtoupper($comment_title_array[0]) . " ";
+            $comments_actual_html .=  $comment_number . ":";
+            $comments_actual_html .= "</td>";
+            $comments_actual_html .= "<td style='width: 50%; border: 1px solid #000;'>${comment}</td>";
+            $comments_actual_html .= "</tr>";
+        }
+        return $comments_actual_html;
     }
 
     function get_question_by_question_key($step_index, $tab_index, $question_index) {
@@ -222,6 +242,7 @@ class Telas_Generate_Pdf_Helper {
     function assessment_pdf_generate($assessment_data = array()) {
         ob_start();
             $course_assessment_details = get_post_meta($assessment_data['assigned_course'][0], 'assessments', true );
+            $course_id = $assessment_data['assigned_course'][0];
             $course_name = $assessment_data['course_name'];
             $assessment_title = $assessment_data['assessment_title'];
             $course_package_type = $assessment_data['course_package_type'];
@@ -231,8 +252,21 @@ class Telas_Generate_Pdf_Helper {
             $course_level = $assessment_data['course_level'];
             $faculty = $assessment_data['faculty'];
             $question_answer_html = $this->get_question_answer_html( $assessment_data['assessment_answer_data'][0], $course_assessment_details );
+            $admin_assessment_id =  get_post_meta($course_id, 'assigned_admin_reviewer_assessment', true);
+            $admin_assessment_comment = $admin_assessment_id ? get_post_meta($admin_assessment_id, 'comment', true) : false;
+
+            $first_assessment_id = get_post_meta($course_id, 'assigned_first_reviewer_assessment', true);
+            $first_assessment_comment = $first_assessment_id ? get_post_meta($first_assessment_id, 'comment', true) : false;
+
+            $second_assessment_id = get_post_meta($course_id, 'assigned_second_reviewer_assessment', true);
+            $second_assessment_comment = $second_assessment_id ? get_post_meta($second_assessment_id, 'comment', true) : false;
+            $previous_comments = array(
+                'admin_reviewer_comment' => $admin_assessment_comment,
+                'first_reviewer_comment' => $first_assessment_comment,
+                'second_reviewer_comment' => $second_assessment_comment,
+            );
             $comments = $assessment_data['comment'][0];
-            $comments_html = $this->get_comments_html( $comments );
+            $comments_html = $this->get_comments_html( $comments, $previous_comments );
             $commencement_date = date(get_option('date_format'), strtotime($assessment_data['commencement_date']));
             $completion_date =$assessment_data['completion_date'];
             include( plugin_dir_path( __FILE__ ) . 'pdf-htmls/assessment-pdf.php' );
