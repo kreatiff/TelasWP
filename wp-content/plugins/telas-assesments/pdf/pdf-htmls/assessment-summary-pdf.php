@@ -158,15 +158,6 @@ echo "<html>
                 </td>
             </tr>
             <tr class='pdf-subheading'>
-                <td colspan='4' style='width: 100%; border-bottom: 1px solid #00000; '>
-                    Course Accreditation
-                </td>
-            </tr>
-            <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Accreditation Certificate Status</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${eligibility_text}</td>
-            </tr>
-            <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
                     Assessment Data
                 </td>
