@@ -73,15 +73,15 @@ class Telas_Generate_Pdf_Helper {
                     $actual_tab_index = $tab_index + 1;
                     $actual_question_index = $question_index + 1;
                     $question_key = "question_${actual_step_index}_${actual_tab_index}_${actual_question_index}";
-                    if ($all_assessment_values['admin_reviewer']['status'] === 'completed') {
-                        if (
-                            !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key])
-                        ) {
-                            $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
-                        } else {
-                            $admin_answer = '--';
-                        }
-                    }
+                    // if ($all_assessment_values['admin_reviewer']['status'] === 'completed') {
+                    //     if (
+                    //         !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key])
+                    //     ) {
+                    //         $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
+                    //     } else {
+                    //         $admin_answer = '--';
+                    //     }
+                    // }
                     if ($all_assessment_values['first_reviewer']['status'] === 'completed') {
                         if (
                             !empty($all_assessment_values['first_reviewer']['review_data'][$question_key])
@@ -91,18 +91,18 @@ class Telas_Generate_Pdf_Helper {
                             $first_reviewer_answer = '--';
                         }
                     }
-                    if ($all_assessment_values['second_reviewer']['status'] === 'completed') {
-                        if (
-                            !empty($all_assessment_values['second_reviewer']['review_data'][$question_key])
-                        ) {
-                            $second_reviewer_answer = $all_assessment_values['second_reviewer']['review_data'][$question_key];
-                        } else {
-                            $second_reviewer_answer = '--';
-                        }
-                    }
-                    $formatted_admin_answer = ucwords(join(' ', explode('_', $admin_answer)));
-                    $formatted_first_reviewer_answer = ucwords(join(' ', explode('_', $first_reviewer_answer)));
-                    $formatted_second_reviewer_answer = ucwords(join(' ', explode('_', $second_reviewer_answer)));
+                    // if ($all_assessment_values['second_reviewer']['status'] === 'completed') {
+                    //     if (
+                    //         !empty($all_assessment_values['second_reviewer']['review_data'][$question_key])
+                    //     ) {
+                    //         $second_reviewer_answer = $all_assessment_values['second_reviewer']['review_data'][$question_key];
+                    //     } else {
+                    //         $second_reviewer_answer = '--';
+                    //     }
+                    // }
+                    // $formatted_admin_answer = ucwords(join(' ', explode('_', $admin_answer)));
+                    $combined_review_answer = ucwords(join(' ', explode('_', $first_reviewer_answer)));
+                    // $formatted_second_reviewer_answer = ucwords(join(' ', explode('_', $second_reviewer_answer)));
 
                     if ($step_index != $prev_step || $tab_index != $prev_tab) {
                         $standard_heading = $this->get_section_heading($step_index, $tab_index);
@@ -116,7 +116,7 @@ class Telas_Generate_Pdf_Helper {
                     $prev_tab = $tab_index;
                     $question_answer_html .= "<tr>
                 <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer}* | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
+                <td style='width: 50%; border: 1px solid #000;'>Score:${combined_review_answer}
             </tr>";
                 }
             }
@@ -179,7 +179,7 @@ class Telas_Generate_Pdf_Helper {
                     $prev_tab = $tab_index;
                     $question_answer_html .= "<tr>
                         <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                        <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer}* | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
+                        <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer} | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
                     </tr>";
                 }
             }
@@ -193,8 +193,8 @@ class Telas_Generate_Pdf_Helper {
             foreach( $previous_comments as $previous_comment_key => $previous_comment ) {
                 if ( ! empty( $previous_comment ) ) {
                     $key_text = ucfirst( str_replace('_', ' ', $previous_comment_key) );
-                    $comment_html .= "<tr class='comments'>";
-                    $comment_html .= "<td style='width: 50%; border: 1px solid #000;'>";
+                    $comment_html .= "<tr class='comments pdf-subheading'>";
+                    $comment_html .= "<td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>";
                     $comment_html .= strtoupper($key_text) . " ";
                     $comment_html .= "</td>";
                     $comment_html .= $this->comment_actual_html( $previous_comment );
@@ -290,10 +290,22 @@ class Telas_Generate_Pdf_Helper {
         $domain_two_badge = $assessment_data['domain_two_badge'];
         $domain_three_badge = $assessment_data['domain_three_badge'];
         $domain_four_badge = $assessment_data['domain_four_badge'];
+        $overall_badge = $assessment_data['overall_badge'];
         $combined_review_end_date = $assessment_data['combined_review_end_date'];
         $submit_for_accreditation = $assessment_data['submit_for_accreditation'];
-        $comment_html = $this->get_comments_html($assessment_data['comments']);
+        $course_id = $assessment_data['course_id'];
+        
         $assessment_id = $assessment_data['assessment_id'];
+        $admin_assessment_id =  get_post_meta($course_id, 'assigned_admin_reviewer_assessment', true);
+        $admin_assessment_comment = $admin_assessment_id ? get_post_meta($admin_assessment_id, 'comment', true) : false;
+
+        $first_assessment_id = get_post_meta($course_id, 'assigned_first_reviewer_assessment', true);
+        $first_assessment_comment = $first_assessment_id ? get_post_meta($first_assessment_id, 'comment', true) : false;
+
+        $second_assessment_id = get_post_meta($course_id, 'assigned_second_reviewer_assessment', true);
+        $second_assessment_comment = $second_assessment_id ? get_post_meta($second_assessment_id, 'comment', true) : false;
+        $previous_comments = array();
+        $comment_html = $this->get_comments_html($assessment_data['comments'], $previous_comments);
         
         $question_answer_html = $this->get_question_answer_html_combined_review($assessment_data['all_assessment_values'], $assessment_id);
         // var_dump( $question_answer_html );
@@ -325,6 +337,7 @@ class Telas_Generate_Pdf_Helper {
         $assessment_answer_value = ! empty( $assessment_answer_values['question' . '_' . ($step_key+1) . '_' . ($performance_criteria_key+1) . '_' . ( $question_key+1 ) ] ) ? str_replace( '_', ' ', $assessment_answer_values['question' . '_' . ($step_key+1) . '_' . ($performance_criteria_key+1) . '_' . ( $question_key+1 ) ] ): '-';
         return $assessment_answer_value;
     }
+
 
     function get_answered_overall_value( $assessment_id = 859, $step_key, $performance_criteria_key, $domain_score ) {
         $assessment_answer_values = get_post_meta( $assessment_id, 'assessment_answer_data', true );

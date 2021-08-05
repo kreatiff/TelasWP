@@ -2126,10 +2126,12 @@ class Telas_Assesments_Admin {
 			'domain_two_badge' => $all_domain_entries['second']['badge'],
 			'domain_three_badge' => $all_domain_entries['third']['badge'],
 			'domain_four_badge' => $all_domain_entries['fourth']['badge'],
+            'overall_badge' => $overall_badge,
 			'submit_for_accreditation' => $submit_for_accreditation,
             'comments'=> serialize(get_post_meta( $assessment_id, 'comments', true )),
             'all_assessment_values' => get_post_meta( $assessment_id, 'assessment_data', true ),
             'assessment_id' => $assessment_id,
+            'course_id' => $course_id,
 		);
 		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
 		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible, true );

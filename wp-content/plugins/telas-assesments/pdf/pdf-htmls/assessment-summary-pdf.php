@@ -150,6 +150,14 @@ echo "<html>
                 <td style='width: 50%; border-bottom: 1px solid #0000;'>${domain_four_badge}</td>
             </tr>
             <tr class='pdf-subheading'>
+                <td style='width: 50%; border-bottom: 1px solid #00000;'>
+                  Eligible Accreditation Badge
+                </td>
+                <td style='width: 50%; border-bottom: 1px solid #00000;'>
+                  ${overall_badge}
+                </td>
+            </tr>
+            <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #00000; '>
                     Course Accreditation
                 </td>
