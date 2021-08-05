@@ -73,15 +73,15 @@ class Telas_Generate_Pdf_Helper {
                     $actual_tab_index = $tab_index + 1;
                     $actual_question_index = $question_index + 1;
                     $question_key = "question_${actual_step_index}_${actual_tab_index}_${actual_question_index}";
-                    // if ($all_assessment_values['admin_reviewer']['status'] === 'completed') {
-                    //     if (
-                    //         !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key])
-                    //     ) {
-                    //         $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
-                    //     } else {
-                    //         $admin_answer = '--';
-                    //     }
-                    // }
+                    if ($all_assessment_values['admin_reviewer']['status'] === 'completed') {
+                        if (
+                            !empty($all_assessment_values['admin_reviewer']['review_data'][$question_key])
+                        ) {
+                            $admin_answer = $all_assessment_values['admin_reviewer']['review_data'][$question_key];
+                        } else {
+                            $admin_answer = '--';
+                        }
+                    }
                     if ($all_assessment_values['first_reviewer']['status'] === 'completed') {
                         if (
                             !empty($all_assessment_values['first_reviewer']['review_data'][$question_key])
@@ -100,8 +100,8 @@ class Telas_Generate_Pdf_Helper {
                     //         $second_reviewer_answer = '--';
                     //     }
                     // }
-                    // $formatted_admin_answer = ucwords(join(' ', explode('_', $admin_answer)));
-                    $combined_review_answer = ucwords(join(' ', explode('_', $first_reviewer_answer)));
+                    $formatted_admin_answer = ucwords(join(' ', explode('_', $admin_answer)));
+                    $combined_review_answer = $first_reviewer_answer === '--' ? $formatted_admin_answer : ucwords(join(' ', explode('_', $first_reviewer_answer)));
                     // $formatted_second_reviewer_answer = ucwords(join(' ', explode('_', $second_reviewer_answer)));
 
                     if ($step_index != $prev_step || $tab_index != $prev_tab) {

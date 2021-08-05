@@ -45,4 +45,4 @@ wp-config.php
 wp-content/plugins/user-role-editor
 .htaccess
 # End of https://www.gitignore.io/api/linux,wordpress
-n
+wp-content/plugins/telas-assesments/pdf/generated-pdfs/*
