@@ -1994,6 +1994,8 @@ class Telas_Assesments_Admin {
             $assessment_end_date = get_post_meta( $course_id, $review_level . '_completion_date', true  );
             $assessment_data['commencement_date'] = $assessment_start_date;
             $assessment_data['completion_date'] = $assessment_end_date;
+            $assessment_data['assessment_assigned_user_level'] = get_post_meta( $assessment_id, 'assessment_assigned_user_level', true );
+            $assessment_data['assessment_id'] = $assessment_id;
             $pdf_helper = new Telas_Generate_Pdf_Helper();
             $pdf_data = $pdf_helper->generate_assessment_pdf($assessment_data);
             return $pdf_data;
@@ -3601,10 +3603,10 @@ class Telas_Assesments_Admin {
 
         if ( $accreditation_percentage <= 49 ) {
             update_post_meta( $course_id, 'accreditation_eligibility_status', 'Not eligible at this time' );
-            $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, false );
+            $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, false, $report_id );
         } else {
             update_post_meta( $course_id, 'accreditation_eligibility_status', 'Eligible' );
-            $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, true );
+            $mail_status = Telas_Assesments_Helper::accreditation_email( $course_id, $all_domain_entries, true, $report_id );
             if ( $mail_status ) {
                 update_post_meta( $report_id, 'review_status', 'accredited' );
                 update_post_meta( $report_id, 'accredited_mail_sent_date', date( get_option( 'date_format' ), current_time( 'timestamp', 0 ) ) );

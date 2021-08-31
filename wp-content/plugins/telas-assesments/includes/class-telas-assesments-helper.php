@@ -430,7 +430,7 @@ class Telas_Assesments_Helper {
 		wp_mail( $first_reviewer_email, $subject, $message, $headers );
 	}
 
-	public static function accreditation_email( $course_id, $domain_entries, $eligible ) {
+	public static function accreditation_email( $course_id, $domain_entries, $eligible, $assessment_id ) {
 		$course_submitter_first_name = get_post_meta( $course_id, 'courseSubmitterName', true );
 		$course_submitter_user_id = get_post_meta( $course_id, 'courseSubmitterId', true );
 		$course_submitter_user_data = get_userdata( $course_submitter_user_id );
@@ -489,8 +489,32 @@ class Telas_Assesments_Helper {
 			'domain_two_badge' => $domain_entries['second']['badge'],
 			'domain_three_badge' => $domain_entries['third']['badge'],
 			'domain_four_badge' => $domain_entries['fourth']['badge'],
+            'overall_badge' => $domain_entries['accreditation_badge'],
 			'submit_for_accreditation' => $submit_for_accreditation,
+            'comments'=> serialize(get_post_meta( $assessment_id, 'comments', true )),
+            'all_assessment_values' => get_post_meta( $assessment_id, 'assessment_data', true ),
+            'assessment_id' => $assessment_id,
+            'course_id' => $course_id,
 		);
+		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
+		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible, true );
+		// $assessment_pdf_data = array(
+		// 	'course_name' => $course_name,
+		// 	'course_package_type' => $course_package_type,
+		// 	'course_package_identifier' => $course_package_identifier,
+		// 	'course_module_identifier' => $course_module_identifier,
+		// 	'study_area' => $study_level,
+		// 	'course_level' => $course_level,
+		// 	'institution_name' => $institution_name,
+		// 	'faculty' => $faculty,
+		// 	'combined_review_start_date' => $combined_review_commencement_date,
+		// 	'combined_review_end_date' => $combined_review_completion_date,
+		// 	'domain_one_badge' => $domain_entries['first']['badge'],
+		// 	'domain_two_badge' => $domain_entries['second']['badge'],
+		// 	'domain_three_badge' => $domain_entries['third']['badge'],
+		// 	'domain_four_badge' => $domain_entries['fourth']['badge'],
+		// 	'submit_for_accreditation' => $submit_for_accreditation,
+		// );
 		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
 		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible );
 		$email_template_data     = self::prepare_accreditation_application_email( $email_replacement_array, $eligible );
