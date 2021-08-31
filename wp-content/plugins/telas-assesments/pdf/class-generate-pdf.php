@@ -269,6 +269,7 @@ class Telas_Generate_Pdf_Helper {
             $study_area = $assessment_data['study_area'];
             $course_level = $assessment_data['course_level'];
             $faculty = $assessment_data['faculty'];
+            $assessment_id = $assessment_data['assessment_id'];
             $question_answer_html = $this->get_question_answer_html( $assessment_data['assessment_answer_data'][0], $course_assessment_details );
             $assigned_user_level = $assessment_data['assessment_assigned_user_level'];
             if ( $assigned_user_level === 'interim_reviewer' ) {
@@ -278,8 +279,12 @@ class Telas_Generate_Pdf_Helper {
                 $comments = $assessment_data['comment'][0];
                 $comments_html = $this->get_comments_html( $comments, $previous_comments );
                 $commencement_date = date(get_option('date_format'), strtotime($assessment_data['commencement_date']));
-                $completion_date =$assessment_data['completion_date'];
-                $assessment_answer_data['interim_reviewer']['review_data'] = get_post_meta( $assessment_data['assessment_id'], 'assessment_answer_data', true );
+                $assigned_user_id = get_post_meta( $assessment_id, 'assigned_reviewer_user_id', true );
+                $interim_review_data = get_post_meta( $course_id, 'assigned_interim_reviews_obj', true );
+                
+                $completion_date = $interim_review_data[$assigned_user_id]['completed_date'];
+                $reviewer_name = get_user_meta( $assigned_user_id, 'nickname', true );
+                $assessment_answer_data['interim_reviewer']['review_data'] = get_post_meta($assessment_id, 'assessment_answer_data', true );
                 $assessment_answer_data['interim_reviewer']['status'] = 'completed';
                 
                 $assessment_answer_data['admin_reviewer'] = $course_assessment_details['admin_reviewer'];

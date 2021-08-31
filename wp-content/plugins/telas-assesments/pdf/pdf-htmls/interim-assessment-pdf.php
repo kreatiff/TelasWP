@@ -118,6 +118,10 @@ echo "<html>
                 <td style='width: 50%; border: 1px solid #000;'>Review Completion Date</td>
                 <td style='width: 50%; border: 1px solid #000;'>${completion_date}</td>
             </tr>
+            <tr>
+                <td style='width: 50%; border: 1px solid #000;'>Reviewer Name</td>
+                <td style='width: 50%; border: 1px solid #000;'>${reviewer_name}</td>
+            </tr>
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
                     Assessment Data
