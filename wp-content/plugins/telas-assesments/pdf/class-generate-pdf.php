@@ -275,8 +275,12 @@ class Telas_Generate_Pdf_Helper {
             if ( $assigned_user_level === 'interim_reviewer' ) {
                 $admin_assessment_id =  get_post_meta($course_id, 'assigned_admin_reviewer_assessment', true);
                 $admin_assessment_comment = $admin_assessment_id ? get_post_meta($admin_assessment_id, 'comment', true) : false;
-                $previous_comments = array();
+                $admin_assessment_id =  get_post_meta($course_id, 'assigned_admin_reviewer_assessment', true);
                 $comments = $assessment_data['comment'][0];
+                $previous_comments = array(
+                    'admin_reviewer_comment' => $admin_assessment_comment,
+                    'interim_reviewer_comment' => $comments,
+                );
                 $comments_html = $this->get_comments_html( $comments, $previous_comments );
                 $commencement_date = date(get_option('date_format'), strtotime($assessment_data['commencement_date']));
                 $assigned_user_id = get_post_meta( $assessment_id, 'assigned_reviewer_user_id', true );
