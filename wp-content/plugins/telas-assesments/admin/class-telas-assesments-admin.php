@@ -2455,7 +2455,7 @@ class Telas_Assesments_Admin {
                     // update_user_meta($course_id, 'user_available', 'yes');
                     break;
                 case 'interim_reviewer':
-                    $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);
+                    $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);   
                     $assigned_interim_reviews_obj[$post_author_id]['status'] = 'completed';
                     $assigned_interim_reviews_obj[$post_author_id]['completed_date'] =  date($date_format, current_time('timestamp', 0));
                     update_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj);
@@ -2532,6 +2532,7 @@ class Telas_Assesments_Admin {
             'first_review_comment' => $first_assessment_comment,
             'second_review_comment' => $second_assessment_comment,
         );
+        $author_id = get_post_field('post_author' , $assessment_id);
         $course_details = array(
             'title'                 => get_the_title($course_id),
             'review_status'         => get_post_meta($assessment_id, 'percentage_completed', true),
@@ -2546,6 +2547,7 @@ class Telas_Assesments_Admin {
             'studyArea'             => get_post_meta($course_id, 'studyLevel', true),
             'courseLevel'           => get_post_meta($course_id, 'courseLevel', true),
             'previous_comments'     => $previous_comments,
+            'reviewer_name'         => get_the_author_meta( 'display_name', $author_id ),             
         );
         
         $all_meta       = get_post_meta($assessment_id);
@@ -3854,6 +3856,7 @@ class Telas_Assesments_Admin {
                 'review_data' => $interim_reviewer_assessment_data
             ),
         );
+        
 
         $course_title             = get_the_title($course_id);
         $interim_review_args = array(
