@@ -2442,6 +2442,7 @@ class Telas_Assesments_Admin {
             array_push($all_completed_assessments, $assessment_id);
             update_post_meta($assigned_course_id, 'completed_assessments', array_unique($all_completed_assessments));
             update_user_meta($post_author_id, 'user_available', 'yes');
+            $is_test_course = $all_params['is_test_course'];
             switch ( $assessment_level ) {
                 case 'admin_reviewer':
                     $all_assessments['admin_reviewer']['status']      = 'completed';
@@ -2547,7 +2548,8 @@ class Telas_Assesments_Admin {
             'studyArea'             => get_post_meta($course_id, 'studyLevel', true),
             'courseLevel'           => get_post_meta($course_id, 'courseLevel', true),
             'previous_comments'     => $previous_comments,
-            'reviewer_name'         => get_the_author_meta( 'display_name', $author_id ),             
+            'reviewer_name'         => get_the_author_meta( 'display_name', $author_id ),
+            'is_test_course'        => get_post_meta( $course_id, 'forTest', true ) === 'yes',           
         );
         
         $all_meta       = get_post_meta($assessment_id);
