@@ -2453,7 +2453,6 @@ class Telas_Assesments_Admin {
                     update_post_meta($assigned_course_id, 'assessment_progress', 'in-progress');
                     update_post_meta($assigned_course_id, 'admin_reviewer_completion_date', date($date_format, current_time('timestamp', 0)));
                     update_post_meta($assigned_course_id, 'current_review_status', 'Admin Review Completed');
-                    // update_user_meta($course_id, 'user_available', 'yes');
                     break;
                 case 'interim_reviewer':
                     $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);   
@@ -2793,11 +2792,12 @@ class Telas_Assesments_Admin {
                 update_user_meta($reviewer_user_id, 'user_available', 'no');
                 array_push($assessments, $new_assessment_id);
                 update_post_meta($course_id, 'linked_assessments', $assessments);
+                $is_test_course = get_post_meta( $course_id, 'forTest', true ) === 'yes' ? 'yes' : 'no';
+                update_post_meta( $new_assessment_id, 'linked_to_test_course', $is_test_course );
                 break;
             case 'interim_reviewer':
-                $this->assign_interim_reviewer($reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course);
-                array_push($assessments, $new_assessment_id);
-                update_post_meta($course_id, 'linked_assessments', $assessments);
+                $this->assign_interim_reviewer($reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course, $assessments);
+                
                 break;
             case 'first_reviewer':
                 $create_new_assessment_args = array(
@@ -3790,7 +3790,7 @@ class Telas_Assesments_Admin {
         exit;
     }
 
-    function assign_interim_reviewer( $reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course )
+    function assign_interim_reviewer( $reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course, $linked_assessments )
     {
         $create_new_assessment_args = array(
         'post_type'   => 'telas_assessment',
@@ -3831,6 +3831,10 @@ class Telas_Assesments_Admin {
         update_post_meta($new_assessment_id, 'assigned_reviewer_user_id', $reviewer_user_id);
         update_post_meta( $new_assessment_id, 'course_submitter_id', $course_submitter_id );
         update_user_meta($reviewer_user_id, 'user_available', 'no');
+        $is_test_course = get_post_meta( $course_id, 'forTest', true ) === 'yes' ? 'yes' : 'no';
+        update_post_meta( $new_assessment_id, 'linked_to_test_course', $is_test_course );
+        array_push($linked_assessments, $new_assessment_id);
+        update_post_meta($course_id, 'linked_assessments', $linked_assessments);
     }
 
     function create_interim_reviewer_report( $course_id, $assigned_interim_reviews_obj, $interim_reviewer_id )
@@ -3862,10 +3866,10 @@ class Telas_Assesments_Admin {
 
         $course_title             = get_the_title($course_id);
         $interim_review_args = array(
-        'post_type'   => 'telas_report',
-        'post_title'  => 'Test Assessment of course ' . $course_title . ' by ' . $interim_reviewer_name,
-        'post_status' => 'publish',
-        'post_author' => $interim_reviewer_id,
+            'post_type'   => 'telas_report',
+            'post_title'  => 'Test Assessment of course ' . $course_title . ' by ' . $interim_reviewer_name,
+            'post_status' => 'publish',
+            'post_author' => $interim_reviewer_id,
         );
         $new_interim_review_id   = wp_insert_post($interim_review_args);
         update_post_meta($course_id, 'report_post_id', $new_interim_review_id);
