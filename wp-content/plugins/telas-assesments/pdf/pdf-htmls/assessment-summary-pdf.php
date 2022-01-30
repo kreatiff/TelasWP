@@ -84,36 +84,36 @@ echo "<html>
                 </td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000'>Course name</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${course_name}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000'>Course name</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${course_name}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Course Package Type</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${course_package_type}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Course Package Type</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${course_package_type}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Course Package Identifier</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${course_package_identifier}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Course Package Identifier</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${course_package_identifier}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Course module Identifier</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${course_module_identifier}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Course module Identifier</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${course_module_identifier}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Study Area</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${study_area}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Study Area</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${study_area}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Course Level</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${course_level}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Course Level</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${course_level}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Faculty / Dept ( if applicable )</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${faculty}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Faculty / Dept ( if applicable )</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${faculty}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Submit for Accreditation</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${submit_for_accreditation}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Submit for Accreditation</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${submit_for_accreditation}</td>
             </tr>
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #00000; '>
@@ -121,12 +121,12 @@ echo "<html>
                 </td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Review start date</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${combined_review_start_date}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Review start date</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${combined_review_start_date}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>Review end date</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${combined_review_end_date}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Review end date</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${combined_review_end_date}</td>
             </tr>
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #00000; '>
@@ -134,26 +134,26 @@ echo "<html>
                 </td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>1. Online Environment</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${domain_one_badge}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>1. Online Environment</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${domain_one_badge}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>2. Learner Support</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${domain_two_badge}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>2. Learner Support</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${domain_two_badge}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>3. Learning & Assessment Tasks</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${domain_three_badge}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>3. Learning & Assessment Tasks</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${domain_three_badge}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>4. Learning Resources</td>
-                <td style='width: 50%; border-bottom: 1px solid #0000;'>${domain_four_badge}</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>4. Learning Resources</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${domain_four_badge}</td>
             </tr>
             <tr class='pdf-subheading'>
-                <td style='width: 50%; border-bottom: 1px solid #00000;'>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #00000;'>
                   Eligible Accreditation Badge
                 </td>
-                <td style='width: 50%; border-bottom: 1px solid #00000;'>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #00000;'>
                   ${overall_badge}
                 </td>
             </tr>

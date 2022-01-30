@@ -2035,8 +2035,8 @@ class Telas_Assesments_Admin {
         $report_id = get_post_meta( $course_id, 'report_post_id', true );
 
         $assigned_course_id         = get_post_meta($report_id, 'assigned_course', true);
-        $current_report_status = get_post_meta($report_id, 'assessment_status', true);
-        if ($current_report_status !== 'complete' ) {
+        $current_report_status = get_post_meta($report_id, 'assessment_status', true) === 'completed' ? 'complete' : get_post_meta($report_id, 'assessment_status', true) ;
+        if ($current_report_status !== 'complete') {
             return false;
         }
         $all_completed_assessments          = get_post_meta( $report_id, 'assessment_data', true );
@@ -3405,20 +3405,22 @@ class Telas_Assesments_Admin {
                 'standard_7_comment' => '',
             ),
             'is_pending' => get_post_meta( $report_id, 'is_pending', true ) ? get_post_meta( $report_id, 'is_pending', true) : 'no',
-            'original_assessments_data' => $this->prepare_assessments_data_by_course_id( $course_id ),
+            'original_assessments_data' => $this->prepare_assessments_data_by_course_id( $course_id, $report_id ),
+            'is_interim'=> get_post_meta( $report_id, 'for_test', true ) ? get_post_meta( $report_id, 'for_test', true) : 'no',   
         );
     }
 
-    function prepare_assessments_data_by_course_id( $course_id ) {
+    function prepare_assessments_data_by_course_id( $course_id, $report_id ) {
         $completed_assessments = get_post_meta( $course_id, 'completed_assessments', true );
         $assessments_data = get_post_meta( $course_id, 'assessments', true );
         $admin_assessment_comments = get_post_meta( $assessments_data['admin_reviewer']['assessment_id'], 'comment', true );
         $first_assessment_comments = get_post_meta( $assessments_data['first_reviewer']['assessment_id'], 'comment', true );
         $second_assessment_comments = get_post_meta( $assessments_data['second_reviewer']['assessment_id'], 'comment', true );
+        $first_reviewer_data = get_post_meta( $report_id, 'first_reviewer_assessment_data', true );
         return array(
             'admin_reviewer_data'   => $assessments_data['admin_reviewer']['review_data'],
-            'first_reviewer_data'   => $assessments_data['first_reviewer']['review_data'],
-            'second_reviewer_data'  => $assessments_data['second_reviewer']['review_data'],
+            'first_reviewer_data'   => $first_reviewer_data['review_data'],
+            'second_reviewer_data'  => !empty( $assessments_data['second_reviewer']['review_data'] ) ? $assessments_data['second_reviewer']['review_data'] : array(),
             'admin_reviewer_comments' => $admin_assessment_comments,
             'first_reviewer_comments' => $first_assessment_comments,
             'second_reviewer_comments' => $second_assessment_comments,
@@ -3441,6 +3443,7 @@ class Telas_Assesments_Admin {
         $report_id                  = $all_params['id'];
         $assigned_course_id         = get_post_meta($report_id, 'assigned_course', true);
         $current_report_status = get_post_meta($report_id, 'assessment_status', true);
+        $current_report_status =  get_post_meta( $report_id, 'for_test', true ) === 'yes' ? 'complete' : $current_report_status;
         if ($current_report_status !== 'complete' ) {
             return array(
             'calc'   => false,

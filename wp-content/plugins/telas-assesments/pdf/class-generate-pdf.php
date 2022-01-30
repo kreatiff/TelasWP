@@ -115,8 +115,8 @@ class Telas_Generate_Pdf_Helper {
                     $prev_step = $step_index;
                     $prev_tab = $tab_index;
                     $question_answer_html .= "<tr>
-                <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                <td style='width: 50%; border: 1px solid #000;'>Score:${combined_review_answer}
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Score:${combined_review_answer}
             </tr>";
                 }
             }
@@ -206,6 +206,9 @@ class Telas_Generate_Pdf_Helper {
     }
 
     function get_comments_html( $comments, $previous_comments = array() ) {
+        if ( empty( $comments ) ) {
+            $comments = array();
+        }
         $comment_html = "";
         if ( ! empty( $previous_comments ) ) {
             foreach( $previous_comments as $previous_comment_key => $previous_comment ) {
@@ -227,6 +230,7 @@ class Telas_Generate_Pdf_Helper {
     function comment_actual_html( $comments ) {
         $comment_data = ! empty( $comments ) && ! is_array( $comments ) && is_string( $comments ) ? unserialize( $comments ) : $comments;
         $comments_actual_html = '';
+        if ( is_string( $comments ) ) return '';
         foreach ($comment_data as $comment_key => $comment) {
             $comment_title_array = explode('_', $comment_key);
             $comment_number = (int)$comment_title_array[1] + 1;
@@ -342,13 +346,13 @@ class Telas_Generate_Pdf_Helper {
         
         $assessment_id = $assessment_data['assessment_id'];
         $admin_assessment_id =  get_post_meta($course_id, 'assigned_admin_reviewer_assessment', true);
-        $admin_assessment_comment = $admin_assessment_id ? get_post_meta($admin_assessment_id, 'comment', true) : false;
+        $admin_assessment_comment = $admin_assessment_id ? get_post_meta($admin_assessment_id, 'comment', true) : array();
 
         $first_assessment_id = get_post_meta($course_id, 'assigned_first_reviewer_assessment', true);
-        $first_assessment_comment = $first_assessment_id ? get_post_meta($first_assessment_id, 'comment', true) : false;
+        $first_assessment_comment = $first_assessment_id ? get_post_meta($first_assessment_id, 'comment', true) : array();
 
         $second_assessment_id = get_post_meta($course_id, 'assigned_second_reviewer_assessment', true);
-        $second_assessment_comment = $second_assessment_id ? get_post_meta($second_assessment_id, 'comment', true) : false;
+        $second_assessment_comment = $second_assessment_id ? get_post_meta($second_assessment_id, 'comment', true) : array();
         $previous_comments = array();
         $comment_html = $this->get_comments_html($assessment_data['comments'], $previous_comments);
         
