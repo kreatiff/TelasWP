@@ -83,44 +83,44 @@ echo "<html>
                 </td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000'>Course name</td>
-                <td style='width: 50%; border: 1px solid #000;'>${course_name}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000'>Course name</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${course_name}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Course Package Type</td>
-                <td style='width: 50%; border: 1px solid #000;'>${course_package_type}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Course Package Type</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${course_package_type}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Course Package Identifier</td>
-                <td style='width: 50%; border: 1px solid #000;'>${course_package_identifier}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Course Package Identifier</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${course_package_identifier}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Course module Identifier</td>
-                <td style='width: 50%; border: 1px solid #000;'>${course_module_identifier}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Course module Identifier</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${course_module_identifier}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Study Area</td>
-                <td style='width: 50%; border: 1px solid #000;'>${study_area}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Study Area</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${study_area}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Course Level</td>
-                <td style='width: 50%; border: 1px solid #000;'>${course_level}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Course Level</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${course_level}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Faculty / Dept ( if applicable )</td>
-                <td style='width: 50%; border: 1px solid #000;'>${faculty}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Faculty / Dept ( if applicable )</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${faculty}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Review Commencement Date</td>
-                <td style='width: 50%; border: 1px solid #000;'>${commencement_date}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Review Commencement Date</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${commencement_date}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Review Completion Date</td>
-                <td style='width: 50%; border: 1px solid #000;'>${completion_date}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Review Completion Date</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${completion_date}</td>
             </tr>
             <tr>
-                <td style='width: 50%; border: 1px solid #000;'>Reviewer Name</td>
-                <td style='width: 50%; border: 1px solid #000;'>${reviewer_name}</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>Reviewer Name</td>
+                <td colspan='2' style='width: 50%; border: 1px solid #000;'>${reviewer_name}</td>
             </tr>
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>

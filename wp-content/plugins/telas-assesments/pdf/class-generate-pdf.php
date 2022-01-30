@@ -181,7 +181,7 @@ class Telas_Generate_Pdf_Helper {
                     if ($step_index != $prev_step || $tab_index != $prev_tab) {
                         $standard_heading = $this->get_section_heading($step_index, $tab_index);
                         $question_answer_html .= "<tr class='pdf-subheading'>
-                            <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                            <td colspan='2' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
                                 ${standard_heading}
                             </td>
                         </tr>";
@@ -190,8 +190,8 @@ class Telas_Generate_Pdf_Helper {
                     $prev_tab = $tab_index;
                     if ( $reviewer_level === 'interim_reviewer' ) {
                         $question_answer_html .= "<tr>
-                        <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                        <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer} | Interim Reviewer:${formatted_interim_reviewer_answer}</td>
+                        <td colspan='2' style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
+                        <td colspan='2' style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer} | Interim Reviewer:${formatted_interim_reviewer_answer}</td>
                     </tr>";
                     } else {
                         $question_answer_html .= "<tr>
@@ -235,11 +235,11 @@ class Telas_Generate_Pdf_Helper {
             $comment_title_array = explode('_', $comment_key);
             $comment_number = (int)$comment_title_array[1] + 1;
             $comments_actual_html .= "<tr class='comments'>";
-            $comments_actual_html .= "<td style='width: 50%; border: 1px solid #000; font-weight: 100;'>";
+            $comments_actual_html .= "<td colspan='2' style='width: 50%; border: 1px solid #000; font-weight: 100;'>";
             $comments_actual_html .= strtoupper($comment_title_array[0]) . " ";
             $comments_actual_html .=  $comment_number . ":";
             $comments_actual_html .= "</td>";
-            $comments_actual_html .= "<td style='width: 50%; border: 1px solid #000; font-weight: 100;'>${comment}</td>";
+            $comments_actual_html .= "<td colspan='2' style='width: 50%; border: 1px solid #000; font-weight: 100;'>${comment}</td>";
             $comments_actual_html .= "</tr>";
         }
         return $comments_actual_html;
@@ -283,7 +283,7 @@ class Telas_Generate_Pdf_Helper {
                 $comments = $assessment_data['comment'][0];
                 $previous_comments = array(
                     'admin_reviewer_comment' => $admin_assessment_comment,
-                    'interim_reviewer_comment' => $comments,
+                    'interim_reviewer_comment' => is_serialized( $comments ) ? unserialize( $comments ) : $comments,
                 );
                 $comments_html = $this->get_comments_html( $comments, $previous_comments );
                 $commencement_date = date(get_option('date_format'), strtotime($assessment_data['commencement_date']));
