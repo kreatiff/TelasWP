@@ -74,7 +74,7 @@ echo "<html>
     <table class='items' width='100%' style='border-collapse: collapse;' id='pdf-table'>
         <thead>
             <tr>
-                <th colspan='4' class='pdf-heading' style='border-bottom: 1px solid #000000;'>Combined Assessment Report</th>
+                <th colspan='4' class='pdf-heading' style='border-bottom: 1px solid #000000;'>${PDF_sub_heading}</th>
             </tr>
         </thead>
         <tbody>
@@ -128,6 +128,7 @@ echo "<html>
                 <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Review end date</td>
                 <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${combined_review_end_date}</td>
             </tr>
+            ${interim_reviewer_table_row}
             <tr class='pdf-subheading'>
                 <td colspan='4' style='width: 100%; border-bottom: 1px solid #00000; '>
                     Assessed Badge Level (per domain)*
@@ -149,7 +150,7 @@ echo "<html>
                 <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>4. Learning Resources</td>
                 <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${domain_four_badge}</td>
             </tr>
-            <tr class='pdf-subheading'>
+            <tr class=''>
                 <td colspan='2' style='width: 50%; border-bottom: 1px solid #00000;'>
                   Eligible Accreditation Badge
                 </td>

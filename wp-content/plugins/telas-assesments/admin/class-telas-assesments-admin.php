@@ -2113,6 +2113,29 @@ class Telas_Assesments_Admin {
         } else {
            $eligible = true;
         }
+
+        $for_test = get_post_meta( $course_id, 'forTest', true );
+        $interim_reviewer_data = false;
+
+        if ( $for_test === 'yes' ) {
+            $interim_reviewer_id = get_post_meta( $assessment_id, 'first_reviewer_id', true );
+            $admin_assessment_id = get_post_meta( $course_id, 'assigned_admin_reviewer_assessment', true );
+            $all_interim_reviews = get_post_meta( $course_id, 'assigned_interim_reviews_obj', true );
+            $interim_reviewer_assessment_id = $all_interim_reviews[$interim_reviewer_id]['assessment_id'];
+            $interim_reviewer_commencement_date = $all_interim_reviews[$interim_reviewer_id]['commencement_date'];
+            $interim_reviewer_completed_date = $all_interim_reviews[$interim_reviewer_id]['completed_date'];
+            $interim_reviewer_comments = get_post_meta( $interim_reviewer_assessment_id, 'comment', true );
+            $admin_reviewer_comments = get_post_meta( $admin_assessment_id, 'comment', true );
+            $interim_reviewer_data = array(
+                'interim_reviewer_assessment_id' => $interim_reviewer_assessment_id,
+                'interim_reviewer_commencement_date' => $interim_reviewer_commencement_date,
+                'interim_reviewer_completed_date' => $interim_reviewer_completed_date,
+                'interim_reviewer_comments' => $interim_reviewer_comments,
+                'admin_reviewer_comments' => $admin_reviewer_comments,
+                'interim_reviewer_id' => $interim_reviewer_id,
+            );
+        }
+
         $assessment_pdf_data = array(
 			'course_name' => $course_name,
 			'course_package_type' => $course_package_type,
@@ -2134,6 +2157,7 @@ class Telas_Assesments_Admin {
             'all_assessment_values' => get_post_meta( $assessment_id, 'assessment_data', true ),
             'assessment_id' => $assessment_id,
             'course_id' => $course_id,
+            'interim_reviewer_data' => $interim_reviewer_data,
 		);
 		$assessment_pdf_instance = new Telas_Generate_Pdf_Helper();
 		$assessment_attachment = $assessment_pdf_instance->generate_assessment_summary_pdf( $assessment_pdf_data, $eligible, true );
@@ -3417,6 +3441,7 @@ class Telas_Assesments_Admin {
         $first_assessment_comments = get_post_meta( $assessments_data['first_reviewer']['assessment_id'], 'comment', true );
         $second_assessment_comments = get_post_meta( $assessments_data['second_reviewer']['assessment_id'], 'comment', true );
         $first_reviewer_data = get_post_meta( $report_id, 'first_reviewer_assessment_data', true );
+        error_log(print_r( $assessments_data, true ));
         return array(
             'admin_reviewer_data'   => $assessments_data['admin_reviewer']['review_data'],
             'first_reviewer_data'   => $first_reviewer_data['review_data'],
@@ -3855,6 +3880,7 @@ class Telas_Assesments_Admin {
         $assessments_obj = get_post_meta($course_id, 'assessments', true);
         $admin_assessment_data = $assessments_obj['admin_reviewer']['review_data'];
         $interim_reviewer_assessment_data = $assigned_interim_reviews_obj[$interim_reviewer_id]['review_data'];
+
         $assessment_data = array(
             'admin_reviewer' => array(
                 'status' => 'completed',

@@ -181,7 +181,7 @@ class Telas_Generate_Pdf_Helper {
                     if ($step_index != $prev_step || $tab_index != $prev_tab) {
                         $standard_heading = $this->get_section_heading($step_index, $tab_index);
                         $question_answer_html .= "<tr class='pdf-subheading'>
-                            <td colspan='2' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
+                            <td colspan='4' style='width: 100%; border-bottom: 1px solid #000; border-top: 1px solid #000; text-align: center;'>
                                 ${standard_heading}
                             </td>
                         </tr>";
@@ -195,8 +195,8 @@ class Telas_Generate_Pdf_Helper {
                     </tr>";
                     } else {
                         $question_answer_html .= "<tr>
-                            <td style='width: 50%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
-                            <td style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer} | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
+                            <td colspan='2' style='width: 100%; border: 1px solid #000;'>${actual_step_index}.${actual_tab_index}.${actual_question_index}. ${question}</td>
+                            <td colspan='2' style='width: 50%; border: 1px solid #000;'>Admin Reviewer:${formatted_admin_answer} | First Reviewer:${formatted_first_reviewer_answer} | Second Reviewer:${formatted_second_reviewer_answer}</td>
                         </tr>";
                     }
                 }
@@ -354,8 +354,26 @@ class Telas_Generate_Pdf_Helper {
         $second_assessment_id = get_post_meta($course_id, 'assigned_second_reviewer_assessment', true);
         $second_assessment_comment = $second_assessment_id ? get_post_meta($second_assessment_id, 'comment', true) : array();
         $previous_comments = array();
+        $PDF_sub_heading = 'Combined Assessment Report';
+        if ( ! empty( $assessment_data['interim_reviewer_data'] ) ) {
+            $interim_reviewer_comments = $assessment_data['interim_reviewer_data']['interim_reviewer_comments'];
+            $admin_reviewer_comments = $assessment_data['interim_reviewer_data']['admin_reviewer_comments'];
+            $previous_comments = array(
+                'admin_reviewer_comment' => $admin_reviewer_comments,
+                'interim_reviewer_comment' => is_serialized( $interim_reviewer_comments ) ? unserialize( $interim_reviewer_comments ) : $interim_reviewer_comments,
+            );
+            $PDF_sub_heading = 'Test Course Assessment';
+            $interim_reviewer_id = $assessment_data['interim_reviewer_data']['interim_reviewer_id'];
+            $interim_reviewer_name = get_userdata($interim_reviewer_id)->display_name;
+            $interim_reviewer_table_row = "<tr>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>Reviewer Name</td>
+                <td colspan='2' style='width: 50%; border-bottom: 1px solid #0000;'>${interim_reviewer_name}</td>
+            </tr>";
+            $combined_review_start_date =
+            $assessment_data['interim_reviewer_data']['interim_reviewer_commencement_date'];
+            $combined_review_end_date =  $assessment_data['interim_reviewer_data']['interim_reviewer_completed_date'];
+        }
         $comment_html = $this->get_comments_html($assessment_data['comments'], $previous_comments);
-        
         $question_answer_html = $this->get_question_answer_html_combined_review($assessment_data['all_assessment_values'], $assessment_id);
         // var_dump( $question_answer_html );
         // return 'jhere';
