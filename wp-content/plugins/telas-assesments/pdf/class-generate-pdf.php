@@ -48,7 +48,8 @@ class Telas_Generate_Pdf_Helper {
 		// Write some HTML code:
         $html = $this->assessment_pdf_generate($assessment_data);
 		$mpdf_instance->WriteHTML($html);
-		$mpdf_instance->SetProtection(array('print'));
+		$mpdf_instance->SetProtection(array('print', 'modify', 'print-highres', 'copy', 'annot-forms', 'fill-forms',
+		'extract', 'assemble', ));
 		$mpdf_instance->SetTitle("TELAS. - Assessment Summary");
 		$mpdf_instance->SetAuthor("TELAS.");
 		$mpdf_instance->SetWatermarkText("TELAS");

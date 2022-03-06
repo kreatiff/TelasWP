@@ -3441,7 +3441,6 @@ class Telas_Assesments_Admin {
         $first_assessment_comments = get_post_meta( $assessments_data['first_reviewer']['assessment_id'], 'comment', true );
         $second_assessment_comments = get_post_meta( $assessments_data['second_reviewer']['assessment_id'], 'comment', true );
         $first_reviewer_data = get_post_meta( $report_id, 'first_reviewer_assessment_data', true );
-        error_log(print_r( $assessments_data, true ));
         return array(
             'admin_reviewer_data'   => $assessments_data['admin_reviewer']['review_data'],
             'first_reviewer_data'   => $first_reviewer_data['review_data'],
@@ -3512,6 +3511,12 @@ class Telas_Assesments_Admin {
         $all_domain_entries['third']['selected_total']  = round($third_domain_selected_total, 2);
         $all_domain_entries['fourth']['selected_total'] = round($fourth_domain_selected_total, 2);
 
+        // $first_domain_selected_total = 19.47;
+        // $second_domain_selected_total = 20.72;
+        // $third_domain_selected_total = 19.13;
+        // $fourth_domain_selected_total = 20.20;
+
+        
         $first_domain_badge_level  = round(( $first_domain_selected_total / 25 ) * 100);
         $first_domain_badge = $this->get_badge_value( $first_domain_badge_level );
         
@@ -3525,6 +3530,20 @@ class Telas_Assesments_Admin {
         $fourth_domain_badge = $this->get_badge_value( $fourth_domain_badge_level );
         
         $accreditation_percentage  = round(( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ));
+
+        // print_r( 'here' );
+        // print_r( $first_domain_badge_level);
+        // print_r( $first_domain_badge);
+        // print_r('---');
+        // print_r( $second_domain_badge_level);
+        // print_r( $second_domain_badge);
+        // print_r('---');
+        // print_r( $third_domain_badge_level);
+        // print_r( $third_domain_badge);
+        // print_r('---');
+        // print_r( $fourth_domain_badge_level);
+        // print_r( $fourth_domain_badge);
+
         
         $overall_badge = $this->get_badge_value( $accreditation_percentage );
         
