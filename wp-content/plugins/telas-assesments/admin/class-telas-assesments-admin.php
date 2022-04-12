@@ -1972,7 +1972,7 @@ class Telas_Assesments_Admin {
                 'permission_callback' => array( $this, 'download_pdf_permission_callback' ),
             )
         );
-        
+
     }
     public function download_pdf_callback( $request ) {
         $params = $request->get_params();
@@ -2027,7 +2027,7 @@ class Telas_Assesments_Admin {
 		$combined_review_commencement_date = get_post_meta( $course_id, 'combined_review_commencement_date', true );
 		$combined_review_completion_date = get_post_meta( $course_id, 'combined_review_completion_date', true );
 		$submit_for_accreditation = get_post_meta( $course_id, 'submitForAccreditation', true );
-       
+
         $has_report_created = get_post_meta( $course_id, 'has_report_created', true );
         if ( empty( $has_report_created ) || $has_report_created === 'no' ) {
             return false;
@@ -2070,7 +2070,7 @@ class Telas_Assesments_Admin {
                 $fourth_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
             }
         }
-        
+
         $all_domain_entries['first']['selected_total']  = round($first_domain_selected_total, 2);
         $all_domain_entries['second']['selected_total'] = round($second_domain_selected_total, 2);
         $all_domain_entries['third']['selected_total']  = round($third_domain_selected_total, 2);
@@ -2078,33 +2078,33 @@ class Telas_Assesments_Admin {
 
         $first_domain_badge_level  = round(( $first_domain_selected_total / 25 ) * 100);
         $first_domain_badge = $this->get_badge_value( $first_domain_badge_level );
-        
+
         $second_domain_badge_level = round(( $second_domain_selected_total / 25 ) * 100);
         $second_domain_badge = $this->get_badge_value( $second_domain_badge_level );
-        
+
         $third_domain_badge_level  = round(( $third_domain_selected_total / 25 ) * 100);
         $third_domain_badge = $this->get_badge_value( $third_domain_badge_level );
-        
+
         $fourth_domain_badge_level = round(( $fourth_domain_selected_total / 25 ) * 100);
         $fourth_domain_badge = $this->get_badge_value( $fourth_domain_badge_level );
-        
+
         $accreditation_percentage  = round(( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ));
-        
+
         $overall_badge = $this->get_badge_value( $accreditation_percentage );
-        
+
 
         $all_domain_entries['first']['badge_level']     = $first_domain_badge_level;
         $all_domain_entries['first']['badge']     = $first_domain_badge;
 
         $all_domain_entries['second']['badge_level']    = $second_domain_badge_level;
         $all_domain_entries['second']['badge']    = $second_domain_badge;
-        
+
         $all_domain_entries['third']['badge_level']     = $third_domain_badge_level;
         $all_domain_entries['third']['badge']     = $third_domain_badge;
-        
+
         $all_domain_entries['fourth']['badge_level']    = $fourth_domain_badge_level;
         $all_domain_entries['fourth']['badge']    = $fourth_domain_badge;
-        
+
         $all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
         $all_domain_entries['accreditation_badge']      = $overall_badge;
 
@@ -2311,7 +2311,7 @@ class Telas_Assesments_Admin {
         $second_assessment_id  = array_intersect($completed_assessments, $assigned_second_reviewer_assessment_ids);
         $interim_assessment_id = array_intersect($completed_assessments, $assigned_interim_reviewer_assessment_ids);
         $is_test_course = (get_post_meta($post_id, 'forTest', true) && get_post_meta($post_id, 'forTest', true) === 'yes');
-        
+
         $interim_reviewer_data = $is_test_course ? array(
             'assigned_interim_reviewer_user_ids' => get_post_meta($post_id, 'assigned_interim_reviewer_user_ids', true),
             'assigned_interim_review_ids' => get_post_meta($post_id, 'assigned_interim_review_ids', true),
@@ -2479,7 +2479,7 @@ class Telas_Assesments_Admin {
                     update_post_meta($assigned_course_id, 'current_review_status', 'Admin Review Completed');
                     break;
                 case 'interim_reviewer':
-                    $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);   
+                    $assigned_interim_reviews_obj = get_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', true);
                     $assigned_interim_reviews_obj[$post_author_id]['status'] = 'completed';
                     $assigned_interim_reviews_obj[$post_author_id]['completed_date'] =  date($date_format, current_time('timestamp', 0));
                     update_post_meta($assigned_course_id, 'assigned_interim_reviews_obj', $assigned_interim_reviews_obj);
@@ -2545,10 +2545,10 @@ class Telas_Assesments_Admin {
         $course_id      = get_post_meta($assessment_id, 'assigned_course', true);
         $admin_assessment_id =  get_post_meta($course_id, 'assigned_admin_reviewer_assessment', true);
         $admin_assessment_comment = $admin_assessment_id ? get_post_meta($admin_assessment_id, 'comment', true) : false;
-        
+
         $first_assessment_id = get_post_meta($course_id, 'assigned_first_reviewer_assessment', true);
         $first_assessment_comment = $first_assessment_id ? get_post_meta($first_assessment_id, 'comment', true) : false;
-        
+
         $second_assessment_id = get_post_meta($course_id, 'assigned_second_reviewer_assessment', true);
         $second_assessment_comment = $second_assessment_id ? get_post_meta($second_assessment_id, 'comment', true) : false;
         $previous_comments = array(
@@ -2572,9 +2572,9 @@ class Telas_Assesments_Admin {
             'courseLevel'           => get_post_meta($course_id, 'courseLevel', true),
             'previous_comments'     => $previous_comments,
             'reviewer_name'         => get_the_author_meta( 'display_name', $author_id ),
-            'is_test_course'        => get_post_meta( $course_id, 'forTest', true ) === 'yes',           
+            'is_test_course'        => get_post_meta( $course_id, 'forTest', true ) === 'yes',
         );
-        
+
         $all_meta       = get_post_meta($assessment_id);
         return array(
         'course_detail'   => $course_details,
@@ -2651,7 +2651,7 @@ class Telas_Assesments_Admin {
                         'status' => 403,
                     )
                 );
-            } 
+            }
             return new WP_Error(
                 '[extend_telas] ' . $error_code,
                 $new_user_id->get_error_message($error_code),
@@ -2768,7 +2768,7 @@ class Telas_Assesments_Admin {
         $re_assign_flag = $all_params['reAssign'];
         $courses_assigned_to_the_user = get_user_meta($reviewer_user_id, 'courses_assigned', true);
         $assessments = get_post_meta($course_id, 'linked_assessments', true) ? get_post_meta($course_id, 'linked_assessments', true) : array();
-        
+
         if (empty($courses_assigned_to_the_user) ) {
             $courses_assigned_to_the_user = array( $course_id );
         } else {
@@ -2821,7 +2821,7 @@ class Telas_Assesments_Admin {
                 break;
             case 'interim_reviewer':
                 $this->assign_interim_reviewer($reviewer_user_id, $course_title, $course_id, $assigned_assessments, $date_format, $courses_assigned_to_the_user, $assigned_reviewers_to_a_course, $assessments);
-                
+
                 break;
             case 'first_reviewer':
                 $create_new_assessment_args = array(
@@ -3430,7 +3430,7 @@ class Telas_Assesments_Admin {
             ),
             'is_pending' => get_post_meta( $report_id, 'is_pending', true ) ? get_post_meta( $report_id, 'is_pending', true) : 'no',
             'original_assessments_data' => $this->prepare_assessments_data_by_course_id( $course_id, $report_id ),
-            'is_interim'=> get_post_meta( $report_id, 'for_test', true ) ? get_post_meta( $report_id, 'for_test', true) : 'no',   
+            'is_interim'=> get_post_meta( $report_id, 'for_test', true ) ? get_post_meta( $report_id, 'for_test', true) : 'no',
         );
     }
 
@@ -3505,7 +3505,7 @@ class Telas_Assesments_Admin {
                 $fourth_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
             }
         }
-        
+
         $all_domain_entries['first']['selected_total']  = round($first_domain_selected_total, 2);
         $all_domain_entries['second']['selected_total'] = round($second_domain_selected_total, 2);
         $all_domain_entries['third']['selected_total']  = round($third_domain_selected_total, 2);
@@ -3516,19 +3516,19 @@ class Telas_Assesments_Admin {
         // $third_domain_selected_total = 19.13;
         // $fourth_domain_selected_total = 20.20;
 
-        
+
         $first_domain_badge_level  = round(( $first_domain_selected_total / 25 ) * 100);
         $first_domain_badge = $this->get_badge_value( $first_domain_badge_level );
-        
+
         $second_domain_badge_level = round(( $second_domain_selected_total / 25 ) * 100);
         $second_domain_badge = $this->get_badge_value( $second_domain_badge_level );
-        
+
         $third_domain_badge_level  = round(( $third_domain_selected_total / 25 ) * 100);
         $third_domain_badge = $this->get_badge_value( $third_domain_badge_level );
-        
+
         $fourth_domain_badge_level = round(( $fourth_domain_selected_total / 25 ) * 100);
         $fourth_domain_badge = $this->get_badge_value( $fourth_domain_badge_level );
-        
+
         $accreditation_percentage  = round(( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ));
 
         // print_r( 'here' );
@@ -3544,22 +3544,22 @@ class Telas_Assesments_Admin {
         // print_r( $fourth_domain_badge_level);
         // print_r( $fourth_domain_badge);
 
-        
+
         $overall_badge = $this->get_badge_value( $accreditation_percentage );
-        
+
 
         $all_domain_entries['first']['badge_level']     = $first_domain_badge_level;
         $all_domain_entries['first']['badge']     = $first_domain_badge;
 
         $all_domain_entries['second']['badge_level']    = $second_domain_badge_level;
         $all_domain_entries['second']['badge']    = $second_domain_badge;
-        
+
         $all_domain_entries['third']['badge_level']     = $third_domain_badge_level;
         $all_domain_entries['third']['badge']     = $third_domain_badge;
-        
+
         $all_domain_entries['fourth']['badge_level']    = $fourth_domain_badge_level;
         $all_domain_entries['fourth']['badge']    = $fourth_domain_badge;
-        
+
         $all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
         $all_domain_entries['accreditation_badge']      = $overall_badge;
         // update_post_meta( $assigned_course_id, 'combined_review_completion_date', date($date_format, current_time('timestamp', 0)) );
@@ -3614,7 +3614,7 @@ class Telas_Assesments_Admin {
                 $fourth_domain_selected_total                               += (float) $combined_review_assessments_value[ $domain_entry_key ];
             }
         }
-        
+
         $all_domain_entries['first']['selected_total']  = round($first_domain_selected_total, 2);
         $all_domain_entries['second']['selected_total'] = round($second_domain_selected_total, 2);
         $all_domain_entries['third']['selected_total']  = round($third_domain_selected_total, 2);
@@ -3622,33 +3622,33 @@ class Telas_Assesments_Admin {
 
         $first_domain_badge_level  = round(( $first_domain_selected_total / 25 ) * 100);
         $first_domain_badge = $this->get_badge_value( $first_domain_badge_level );
-        
+
         $second_domain_badge_level = round(( $second_domain_selected_total / 25 ) * 100);
         $second_domain_badge = $this->get_badge_value( $second_domain_badge_level );
-        
+
         $third_domain_badge_level  = round(( $third_domain_selected_total / 25 ) * 100);
         $third_domain_badge = $this->get_badge_value( $third_domain_badge_level );
-        
+
         $fourth_domain_badge_level = round(( $fourth_domain_selected_total / 25 ) * 100);
         $fourth_domain_badge = $this->get_badge_value( $fourth_domain_badge_level );
-        
+
         $accreditation_percentage  = round(( ( $first_domain_badge_level + $second_domain_badge_level + $third_domain_badge_level + $fourth_domain_badge_level ) / 4 ));
-        
+
         $overall_badge = $this->get_badge_value( $accreditation_percentage );
-        
+
 
         $all_domain_entries['first']['badge_level']     = $first_domain_badge_level;
         $all_domain_entries['first']['badge']     = $first_domain_badge;
 
         $all_domain_entries['second']['badge_level']    = $second_domain_badge_level;
         $all_domain_entries['second']['badge']    = $second_domain_badge;
-        
+
         $all_domain_entries['third']['badge_level']     = $third_domain_badge_level;
         $all_domain_entries['third']['badge']     = $third_domain_badge;
-        
+
         $all_domain_entries['fourth']['badge_level']    = $fourth_domain_badge_level;
         $all_domain_entries['fourth']['badge']    = $fourth_domain_badge;
-        
+
         $all_domain_entries['accreditation_percentage'] = $accreditation_percentage;
         $all_domain_entries['accreditation_badge']      = $overall_badge;
 
@@ -3680,17 +3680,17 @@ class Telas_Assesments_Admin {
 
     function get_badge_value( $domain_score ) {
         $badge = 'No Badge';
-        if ($domain_score >= 0 && $domain_score <= 49 ) {
+        if ($domain_score >= 0 && $domain_score <= 50 ) {
             $badge = 'No Badge';
-        } elseif ($domain_score >= 50 && $domain_score <= 59 ) {
+        } elseif ($domain_score >= 51 && $domain_score <= 60 ) {
             $badge = 'Bronze';
-        } elseif ($domain_score >= 60 && $domain_score <= 69 ) {
+        } elseif ($domain_score >= 61 && $domain_score <= 70 ) {
             $badge = 'Silver';
-        } elseif ($domain_score >= 70 && $domain_score <= 79 ) {
+        } elseif ($domain_score >= 71 && $domain_score <= 80 ) {
             $badge = 'Gold';
-        } elseif ($domain_score >= 80 && $domain_score <= 89 ) {
+        } elseif ($domain_score >= 81 && $domain_score <= 90 ) {
             $badge = 'Platinum';
-        } elseif ($domain_score >= 90) {
+        } elseif ($domain_score >= 91) {
             $badge = 'Diamond';
         } else {
             $badge = 'No Badge';
@@ -3886,7 +3886,7 @@ class Telas_Assesments_Admin {
 
     function create_interim_reviewer_report( $course_id, $assigned_interim_reviews_obj, $interim_reviewer_id )
     {
-        
+
         $interim_reviewer_id = $interim_reviewer_id;
         $admin_reviewer_id  = get_post_meta($course_id, 'assigned_admin_reviewer_user_id', true);
 
@@ -3910,7 +3910,7 @@ class Telas_Assesments_Admin {
                 'review_data' => $interim_reviewer_assessment_data
             ),
         );
-        
+
 
         $course_title             = get_the_title($course_id);
         $interim_review_args = array(
@@ -3950,14 +3950,14 @@ class Telas_Assesments_Admin {
         global $wpdb;
         if (! $assessment_object = get_post($previously_assigned_assessment_id) ) { return;
         }
-        
+
         if ('draft' == $assessment_object->post_status ) { return;
         }
-            
+
         $wpdb->update($wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $assessment_object->ID ));
-        
+
         clean_post_cache($assessment_object->ID);
-            
+
         $old_status = $assessment_object->post_status;
         $assessment_object->post_status = 'draft';
         wp_transition_post_status('draft', $old_status, $assessment_object);
@@ -3987,7 +3987,7 @@ class Telas_Assesments_Admin {
     function override_sender_email( $original_email_address ) {
         return get_option('admin_email');
     }
-    
+
     function override_sender_name( $original_email_from ) {
         return get_option('blogname');
     }
@@ -4015,7 +4015,7 @@ class Telas_Assesments_Admin {
         ));
         return $errors;
     }
-    
+
     public static function remove_old_pdf_files_hook_callback() {
         $pdf_files = glob( plugin_dir_path( dirname( __FILE__ ) ) . 'pdf/generated-pdfs/*.pdf' );
         foreach( $pdf_files as $file ) {
